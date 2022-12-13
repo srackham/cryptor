@@ -132,6 +132,12 @@ func (cli *cli) parseArgs(args []string) error {
 			case "-currency":
 				cli.opts.currency = arg
 			case "-date":
+				if arg != "latest" {
+					if _, err := helpers.ParseDateString(arg, nil); err != nil {
+						return fmt.Errorf("invalid date: %q", arg)
+
+					}
+				}
 				cli.opts.date = arg
 			case "-portfolio":
 				cli.opts.portfolios = append(cli.opts.portfolios, arg)
