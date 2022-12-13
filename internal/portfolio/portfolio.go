@@ -112,12 +112,6 @@ func (p *Portfolio) SetTimeStamp(date string) {
 	}
 }
 
-// ToString a human-readable portfolio summary.
-// TODO tests
-func (p Portfolio) ToString() string {
-	return ""
-}
-
 // See [How to deep copy a struct in Go](https://www.educative.io/answers/how-to-deep-copy-a-struct-in-go)
 // TODO tests
 func (p Portfolio) DeepCopy() Portfolio {
