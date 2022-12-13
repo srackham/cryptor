@@ -80,8 +80,6 @@ func (cli *cli) Execute(args []string) error {
 		switch cli.command {
 		case "help":
 			cli.help()
-		case "nop":
-			// Do nothing, used by tests
 		case "evaluate":
 			err = cli.evaluate()
 		default:
@@ -110,7 +108,7 @@ func (cli *cli) parseArgs(args []string) error {
 				opt = "help"
 			}
 			if !isCommand(opt) {
-				return fmt.Errorf("illegal command: \"%s\"", opt)
+				return fmt.Errorf("illegal command: %q", opt)
 			}
 			cli.command = opt
 		case opt == "-aggregate":
@@ -141,11 +139,11 @@ func (cli *cli) parseArgs(args []string) error {
 			case "-portfolio":
 				cli.opts.portfolios = append(cli.opts.portfolios, arg)
 			default:
-				return fmt.Errorf("unexpected option: \"%s\"", opt)
+				return fmt.Errorf("unexpected option: %q", opt)
 			}
 			skip = true
 		default:
-			return fmt.Errorf("illegal argument: \"%s\"", opt)
+			return fmt.Errorf("illegal argument: %q", opt)
 		}
 	}
 	if cli.command == "help" {
@@ -248,7 +246,21 @@ func (cli *cli) evaluate() error {
 	if err := cli.load(); err != nil {
 		return err
 	}
-	ps := cli.portfolios
+	var ps portfolio.Portfolios
+	if len(cli.opts.portfolios) > 0 {
+		for _, name := range cli.opts.portfolios {
+			i := cli.portfolios.FindByName(name)
+			if i == -1 {
+				return fmt.Errorf("missing portfolio: %q", name)
+			}
+			if ps.FindByName(name) != -1 {
+				return fmt.Errorf("portfolio name can only be specified once: %q", name)
+			}
+			ps = append(ps, cli.portfolios[i])
+		}
+	} else {
+		ps = cli.portfolios
+	}
 	if cli.opts.aggregate {
 		aggregate := ps.Aggregate("__aggregate__", "Combined Portfolios")
 		ps = append(ps, aggregate)
@@ -303,7 +315,7 @@ Value:       %.2f %s
 // ParseConfig reads TOML config file to cli.portfolios
 func (cli *cli) loadConfig() error {
 	if !fsx.FileExists(cli.configFile) {
-		return fmt.Errorf("missing config file: \"%s\"", cli.configFile)
+		return fmt.Errorf("missing config file: %q", cli.configFile)
 	}
 	s, err := fsx.ReadFile(cli.configFile)
 	if err != nil {

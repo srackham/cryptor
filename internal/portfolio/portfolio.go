@@ -157,7 +157,7 @@ func (ps *Portfolios) UpdateHistory(p Portfolio) {
 	if p.Name == "" {
 		panic("blank portfolio name")
 	}
-	i := ps.Find(p)
+	i := ps.FindByNameAndDate(p.Name, p.Date)
 	if i == -1 {
 		*ps = append(*ps, p)
 	} else {
@@ -201,12 +201,24 @@ func (ps Portfolios) FilterByDate(date string) Portfolios {
 	return res
 }
 
-// Find searches portfolios slice for a portfolio whose name and date matches portfolio `p`.
+// FindByNameAndDate searches portfolios slice for a portfolio whose name and date matches portfolio `p`.
 // If found it return the portfolio index else returns -1.
 // TODO tests
-func (ps Portfolios) Find(p Portfolio) int {
+func (ps Portfolios) FindByNameAndDate(name string, date string) int {
 	for i := range ps {
-		if p.Name == ps[i].Name && p.Date == ps[i].Date {
+		if name == ps[i].Name && date == ps[i].Date {
+			return i
+		}
+	}
+	return -1
+}
+
+// Find searches portfolios slice for a portfolio whose name matches `name`.
+// If found return the portfolio index else return -1.
+// TODO tests
+func (ps Portfolios) FindByName(name string) int {
+	for i := range ps {
+		if name == ps[i].Name {
 			return i
 		}
 	}
