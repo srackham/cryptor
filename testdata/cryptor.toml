@@ -1,0 +1,37 @@
+# Config file for cryptor tests.
+
+# Personal portfolio.
+[[portfolios]]
+name = "personal"
+description = "Personal holdings"
+
+[[portfolios.assets]]
+symbol = "BTC"
+amount = 0.5
+description = "Cold storage"
+
+[[portfolios.assets]]
+symbol = "ETH"
+amount = 2.5
+description = ""
+
+[[portfolios.assets]]
+symbol = "USDC"
+amount = 100.00
+description = "On exchange"
+
+
+# Joint portfolio.
+[[portfolios]]
+name = "joint"
+description = "Joint holdings"
+
+[[portfolios.assets]]
+symbol = "BTC"
+amount = 0.5
+description = "Cold storage"
+
+[[portfolios.assets]]
+symbol = "ETH"
+amount = 2.5
+description = ""

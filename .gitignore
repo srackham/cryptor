@@ -1,0 +1,8 @@
+debug
+*.test
+*.out
+.vscode/
+tmp/
+dist/
+build/
+TODO.md

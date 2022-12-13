@@ -1,0 +1,324 @@
+[
+    {
+        "Name": "personal",
+        "Description": "Personal holdings",
+        "Date": "2022-12-02",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            },
+            {
+                "Symbol": "USDC",
+                "Amount": 100,
+                "USD": 100,
+                "Description": "On exchange"
+            }
+        ]
+    },
+    {
+        "Name": "joint",
+        "Description": "Joint holdings",
+        "Date": "2022-12-02",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            }
+        ]
+    },
+    {
+        "Name": "personal",
+        "Description": "Personal holdings",
+        "Date": "2022-12-01",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            },
+            {
+                "Symbol": "USDC",
+                "Amount": 100,
+                "USD": 100,
+                "Description": "On exchange"
+            }
+        ]
+    },
+    {
+        "Name": "joint",
+        "Description": "Joint holdings",
+        "Date": "2022-12-01",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            }
+        ]
+    },
+    {
+        "Name": "personal",
+        "Description": "Personal holdings",
+        "Date": "2022-12-03",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            },
+            {
+                "Symbol": "USDC",
+                "Amount": 100,
+                "USD": 100,
+                "Description": "On exchange"
+            }
+        ]
+    },
+    {
+        "Name": "joint",
+        "Description": "Joint holdings",
+        "Date": "2022-12-03",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            }
+        ]
+    },
+    {
+        "Name": "personal",
+        "Description": "Personal holdings",
+        "Date": "2022-12-04",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            },
+            {
+                "Symbol": "USDC",
+                "Amount": 100,
+                "USD": 100,
+                "Description": "On exchange"
+            }
+        ]
+    },
+    {
+        "Name": "joint",
+        "Description": "Joint holdings",
+        "Date": "2022-12-04",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            }
+        ]
+    },
+    {
+        "Name": "personal",
+        "Description": "Personal holdings",
+        "Date": "2022-12-05",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            },
+            {
+                "Symbol": "USDC",
+                "Amount": 100,
+                "USD": 100,
+                "Description": "On exchange"
+            }
+        ]
+    },
+    {
+        "Name": "joint",
+        "Description": "Joint holdings",
+        "Date": "2022-12-05",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            }
+        ]
+    },
+    {
+        "Name": "personal",
+        "Description": "Personal holdings",
+        "Date": "2022-12-07",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            },
+            {
+                "Symbol": "USDC",
+                "Amount": 100,
+                "USD": 100,
+                "Description": "On exchange"
+            }
+        ]
+    },
+    {
+        "Name": "joint",
+        "Description": "Joint holdings",
+        "Date": "2022-12-07",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            }
+        ]
+    },
+    {
+        "Name": "personal",
+        "Description": "Personal holdings",
+        "Date": "2022-12-06",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            },
+            {
+                "Symbol": "USDC",
+                "Amount": 100,
+                "USD": 100,
+                "Description": "On exchange"
+            }
+        ]
+    },
+    {
+        "Name": "joint",
+        "Description": "Joint holdings",
+        "Date": "2022-12-06",
+        "Time": "12:34:56",
+        "Assets": [
+            {
+                "Symbol": "BTC",
+                "Amount": 0.5,
+                "USD": 5000,
+                "Description": "Cold storage"
+            },
+            {
+                "Symbol": "ETH",
+                "Amount": 2.5,
+                "USD": 2500,
+                "Description": ""
+            }
+        ]
+    }
+]
