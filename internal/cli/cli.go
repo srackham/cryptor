@@ -268,7 +268,7 @@ func (cli *cli) evaluate() error {
 		return err
 	}
 	currency := strings.ToUpper(cli.opts.currency)
-	xrate, err := cli.xrates.GetRate(currency, cli.opts.date)
+	xrate, err := cli.xrates.GetRate(currency, helpers.DateNowString()) // Use current exchange rates.
 	if err != nil {
 		return err
 	}
@@ -300,7 +300,8 @@ Value:       %.2f %s
 			}
 			cli.log.Console("%s\n", s)
 		}
-		if p.Name != "__aggregate__" {
+		// Only update history with today's valuation.
+		if p.Name != "__aggregate__" && (cli.opts.date == helpers.DateNowString() || cli.opts.date == "latest") {
 			cli.history.UpdateHistory(p)
 		}
 	}

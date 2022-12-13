@@ -8,7 +8,6 @@ import (
 
 	"github.com/srackham/cryptor/internal/cache"
 	"github.com/srackham/cryptor/internal/fsx"
-	"github.com/srackham/cryptor/internal/helpers"
 	"github.com/srackham/cryptor/internal/price"
 	"github.com/srackham/cryptor/internal/set"
 )
@@ -151,12 +150,6 @@ func (ps Portfolios) SaveHistoryFile(historyFile string) error {
 
 // TODO tests
 func (ps *Portfolios) UpdateHistory(p Portfolio) {
-	if !helpers.IsDateString(p.Date) {
-		panic("invalid date string: " + p.Date)
-	}
-	if p.Name == "" {
-		panic("blank portfolio name")
-	}
 	i := ps.FindByNameAndDate(p.Name, p.Date)
 	if i == -1 {
 		*ps = append(*ps, p)
