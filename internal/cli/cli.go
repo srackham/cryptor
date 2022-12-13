@@ -44,7 +44,6 @@ type cli struct {
 		aggregate  bool     // If true then combine portfolios
 		currency   string   // Symbol of denominated fiat currency (defaults to USD).
 		date       string   // Use previously recorded evaluate from history file.
-		now        bool     // If true recalculate assets based on today's rates.
 		portfolios []string // Portfolios to process (default to all portfolios)
 	}
 }
@@ -112,8 +111,6 @@ func (cli *cli) parseArgs(args []string) error {
 			cli.command = opt
 		case opt == "-aggregate":
 			cli.opts.aggregate = true
-		case opt == "-now":
-			cli.opts.now = true
 		case opt == "-v":
 			cli.log.Verbosity++
 		case opt == "-vv":
@@ -176,7 +173,6 @@ Options:
     -confdir CONF_DIR       Directory containing data and cache files (default: $HOME/.cryptor)
     -currency CURRENCY      Display values in this CURRENCY
     -date DATE              Use dated portfolio position from history
-    -now                    Evaluate current value of historic portfolio position
     -portfolio PORTFOLIO    Named portfolio (can be specified multiple times)
     -v, -vv                 Increased verbosity
 
