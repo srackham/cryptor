@@ -37,7 +37,7 @@ type cli struct {
 	configFile   string
 	log          logger.Log
 	portfolios   portfolio.Portfolios
-	history      portfolio.Portfolios // Evaluated portfolios history.
+	history      portfolio.Portfolios
 	historyCache cache.Cache[portfolio.Portfolios]
 	priceReader  price.PriceReader
 	xrates       exchangerates.ExchangeRates
@@ -228,6 +228,12 @@ func (cli *cli) load() error {
 func (cli *cli) save() error {
 	if err := cli.historyCache.SaveCacheFile(); err != nil {
 		return err
+	}
+	for k, _ := range *cli.xrates.CacheData {
+		// We only use the current exchange rates so delete non-current entries.
+		if k != helpers.DateNowString() {
+			delete(*cli.xrates.CacheData, k)
+		}
 	}
 	if err := cli.xrates.SaveCacheFile(); err != nil {
 		return err
