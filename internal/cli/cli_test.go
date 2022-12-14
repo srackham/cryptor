@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/srackham/cryptor/internal/assert"
+	"github.com/srackham/cryptor/internal/helpers"
 	"github.com/srackham/cryptor/internal/mockprice"
 	"github.com/srackham/cryptor/internal/portfolio"
 )
@@ -58,11 +59,12 @@ func TestEvaluateCmd(t *testing.T) {
 	assert.NotContains(t, out, "price request:")
 	fmt.Println(out)
 
-	out, err = exec(mockCli(), "cryptor evaluate -date latest -v")
+	today := helpers.DateNowString()
+	out, err = exec(mockCli(), "cryptor evaluate -date "+today+" -refresh -v")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Contains(t, out, "price request: BTC latest 10000.00")
-	assert.Contains(t, out, "price request: ETH latest 1000.00")
-	assert.Contains(t, out, "price request: USDC latest 1.00")
+	assert.Contains(t, out, "price request: BTC "+today+" 10000.00")
+	assert.Contains(t, out, "price request: ETH "+today+" 1000.00")
+	assert.Contains(t, out, "price request: USDC "+today+" 1.00")
 	fmt.Println(out)
 }
 

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/srackham/cryptor/internal/assert"
+	"github.com/srackham/cryptor/internal/helpers"
 )
 
 func TestPrice(t *testing.T) {
@@ -17,7 +18,8 @@ func TestPrice(t *testing.T) {
 	cg.SetCacheDir(tmpdir)
 	cg.LoadCacheFiles()
 
-	amt, err := cg.GetPrice("BTC", "latest")
+	today := helpers.DateNowString()
+	amt, err := cg.GetPrice("BTC", today)
 	assert.PassIf(t, err == nil, "%#v", err)
 	assert.PassIf(t, amt > 0.00, "expected BTC price to be greater than zero")
 
@@ -25,7 +27,7 @@ func TestPrice(t *testing.T) {
 	assert.PassIf(t, err == nil, "%#v", err)
 	assert.PassIf(t, amt > 0.00, "expected 2022-06-01 ETH price to be greater than zero")
 
-	_, err = cg.GetPrice("undefined_symbol", "latest")
+	_, err = cg.GetPrice("undefined_symbol", today)
 	assert.Equal(t, "unsupported coin: undefined_symbol", err.Error())
 
 	savedCache := cg.coinList.CacheData

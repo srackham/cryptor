@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/srackham/cryptor/internal/assert"
+	"github.com/srackham/cryptor/internal/helpers"
 	"github.com/srackham/cryptor/internal/logger"
 	"github.com/srackham/cryptor/internal/mockprice"
 	"github.com/srackham/cryptor/internal/price"
@@ -67,7 +68,7 @@ func TestEvaluate(t *testing.T) {
 	assert.PassIf(t, err == nil, "error reading JSON file")
 	p := ps[0]
 	reader := price.NewPriceReader(&mockprice.Reader{}, &logger.Log{})
-	prices, err := ps.GetPrices(reader, "latest")
+	prices, err := ps.GetPrices(reader, helpers.DateNowString(), true)
 	assert.PassIf(t, err == nil, "error evaluating portfolio: %v", err)
 	p.SetUSDValues(prices)
 	p.Assets.SortByValue()

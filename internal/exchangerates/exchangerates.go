@@ -57,10 +57,10 @@ func getRates(date string) (Rates, error) {
 	return rates, nil
 }
 
-// refreshCache checks the cache for rates on `date`.
+// updateCache checks the cache for rates on `date`.
 // If the cache does not contain the rates for `date`  or `refresh` is `true`
 // they are fetched and the cache is updated.
-func (x *ExchangeRates) refreshCache(date string, refresh bool) error {
+func (x *ExchangeRates) updateCache(date string, refresh bool) error {
 	var rates Rates
 	var ok bool
 	var err error
@@ -70,9 +70,6 @@ func (x *ExchangeRates) refreshCache(date string, refresh bool) error {
 		if err != nil {
 			return err
 		}
-		if date == "latest" {
-			date = helpers.DateNowString()
-		}
 		(*x.CacheData)[date] = rates
 	}
 	return nil
@@ -80,19 +77,15 @@ func (x *ExchangeRates) refreshCache(date string, refresh bool) error {
 
 // GetRate returns the amount of `currency` that $1 USD would fetch on `date`.
 // `currency` is a currency symbol.
-// If `date` is `"latest"` then then today's rates are unconditionally fetched and the cache updated.
-// If `date` is a "YYYY-MM-DD" date string rates are fetched only if they are not cached.
-func (x *ExchangeRates) GetRate(currency string, date string) (float64, error) {
+// If `refresh` is `true` then then today's rates are unconditionally fetched and the cache updated.
+func (x *ExchangeRates) GetRate(currency string, date string, refresh bool) (float64, error) {
 	var err error
 	if currency == "USD" {
 		return 1.00, nil
 	}
-	err = x.refreshCache(date, date == "latest")
+	err = x.updateCache(date, refresh)
 	if err != nil {
 		return 0.0, err
-	}
-	if date == "latest" {
-		date = helpers.DateNowString()
 	}
 	if rate, ok := (*x.CacheData)[date][strings.ToUpper(currency)]; !ok {
 		return 0.0, fmt.Errorf("unknown currency: %s", currency)

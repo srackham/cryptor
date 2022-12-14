@@ -56,7 +56,7 @@ func (assets Assets) Find(symbol string) int {
 
 // GetPrices gets the prices of all portfolio crypto assets.
 // TODO tests
-func (ps *Portfolios) GetPrices(reader price.PriceReader, date string) (cache.Rates, error) {
+func (ps *Portfolios) GetPrices(reader price.PriceReader, date string, refresh bool) (cache.Rates, error) {
 	ss := set.New[string]()
 	for _, p := range *ps {
 		for _, a := range p.Assets {
@@ -67,7 +67,7 @@ func (ps *Portfolios) GetPrices(reader price.PriceReader, date string) (cache.Ra
 	sort.Strings(symbols)
 	prices := make(cache.Rates)
 	for _, sym := range symbols {
-		price, err := reader.GetPrice(sym, date)
+		price, err := reader.GetPrice(sym, date, refresh)
 		if err != nil {
 			return prices, err
 		}
@@ -101,14 +101,14 @@ func (p *Portfolio) SetAllocations() {
 
 // SetTimeStamp timestamps the portfolio.
 // TODO tests
-func (p *Portfolio) SetTimeStamp(date string) {
-	if date == "latest" {
-		p.Date = time.Now().Format("2006-01-02")
-		p.Time = time.Now().Format("15:04:05")
+func (p *Portfolio) SetTimeStamp(date string, refresh bool) {
+	if refresh {
+		now := time.Now()
+		p.Date = now.Format("2006-01-02")
+		p.Time = now.Format("15:04:05")
 	} else {
 		p.Date = date
 		p.Time = ""
-
 	}
 }
 

@@ -45,6 +45,7 @@ type cli struct {
 		aggregate  bool     // If true then combine portfolios
 		currency   string   // Symbol of denominated fiat currency (defaults to USD).
 		date       string   // Use previously recorded evaluate from history file.
+		refresh    bool     // If true unconditionally update prices and exchange rates.
 		portfolios []string // Portfolios to process (default to all portfolios)
 	}
 }
@@ -114,6 +115,8 @@ func (cli *cli) parseArgs(args []string) error {
 			cli.command = opt
 		case opt == "-aggregate":
 			cli.opts.aggregate = true
+		case opt == "-refresh":
+			cli.opts.refresh = true
 		case opt == "-v":
 			cli.log.Verbosity++
 		case opt == "-vv":
@@ -132,11 +135,8 @@ func (cli *cli) parseArgs(args []string) error {
 			case "-currency":
 				cli.opts.currency = arg
 			case "-date":
-				if arg != "latest" {
-					if _, err := helpers.ParseDateString(arg, nil); err != nil {
-						return fmt.Errorf("invalid date: %q", arg)
-
-					}
+				if _, err := helpers.ParseDateString(arg, nil); err != nil {
+					return fmt.Errorf("invalid date: %q", arg)
 				}
 				cli.opts.date = arg
 			case "-portfolio":
@@ -175,8 +175,9 @@ Options:
     -conf CONF              Configuration file (default: CONF_DIR/cryptor.toml)
     -confdir CONF_DIR       Directory containing data and cache files (default: $HOME/.cryptor)
     -currency CURRENCY      Display values in this CURRENCY
-    -date DATE              Use dated portfolio position from history
-    -portfolio PORTFOLIO    Named portfolio (can be specified multiple times)
+    -date DATE              Perform valuation using crypto prices as of DATE
+    -portfolio PORTFOLIO    Process named portfolio (can be specified multiple times)
+    -refresh                Fetch the latest prices and exchange rates
     -v, -vv                 Increased verbosity
 
 Version:    ` + VERS + " (" + OS + ")" + `
@@ -271,19 +272,19 @@ func (cli *cli) evaluate() error {
 		aggregate := ps.Aggregate("__aggregate__", "Combined Portfolios")
 		ps = append(ps, aggregate)
 	}
-	prices, err := ps.GetPrices(cli.priceReader, cli.opts.date)
+	prices, err := ps.GetPrices(cli.priceReader, cli.opts.date, cli.opts.refresh)
 	if err != nil {
 		return err
 	}
 	currency := strings.ToUpper(cli.opts.currency)
-	xrate, err := cli.xrates.GetRate(currency, helpers.DateNowString()) // Use current exchange rates.
+	xrate, err := cli.xrates.GetRate(currency, helpers.DateNowString(), cli.opts.refresh) // Use current exchange rates.
 	if err != nil {
 		return err
 	}
 	cli.log.Console("")
 	for _, p := range ps {
 		p.SetUSDValues(prices)
-		p.SetTimeStamp(cli.opts.date)
+		p.SetTimeStamp(cli.opts.date, cli.opts.refresh)
 		p.SetAllocations()
 		p.Assets.SortByValue()
 		if p.Name != "__aggregate__" && !cli.opts.aggregate || p.Name == "__aggregate__" {
@@ -309,7 +310,7 @@ Value:       %.2f %s
 			cli.log.Console("%s\n", s)
 		}
 		// Only update history with today's valuation.
-		if p.Name != "__aggregate__" && (cli.opts.date == helpers.DateNowString() || cli.opts.date == "latest") {
+		if p.Name != "__aggregate__" && cli.opts.date == helpers.DateNowString() {
 			cli.history.UpdateHistory(p)
 		}
 	}
