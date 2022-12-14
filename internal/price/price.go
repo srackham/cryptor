@@ -22,12 +22,11 @@ type PriceReader struct {
 }
 
 func NewPriceReader(reader IPriceAPI, log *logger.Log) PriceReader {
+	data := make(cache.RatesCache)
 	return PriceReader{
-		API: reader,
-		log: log,
-		Cache: cache.Cache[cache.RatesCache]{
-			CacheData: make(cache.RatesCache),
-		},
+		API:   reader,
+		log:   log,
+		Cache: *cache.NewCache(&data),
 	}
 }
 
@@ -40,7 +39,7 @@ func (r *PriceReader) GetPrice(symbol string, date string) (float64, error) {
 	var val float64
 	var ok bool
 	var err error
-	if val, ok = r.CacheData[date][symbol]; !ok {
+	if val, ok = (*r.CacheData)[date][symbol]; !ok {
 		// fmt.Printf("UPDATING CACHE: date=%s\n", date)
 		val, err = r.API.GetPrice(symbol, date)
 		if err != nil {
@@ -50,10 +49,10 @@ func (r *PriceReader) GetPrice(symbol string, date string) (float64, error) {
 		if date == "latest" {
 			date = helpers.DateNowString()
 		}
-		if r.CacheData[date] == nil {
-			r.CacheData[date] = make(cache.Rates)
+		if (*r.CacheData)[date] == nil {
+			(*r.CacheData)[date] = make(cache.Rates)
 		}
-		r.CacheData[date][symbol] = val
+		(*r.CacheData)[date][symbol] = val
 	}
 	return val, nil
 }

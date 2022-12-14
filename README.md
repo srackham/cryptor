@@ -18,3 +18,15 @@ Next run this command:
 Test it by running:
 
     cryptor help
+
+
+## Implementation Notes
+- To ensure minimal use of Web currency APIs (which are often throttled) Portfolio evaluations, crypto prices and exchange rates are cached to the local `$HOME/.cryptor` directory. Normally, unless the `-refresh` option is used, price updates will only be fetched over the Internet once per day.
+
+- Asset values are saved in USD.
+
+- Current portfolio valuations are saved to the `$HOME/.cryptor/history.json` file. Historic valuations (using the `-date` option) do not update the history.
+
+- Use the `-currency` option to display values in non-USD currencies.
+
+- All non-USD valuations are based on the current exchange rate against the USD irrespective of the `-date` option.

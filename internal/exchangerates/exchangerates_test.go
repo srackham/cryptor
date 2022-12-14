@@ -17,18 +17,18 @@ func TestExchangeRates(t *testing.T) {
 
 	rate, err = x.GetRate("NZD", "latest")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Equal(t, 1, len(x.CacheData))
+	assert.Equal(t, 1, len(*x.CacheData))
 	assert.PassIf(t, rate > 0, "invalid NZD rate: %f", rate)
 
 	today := helpers.DateNowString()
 	rate, err = x.GetRate("AUD", today)
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Equal(t, 1, len(x.CacheData))
+	assert.Equal(t, 1, len(*x.CacheData))
 	assert.PassIf(t, rate > 0, "invalid AUD rate: %f", rate)
 
 	rate, err = x.GetRate("AUD", "2022-06-01")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Equal(t, 2, len(x.CacheData))
+	assert.Equal(t, 2, len(*x.CacheData))
 	assert.PassIf(t, rate > 0, "invalid AUD rate: %f", rate)
 
 	_, err = x.GetRate("FOOBAR", today)

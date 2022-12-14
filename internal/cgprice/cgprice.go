@@ -18,6 +18,13 @@ type Reader struct {
 	coinList cache.Cache[types.CoinList]
 }
 
+func NewReader() *Reader {
+	data := types.CoinList{}
+	return &Reader{
+		coinList: *cache.NewCache(&data),
+	}
+}
+
 func (r *Reader) LoadCacheFiles() error {
 	return r.coinList.LoadCacheFile()
 }
@@ -33,14 +40,14 @@ func (r *Reader) SetCacheDir(cacheDir string) {
 // getId returns the CoinGecko API ID of the crypto symbol.
 func (r *Reader) getCoinId(symbol string) (string, error) {
 	symbol = strings.ToLower(symbol)
-	if r.coinList.CacheData == nil {
+	if len(*(r.coinList.CacheData)) == 0 {
 		cl, err := getCoinsList()
 		if err != nil {
 			return "", err
 		}
-		r.coinList.CacheData = *cl
+		r.coinList.CacheData = cl
 	}
-	for _, c := range r.coinList.CacheData {
+	for _, c := range *r.coinList.CacheData {
 		if c.Symbol == symbol {
 			return c.ID, nil
 		}

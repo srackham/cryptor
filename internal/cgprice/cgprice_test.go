@@ -9,7 +9,7 @@ import (
 )
 
 func TestPrice(t *testing.T) {
-	cg := Reader{}
+	cg := NewReader()
 	tmpdir, err := os.MkdirTemp("", "cryptor")
 	if err != nil {
 		return
@@ -33,5 +33,5 @@ func TestPrice(t *testing.T) {
 	assert.PassIf(t, err == nil, "%v", err)
 	err = cg.LoadCacheFiles()
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.PassIf(t, reflect.DeepEqual(savedCache, cg.coinList.CacheData), "expected:\n%v\n\ngot:\n%v", savedCache, cg.coinList.CacheData)
+	assert.PassIf(t, reflect.DeepEqual(&savedCache, &cg.coinList.CacheData), "expected:\n%v\n\ngot:\n%v", &savedCache, &cg.coinList.CacheData)
 }

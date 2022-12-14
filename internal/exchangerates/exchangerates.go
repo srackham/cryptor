@@ -17,11 +17,10 @@ type ExchangeRates struct {
 }
 
 func NewExchangeRates(log *logger.Log) ExchangeRates {
+	data := make(RatesCache)
 	return ExchangeRates{
-		log: log,
-		Cache: Cache[RatesCache]{
-			CacheData: make(RatesCache),
-		},
+		log:   log,
+		Cache: *NewCache(&data),
 	}
 }
 
@@ -65,7 +64,7 @@ func (x *ExchangeRates) refreshCache(date string, refresh bool) error {
 	var rates Rates
 	var ok bool
 	var err error
-	if _, ok = x.CacheData[date]; !ok || refresh {
+	if _, ok = (*x.CacheData)[date]; !ok || refresh {
 		x.log.Verbose("exchange rates request: %s", date)
 		rates, err = getRates(date)
 		if err != nil {
@@ -74,7 +73,7 @@ func (x *ExchangeRates) refreshCache(date string, refresh bool) error {
 		if date == "latest" {
 			date = helpers.DateNowString()
 		}
-		x.CacheData[date] = rates
+		(*x.CacheData)[date] = rates
 	}
 	return nil
 }
@@ -95,7 +94,7 @@ func (x *ExchangeRates) GetRate(currency string, date string) (float64, error) {
 	if date == "latest" {
 		date = helpers.DateNowString()
 	}
-	if rate, ok := x.CacheData[date][strings.ToUpper(currency)]; !ok {
+	if rate, ok := (*x.CacheData)[date][strings.ToUpper(currency)]; !ok {
 		return 0.0, fmt.Errorf("unknown currency: %s", currency)
 	} else {
 		return rate, nil
