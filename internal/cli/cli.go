@@ -8,6 +8,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 
+	"github.com/srackham/cryptor/internal/cache"
 	"github.com/srackham/cryptor/internal/exchangerates"
 	"github.com/srackham/cryptor/internal/fsx"
 	"github.com/srackham/cryptor/internal/helpers"
@@ -30,17 +31,17 @@ var (
 )
 
 type cli struct {
-	command     string
-	executable  string
-	configDir   string
-	configFile  string
-	log         logger.Log
-	portfolios  portfolio.Portfolios
-	history     portfolio.Portfolios // Evaluated portfolios history.
-	historyFile string
-	priceReader price.PriceReader
-	xrates      exchangerates.ExchangeRates
-	opts        struct {
+	command      string
+	executable   string
+	configDir    string
+	configFile   string
+	log          logger.Log
+	portfolios   portfolio.Portfolios
+	history      portfolio.Portfolios // Evaluated portfolios history.
+	historyCache cache.Cache[portfolio.Portfolios]
+	priceReader  price.PriceReader
+	xrates       exchangerates.ExchangeRates
+	opts         struct {
 		aggregate  bool     // If true then combine portfolios
 		currency   string   // Symbol of denominated fiat currency (defaults to USD).
 		date       string   // Use previously recorded evaluate from history file.
@@ -51,6 +52,8 @@ type cli struct {
 // New creates a new cli context.
 func New(api price.IPriceAPI) *cli {
 	cli := cli{}
+	cli.history = portfolio.Portfolios{}
+	cli.historyCache = *cache.NewCache(&cli.history)
 	cli.priceReader = price.NewPriceReader(api, &cli.log)
 	cli.xrates = exchangerates.NewExchangeRates(&cli.log)
 	return &cli
@@ -73,7 +76,7 @@ func (cli *cli) Execute(args []string) error {
 	if err == nil {
 		cli.priceReader.CacheFile = filepath.Join(cli.configDir, "crypto-prices.json")
 		cli.xrates.CacheFile = filepath.Join(cli.configDir, "exchange-rates.json")
-		cli.historyFile = filepath.Join(cli.configDir, "history.json")
+		cli.historyCache.CacheFile = filepath.Join(cli.configDir, "history.json")
 		cli.priceReader.API.SetCacheDir(cli.configDir)
 		switch cli.command {
 		case "help":
@@ -207,8 +210,7 @@ func (cli *cli) load() error {
 	if err = cli.loadConfig(); err != nil {
 		return err
 	}
-	cli.history, err = portfolio.LoadHistoryFile(cli.historyFile)
-	if err != nil {
+	if err := cli.historyCache.LoadCacheFile(); err != nil {
 		return err
 	}
 	if err := cli.xrates.LoadCacheFile(); err != nil {
@@ -224,7 +226,7 @@ func (cli *cli) load() error {
 }
 
 func (cli *cli) save() error {
-	if err := cli.history.SaveHistoryFile(cli.historyFile); err != nil {
+	if err := cli.historyCache.SaveCacheFile(); err != nil {
 		return err
 	}
 	if err := cli.xrates.SaveCacheFile(); err != nil {

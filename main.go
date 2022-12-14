@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-	// TODO implement -test option to use testapi instead of cgapi.
 	cli := cli.New(cgprice.NewReader())
 	if err := cli.Execute(os.Args); err != nil {
 		os.Exit(1)
