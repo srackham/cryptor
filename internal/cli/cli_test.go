@@ -54,7 +54,7 @@ func exec(cli *cli, cmd string) (out string, err error) {
 func TestEvaluateCmd(t *testing.T) {
 	out, err := exec(mockCli(), "cryptor valuate")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Contains(t, out, "Name:        personal\nDescription: Personal holdings\n")
+	assert.Contains(t, out, "Name:      personal\nNotes:     Personal holdings\n")
 	assert.NotContains(t, out, "price request:")
 	fmt.Println(out)
 

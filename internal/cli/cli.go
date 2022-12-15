@@ -287,13 +287,13 @@ func (cli *cli) valuate() error {
 		p.SetAllocations()
 		p.Assets.SortByValue()
 		if p.Name != "__aggregate__" && !cli.opts.aggregate || p.Name == "__aggregate__" {
-			s := fmt.Sprintf(`Name:        %s
-Description: %s
-TimeStamp:   %s %s
-Value:       %.2f %s
+			s := fmt.Sprintf(`Name:      %s
+Notes:     %s
+TimeStamp: %s %s
+Value:     %.2f %s
 
 `,
-				p.Name, p.Description, p.Date, p.Time, p.USD*xrate, currency)
+				p.Name, p.Notes, p.Date, p.Time, p.USD*xrate, currency)
 			s += "            AMOUNT            PRICE       UNIT PRICE\n"
 			for _, a := range p.Assets {
 				value := a.USD * xrate

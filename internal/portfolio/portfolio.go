@@ -14,23 +14,21 @@ import (
 )
 
 type Asset struct {
-	Symbol      string
-	Amount      float64
-	USD         float64 // Value in USD at the time of valuation
-	Allocation  float64 // Percentage of total portfolio USD value
-	Description string
+	Symbol     string
+	Amount     float64
+	USD        float64 // Value in USD at the time of valuation
+	Allocation float64 // Percentage of total portfolio USD value
 }
 
 type Assets []Asset
 
 type Portfolio struct {
-	Name        string
-	Description string
-	Date        string  // The valuation date formatted "YYYY-MM-DD"
-	Time        string  // The valuation time formatted "HH:MM:SS"
-	USD         float64 // Combined assets value in USD
-	Cost        float64 // Total outlay in fiat or USD??? currency to date
-	Assets      Assets
+	Name   string
+	Notes  string
+	Date   string  // The valuation date formatted "YYYY-MM-DD"
+	Time   string  // The valuation time formatted "HH:MM:SS"
+	USD    float64 // Combined assets value in USD
+	Assets Assets
 }
 
 type Portfolios []Portfolio
@@ -132,12 +130,11 @@ func LoadPortfoliosFile(filename string) (Portfolios, error) {
 	}
 	raw := struct {
 		Portfolios []struct {
-			Name        string `toml:"name"`
-			Description string `toml:"description"`
-			Assets      []struct {
-				Symbol      string  `toml:"symbol"`
-				Amount      float64 `toml:"amount"`
-				Description string  `toml:"description"`
+			Name   string `toml:"name"`
+			Notes  string `toml:"notes"`
+			Assets []struct {
+				Symbol string  `toml:"symbol"`
+				Amount float64 `toml:"amount"`
 			} `toml:"assets"`
 		} `toml:"portfolios"`
 	}{}
@@ -149,13 +146,12 @@ func LoadPortfoliosFile(filename string) (Portfolios, error) {
 	for _, c := range raw.Portfolios {
 		p := Portfolio{}
 		p.Name = c.Name
-		p.Description = c.Description
+		p.Notes = c.Notes
 		p.Assets = []Asset{}
 		for _, a := range c.Assets {
 			asset := Asset{}
 			asset.Symbol = a.Symbol
 			asset.Amount = a.Amount
-			asset.Description = a.Description
 			p.Assets = append(p.Assets, asset)
 		}
 		res = append(res, p)
@@ -195,15 +191,15 @@ func (ps *Portfolios) UpdateValuations(p Portfolio) {
 }
 
 // Aggregate returns a new portfolio that combines assets from one or more portfolios.
-// Returns an aggregated portfolio with `name` and `description`.
+// Returns an aggregated portfolio with `name` and `notes`.
 // Portfolio Date and Time fields are left unfilled.
 // Asset.Amount and Asset.USD asset fields are aggregated (summed).
 // TODO tests
-func (ps Portfolios) Aggregate(name, description string) Portfolio {
+func (ps Portfolios) Aggregate(name, notes string) Portfolio {
 	res := Portfolio{
-		Name:        name,
-		Description: description,
-		Assets:      Assets{},
+		Name:   name,
+		Notes:  notes,
+		Assets: Assets{},
 	}
 	for _, p := range ps {
 		for _, a := range p.Assets {
