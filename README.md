@@ -21,11 +21,15 @@ Test it by running:
 
 
 ## Implementation Notes
-- To ensure minimal use of Web currency APIs (which are often throttled) Portfolio evaluations, crypto prices and exchange rates are cached to the local `$HOME/.cryptor` directory. Normally, unless the `-refresh` option is used, price updates will only be fetched over the Internet once per day.
+- To ensure minimal use of Web currency APIs (which are often throttled) Portfolio evaluations, crypto prices and exchange rates are cached to the local `$HOME/.cryptor` directory. Normally, unless the `-refresh` option is used, current asset prices and exchange rates will only be fetched over the Internet once per day.
 
 - Asset values are saved in USD.
 
-- Current portfolio valuations are saved to the `$HOME/.cryptor/history.json` file. Historic valuations (using the `-date` option) do not update the history.
+- Current portfolio valuations are saved to the `$HOME/.cryptor/history.json` file. Historic valuations (using the `-date` option) are not saved.
+
+- When a portfolio valuation is saved to the history file it is date stamped with the current date. If the `-refresh` option is used the portfolio is also time stamped (otherwise the time is left blank).
+
+- Dates are saved as YYYY-DD-MM formatted strings; times are saved as HH:MM:SS formatted strings. Local dates and times are used.
 
 - Use the `-currency` option to display values in non-USD currencies.
 
