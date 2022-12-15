@@ -16,7 +16,7 @@ func TestRates(t *testing.T) {
 	r := NewCache(&data)
 	tmpdir, err := os.MkdirTemp("", "cryptor")
 	assert.PassIf(t, err == nil, "%v", err)
-	r.CacheFile = filepath.Join(tmpdir, "history.json")
+	r.CacheFile = filepath.Join(tmpdir, "valuations.json")
 
 	err = r.SaveCacheFile()
 	assert.PassIf(t, err == nil, "%v", err)

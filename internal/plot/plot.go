@@ -4,7 +4,7 @@ package plot
 import "github.com/srackham/cryptor/internal/portfolio"
 
 type IPlotter interface {
-	PlotHistory(portfolios portfolio.Portfolios) error
+	PlotValuations(portfolios portfolio.Portfolios) error
 	PlotAllocation(portfolio portfolio.Portfolio) error
 }
 
@@ -18,8 +18,8 @@ func New(plotter IPlotter) Plotter {
 	}
 }
 
-func (p *Plotter) PlotHistory(portfolios portfolio.Portfolios) error {
-	return p.PlotHistory(portfolios)
+func (p *Plotter) PlotValuations(portfolios portfolio.Portfolios) error {
+	return p.PlotValuations(portfolios)
 }
 
 func (p *Plotter) PlotAllocation(portfolio portfolio.Portfolio) error {

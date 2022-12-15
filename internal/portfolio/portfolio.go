@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/BurntSushi/toml"
 	"github.com/srackham/cryptor/internal/cache"
 	"github.com/srackham/cryptor/internal/fsx"
 	"github.com/srackham/cryptor/internal/price"
@@ -121,29 +122,70 @@ func (p Portfolio) DeepCopy() Portfolio {
 	return res
 }
 
-func LoadHistoryFile(historyFile string) (Portfolios, error) {
+// LoadPortfoliosFile reads TOML portfolios file.
+// Returns a Portfolios slice.
+func LoadPortfoliosFile(filename string) (Portfolios, error) {
 	res := Portfolios{}
-	if !fsx.FileExists(historyFile) {
+	s, err := fsx.ReadFile(filename)
+	if err != nil {
+		return res, err
+	}
+	raw := struct {
+		Portfolios []struct {
+			Name        string `toml:"name"`
+			Description string `toml:"description"`
+			Assets      []struct {
+				Symbol      string  `toml:"symbol"`
+				Amount      float64 `toml:"amount"`
+				Description string  `toml:"description"`
+			} `toml:"assets"`
+		} `toml:"portfolios"`
+	}{}
+	_, err = toml.Decode(s, &raw)
+	if err != nil {
+		return res, err
+	}
+	// Copy parsed portfolios configuration to Portfolios slice.
+	for _, c := range raw.Portfolios {
+		p := Portfolio{}
+		p.Name = c.Name
+		p.Description = c.Description
+		p.Assets = []Asset{}
+		for _, a := range c.Assets {
+			asset := Asset{}
+			asset.Symbol = a.Symbol
+			asset.Amount = a.Amount
+			asset.Description = a.Description
+			p.Assets = append(p.Assets, asset)
+		}
+		res = append(res, p)
+	}
+	return res, err
+}
+
+func LoadValuationsFile(valuationsFile string) (Portfolios, error) {
+	res := Portfolios{}
+	if !fsx.FileExists(valuationsFile) {
 		return res, nil
 	}
-	s, err := fsx.ReadFile(historyFile)
+	s, err := fsx.ReadFile(valuationsFile)
 	if err == nil {
 		err = json.Unmarshal([]byte(s), &res)
 	}
 	return res, err
 }
 
-func (ps Portfolios) SaveHistoryFile(historyFile string) error {
+func (ps Portfolios) SaveValuationsFile(valuationsFile string) error {
 	ps.SortByDate()
 	data, err := json.MarshalIndent(ps, "", "  ")
 	if err == nil {
-		err = fsx.WriteFile(historyFile, string(data))
+		err = fsx.WriteFile(valuationsFile, string(data))
 	}
 	return err
 }
 
 // TODO tests
-func (ps *Portfolios) UpdateHistory(p Portfolio) {
+func (ps *Portfolios) UpdateValuations(p Portfolio) {
 	i := ps.FindByNameAndDate(p.Name, p.Date)
 	if i == -1 {
 		*ps = append(*ps, p)

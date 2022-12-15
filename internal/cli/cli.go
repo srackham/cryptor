@@ -6,11 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/BurntSushi/toml"
-
 	"github.com/srackham/cryptor/internal/cache"
 	"github.com/srackham/cryptor/internal/exchangerates"
-	"github.com/srackham/cryptor/internal/fsx"
 	"github.com/srackham/cryptor/internal/helpers"
 	"github.com/srackham/cryptor/internal/logger"
 	"github.com/srackham/cryptor/internal/portfolio"
@@ -31,30 +28,30 @@ var (
 )
 
 type cli struct {
-	command      string
-	executable   string
-	configDir    string
-	configFile   string
-	log          logger.Log
-	portfolios   portfolio.Portfolios
-	history      portfolio.Portfolios
-	historyCache cache.Cache[portfolio.Portfolios]
-	priceReader  price.PriceReader
-	xrates       exchangerates.ExchangeRates
-	opts         struct {
-		aggregate  bool     // If true then combine portfolios
-		currency   string   // Symbol of denominated fiat currency (defaults to USD).
-		date       string   // Use previously recorded valuate from history file.
-		refresh    bool     // If true unconditionally update prices and exchange rates.
-		portfolios []string // Portfolios to process (default to all portfolios)
+	command         string
+	executable      string
+	configDir       string
+	configFile      string
+	log             logger.Log
+	portfolios      portfolio.Portfolios
+	valuations      portfolio.Portfolios
+	valuationsCache cache.Cache[portfolio.Portfolios]
+	priceReader     price.PriceReader
+	xrates          exchangerates.ExchangeRates
+	opts            struct {
+		aggregate  bool
+		currency   string
+		date       string
+		refresh    bool
+		portfolios []string
 	}
 }
 
 // New creates a new cli context.
 func New(api price.IPriceAPI) *cli {
 	cli := cli{}
-	cli.history = portfolio.Portfolios{}
-	cli.historyCache = *cache.NewCache(&cli.history)
+	cli.valuations = portfolio.Portfolios{}
+	cli.valuationsCache = *cache.NewCache(&cli.valuations)
 	cli.priceReader = price.NewPriceReader(api, &cli.log)
 	cli.xrates = exchangerates.NewExchangeRates(&cli.log)
 	return &cli
@@ -77,7 +74,7 @@ func (cli *cli) Execute(args []string) error {
 	if err == nil {
 		cli.priceReader.CacheFile = filepath.Join(cli.configDir, "crypto-prices.json")
 		cli.xrates.CacheFile = filepath.Join(cli.configDir, "exchange-rates.json")
-		cli.historyCache.CacheFile = filepath.Join(cli.configDir, "history.json")
+		cli.valuationsCache.CacheFile = filepath.Join(cli.configDir, "valuations.json")
 		cli.priceReader.API.SetCacheDir(cli.configDir)
 		switch cli.command {
 		case "help":
@@ -192,9 +189,9 @@ func isCommand(name string) bool {
 	return slice.New("help", "nop", "valuate").Has(name)
 }
 
-// plotHistory implements the `plot history` command.
+// plotValuations implements the `plot valuations` command.
 // Plots the aggregate of the specified portfolios.
-func (cli *cli) plotHistory() error {
+func (cli *cli) plotValuations() error {
 	// TODO
 	return nil
 }
@@ -208,10 +205,12 @@ func (cli *cli) plotAllocation() error {
 
 func (cli *cli) load() error {
 	var err error
-	if err = cli.loadPortfolios(); err != nil {
+	ps, err := portfolio.LoadPortfoliosFile(cli.configFile)
+	if err != nil {
 		return err
 	}
-	if err := cli.historyCache.LoadCacheFile(); err != nil {
+	cli.portfolios = ps
+	if err := cli.valuationsCache.LoadCacheFile(); err != nil {
 		return err
 	}
 	if err := cli.xrates.LoadCacheFile(); err != nil {
@@ -227,7 +226,7 @@ func (cli *cli) load() error {
 }
 
 func (cli *cli) save() error {
-	if err := cli.historyCache.SaveCacheFile(); err != nil {
+	if err := cli.valuationsCache.SaveCacheFile(); err != nil {
 		return err
 	}
 	for k, _ := range *cli.xrates.CacheData {
@@ -309,56 +308,13 @@ Value:       %.2f %s
 			}
 			cli.log.Console("%s\n", s)
 		}
-		// Only update history with today's valuation.
+		// Save current portfolio valuations only.
 		if p.Name != "__aggregate__" && cli.opts.date == helpers.DateNowString() {
-			cli.history.UpdateHistory(p)
+			cli.valuations.UpdateValuations(p)
 		}
 	}
 	if err := cli.save(); err != nil { // Don't update unless the command succeeds.
 		return err
 	}
 	return nil
-}
-
-// loadPortfolios reads TOML portfolios config file to cli.portfolios
-func (cli *cli) loadPortfolios() error {
-	if !fsx.FileExists(cli.configFile) {
-		return fmt.Errorf("missing config file: %q", cli.configFile)
-	}
-	s, err := fsx.ReadFile(cli.configFile)
-	if err != nil {
-		return err
-	}
-	conf := struct {
-		Portfolios []struct {
-			Name        string `toml:"name"`
-			Description string `toml:"description"`
-			Assets      []struct {
-				Symbol      string  `toml:"symbol"`
-				Amount      float64 `toml:"amount"`
-				Description string  `toml:"description"`
-			} `toml:"assets"`
-		} `toml:"portfolios"`
-	}{}
-	_, err = toml.Decode(s, &conf)
-	if err != nil {
-		return err
-	}
-	// Copy parsed portfolios configuration to cli.portfolios slice.
-	cli.portfolios = portfolio.Portfolios{}
-	for _, c := range conf.Portfolios {
-		p := portfolio.Portfolio{}
-		p.Name = c.Name
-		p.Description = c.Description
-		p.Assets = []portfolio.Asset{}
-		for _, a := range c.Assets {
-			asset := portfolio.Asset{}
-			asset.Symbol = a.Symbol
-			asset.Amount = a.Amount
-			asset.Description = a.Description
-			p.Assets = append(p.Assets, asset)
-		}
-		cli.portfolios = append(cli.portfolios, p)
-	}
-	return err
 }

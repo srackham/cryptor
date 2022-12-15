@@ -7,7 +7,7 @@ import "github.com/srackham/cryptor/internal/portfolio"
 
 type Plotter struct{}
 
-func (p *Plotter) PlotHistory(portfolios portfolio.Portfolios) error {
+func (p *Plotter) PlotValuations(portfolios portfolio.Portfolios) error {
 	// TODO
 	return nil
 }

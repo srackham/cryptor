@@ -49,7 +49,7 @@ TODO
 ## Implementation Notes
 - To ensure minimal use of Web currency APIs (which are often throttled) Portfolio valuations, crypto prices and exchange rates are cached to the local `$HOME/.cryptor` directory. Use the `-refresh` option to bypass the cache and fetch the latest asset prices and exchange rates.
 
-- Current portfolio valuations are saved to the `$HOME/.cryptor/history.json` file. Historic valuations (using the `-date` option) are not saved.
+- Current portfolio valuations are saved to the `$HOME/.cryptor/valuations.json` file. Historic valuations (using the `-date` option) are not saved.
 
 - Asset values are saved in USD.
 
