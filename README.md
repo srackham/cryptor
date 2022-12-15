@@ -20,17 +20,43 @@ Test it by running:
     cryptor help
 
 
-## Implementation Notes
-- To ensure minimal use of Web currency APIs (which are often throttled) Portfolio evaluations, crypto prices and exchange rates are cached to the local `$HOME/.cryptor` directory. Normally, unless the `-refresh` option is used, current asset prices and exchange rates will only be fetched over the Internet once per day.
+## Commands
+TODO
 
-- Asset values are saved in USD.
+
+## Valuate Command
+The _valuate_ command calculates portfolio asset values in USD (or some other specified currency).
+
+### Syntax
+
+    cryptor valuate [OPTION]...
+
+### Options
+[Common command options](#common-command-options) plus:
+
+    -aggregate
+    -currency CURRENCY
+    -date DATE
+    -refresh
+
+- Use the `-currency` option to display values in non-USD currencies.
+- All non-USD valuations are based on the current exchange rate against the USD.
+- The `-date DATE` option specifies the date of the crypto prices; the default date is today's date.
+
+### Examples
+TODO
+
+## Implementation Notes
+- To ensure minimal use of Web currency APIs (which are often throttled) Portfolio valuations, crypto prices and exchange rates are cached to the local `$HOME/.cryptor` directory. Use the `-refresh` option to bypass the cache and fetch the latest asset prices and exchange rates.
 
 - Current portfolio valuations are saved to the `$HOME/.cryptor/history.json` file. Historic valuations (using the `-date` option) are not saved.
 
-- When a portfolio valuation is saved to the history file it is date stamped with the current date. If the `-refresh` option is used the portfolio is also time stamped (otherwise the time is left blank).
+- Asset values are saved in USD.
 
-- Dates are saved as YYYY-DD-MM formatted strings; times are saved as HH:MM:SS formatted strings. Local dates and times are used.
+- Saved portfolio valuations are date stamped. Current valuations fetched with the `-refresh` option are also time stamped (otherwise the time is left blank).
 
-- Use the `-currency` option to display values in non-USD currencies.
+- Dates are specified and saved as YYYY-DD-MM formatted strings; times are saved as HH:MM:SS formatted strings. Local dates and times are used.
 
-- All non-USD valuations are based on the current exchange rate against the USD irrespective of the `-date` option.
+
+## Tips
+-

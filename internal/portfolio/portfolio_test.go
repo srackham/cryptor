@@ -69,7 +69,7 @@ func TestEvaluate(t *testing.T) {
 	p := ps[0]
 	reader := price.NewPriceReader(&mockprice.Reader{}, &logger.Log{})
 	prices, err := ps.GetPrices(reader, helpers.DateNowString(), true)
-	assert.PassIf(t, err == nil, "error evaluating portfolio: %v", err)
+	assert.PassIf(t, err == nil, "error valuating portfolio: %v", err)
 	p.SetUSDValues(prices)
 	p.Assets.SortByValue()
 	assert.Equal(t, 5000.0, p.Assets[0].USD)

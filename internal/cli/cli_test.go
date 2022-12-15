@@ -53,14 +53,14 @@ func exec(cli *cli, cmd string) (out string, err error) {
 }
 
 func TestEvaluateCmd(t *testing.T) {
-	out, err := exec(mockCli(), "cryptor evaluate")
+	out, err := exec(mockCli(), "cryptor valuate")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Contains(t, out, "Name:        personal\nDescription: Personal holdings\n")
 	assert.NotContains(t, out, "price request:")
 	fmt.Println(out)
 
 	today := helpers.DateNowString()
-	out, err = exec(mockCli(), "cryptor evaluate -date "+today+" -refresh -v")
+	out, err = exec(mockCli(), "cryptor valuate -date "+today+" -refresh -v")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Contains(t, out, "price request: BTC "+today+" 10000.00")
 	assert.Contains(t, out, "price request: ETH "+today+" 1000.00")

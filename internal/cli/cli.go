@@ -44,7 +44,7 @@ type cli struct {
 	opts         struct {
 		aggregate  bool     // If true then combine portfolios
 		currency   string   // Symbol of denominated fiat currency (defaults to USD).
-		date       string   // Use previously recorded evaluate from history file.
+		date       string   // Use previously recorded valuate from history file.
 		refresh    bool     // If true unconditionally update prices and exchange rates.
 		portfolios []string // Portfolios to process (default to all portfolios)
 	}
@@ -82,8 +82,8 @@ func (cli *cli) Execute(args []string) error {
 		switch cli.command {
 		case "help":
 			cli.help()
-		case "evaluate":
-			err = cli.evaluate()
+		case "valuate":
+			err = cli.valuate()
 		default:
 			err = fmt.Errorf("illegal command: " + cli.command)
 		}
@@ -166,7 +166,7 @@ Usage:
 
 Commands:
 
-    evaluate    list portfolio valuations (default command)
+    valuate    list portfolio valuations (default command)
     help        display documentation
 
 Options:
@@ -189,7 +189,7 @@ Github:     ` + github + ``
 }
 
 func isCommand(name string) bool {
-	return slice.New("help", "nop", "evaluate").Has(name)
+	return slice.New("help", "nop", "valuate").Has(name)
 }
 
 // plotHistory implements the `plot history` command.
@@ -248,8 +248,8 @@ func (cli *cli) save() error {
 	return nil
 }
 
-// evaluate implements the evaluate command.
-func (cli *cli) evaluate() error {
+// valuate implements the valuate command.
+func (cli *cli) valuate() error {
 	if err := cli.load(); err != nil {
 		return err
 	}
