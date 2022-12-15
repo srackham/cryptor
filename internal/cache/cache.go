@@ -25,7 +25,7 @@ func NewCache[T any](data *T) *Cache[T] {
 	}
 }
 
-func (c *Cache[T]) LoadCacheFile() error {
+func (c *Cache[T]) Load() error {
 	var err error
 	if fsx.FileExists(c.CacheFile) {
 		s, err := fsx.ReadFile(c.CacheFile)
@@ -39,8 +39,8 @@ func (c *Cache[T]) LoadCacheFile() error {
 	return err
 }
 
-// SaveCacheFile writes the cache to disk if it has been modified.
-func (c *Cache[T]) SaveCacheFile() error {
+// Save writes the cache to disk if it has been modified.
+func (c *Cache[T]) Save() error {
 	json, err := json.MarshalIndent(*c.CacheData, "", "  ")
 	if err == nil {
 		sha := sha256.Sum256(json)

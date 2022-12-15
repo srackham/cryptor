@@ -26,11 +26,11 @@ func NewReader() *Reader {
 }
 
 func (r *Reader) LoadCacheFiles() error {
-	return r.coinList.LoadCacheFile()
+	return r.coinList.Load()
 }
 
 func (r *Reader) SaveCacheFiles() error {
-	return r.coinList.SaveCacheFile()
+	return r.coinList.Save()
 }
 
 func (r *Reader) SetCacheDir(cacheDir string) {

@@ -210,13 +210,13 @@ func (cli *cli) load() error {
 		return err
 	}
 	cli.portfolios = ps
-	if err := cli.valuationsCache.LoadCacheFile(); err != nil {
+	if err := cli.valuationsCache.Load(); err != nil {
 		return err
 	}
-	if err := cli.xrates.LoadCacheFile(); err != nil {
+	if err := cli.xrates.Load(); err != nil {
 		return err
 	}
-	if err := cli.priceReader.LoadCacheFile(); err != nil {
+	if err := cli.priceReader.Load(); err != nil {
 		return err
 	}
 	if err := cli.priceReader.API.LoadCacheFiles(); err != nil {
@@ -226,7 +226,7 @@ func (cli *cli) load() error {
 }
 
 func (cli *cli) save() error {
-	if err := cli.valuationsCache.SaveCacheFile(); err != nil {
+	if err := cli.valuationsCache.Save(); err != nil {
 		return err
 	}
 	for k, _ := range *cli.xrates.CacheData {
@@ -235,10 +235,10 @@ func (cli *cli) save() error {
 			delete(*cli.xrates.CacheData, k)
 		}
 	}
-	if err := cli.xrates.SaveCacheFile(); err != nil {
+	if err := cli.xrates.Save(); err != nil {
 		return err
 	}
-	if err := cli.priceReader.SaveCacheFile(); err != nil {
+	if err := cli.priceReader.Save(); err != nil {
 		return err
 	}
 	if err := cli.priceReader.API.SaveCacheFiles(); err != nil {
