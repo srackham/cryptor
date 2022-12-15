@@ -70,7 +70,7 @@ func (cli *cli) Execute(args []string) error {
 	}()
 	user, _ := user.Current()
 	cli.configDir = filepath.Join(user.HomeDir, ".cryptor")
-	cli.configFile = filepath.Join(cli.configDir, "cryptor.toml")
+	cli.configFile = filepath.Join(cli.configDir, "portfolios.toml")
 	cli.opts.currency = "USD"
 	cli.opts.date = helpers.DateNowString()
 	err = cli.parseArgs(args)
@@ -172,7 +172,7 @@ Commands:
 Options:
 
     -aggregate              Combine portfolio valuations
-    -conf CONF              Configuration file (default: CONF_DIR/cryptor.toml)
+    -conf CONF              Configuration file (default: CONF_DIR/portfolios.toml)
     -confdir CONF_DIR       Directory containing data and cache files (default: $HOME/.cryptor)
     -currency CURRENCY      Display values in this CURRENCY
     -date DATE              Perform valuation using crypto prices as of DATE
@@ -208,7 +208,7 @@ func (cli *cli) plotAllocation() error {
 
 func (cli *cli) load() error {
 	var err error
-	if err = cli.loadConfig(); err != nil {
+	if err = cli.loadPortfolios(); err != nil {
 		return err
 	}
 	if err := cli.historyCache.LoadCacheFile(); err != nil {
@@ -320,8 +320,8 @@ Value:       %.2f %s
 	return nil
 }
 
-// ParseConfig reads TOML config file to cli.portfolios
-func (cli *cli) loadConfig() error {
+// loadPortfolios reads TOML portfolios config file to cli.portfolios
+func (cli *cli) loadPortfolios() error {
 	if !fsx.FileExists(cli.configFile) {
 		return fmt.Errorf("missing config file: %q", cli.configFile)
 	}

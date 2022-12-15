@@ -37,7 +37,7 @@ func exec(cli *cli, cmd string) (out string, err error) {
 	if err != nil {
 		return
 	}
-	cmd = fmt.Sprintf("%s -conf ../../testdata/cryptor.toml -confdir %s", cmd, tmpdir)
+	cmd = fmt.Sprintf("%s -conf ../../testdata/portfolios.toml -confdir %s", cmd, tmpdir)
 	args := strings.Split(cmd, " ")
 	cli.log.Out = make(chan string, 100)
 	err = cli.Execute(args)
@@ -85,9 +85,9 @@ func TestHelpCmd(t *testing.T) {
 
 func TestParseConfig(t *testing.T) {
 	cli := mockCli()
-	cli.configFile = "../../testdata/cryptor.toml"
+	cli.configFile = "../../testdata/portfolios.toml"
 	println(os.Getwd())
-	err := cli.loadConfig()
+	err := cli.loadPortfolios()
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Equal(t, 2, len(cli.portfolios))
 
