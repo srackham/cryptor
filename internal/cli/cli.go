@@ -265,6 +265,7 @@ func (cli *cli) valuate() error {
 	} else {
 		ps = cli.portfolios
 	}
+	ps.SortByDateAndName()
 	if cli.opts.aggregate {
 		aggregate := ps.Aggregate("aggregate")
 		ps = append(ps, aggregate)
