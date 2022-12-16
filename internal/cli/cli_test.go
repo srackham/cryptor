@@ -3,10 +3,12 @@ package cli
 import (
 	"fmt"
 	"os"
+	"path"
 	"strings"
 	"testing"
 
 	"github.com/srackham/cryptor/internal/assert"
+	"github.com/srackham/cryptor/internal/fsx"
 	"github.com/srackham/cryptor/internal/helpers"
 	"github.com/srackham/cryptor/internal/mockprice"
 )
@@ -36,7 +38,11 @@ func exec(cli *cli, cmd string) (out string, err error) {
 	if err != nil {
 		return
 	}
-	cmd = fmt.Sprintf("%s -conf ../../testdata/portfolios.toml -confdir %s", cmd, tmpdir)
+	err = fsx.CopyFile("../../testdata/portfolios.toml", path.Join(tmpdir, "portfolios.toml"))
+	if err != nil {
+		return
+	}
+	cmd = fmt.Sprintf("%s -confdir %s", cmd, tmpdir)
 	args := strings.Split(cmd, " ")
 	cli.log.Out = make(chan string, 100)
 	err = cli.Execute(args)

@@ -31,7 +31,6 @@ type cli struct {
 	command         string
 	executable      string
 	configDir       string
-	configFile      string
 	log             logger.Log
 	portfolios      portfolio.Portfolios
 	valuations      portfolio.Portfolios
@@ -67,7 +66,6 @@ func (cli *cli) Execute(args []string) error {
 	}()
 	user, _ := user.Current()
 	cli.configDir = filepath.Join(user.HomeDir, ".cryptor")
-	cli.configFile = filepath.Join(cli.configDir, "portfolios.toml")
 	cli.opts.currency = "USD"
 	cli.opts.date = helpers.DateNowString()
 	err = cli.parseArgs(args)
@@ -118,15 +116,13 @@ func (cli *cli) parseArgs(args []string) error {
 			cli.log.Verbosity++
 		case opt == "-vv":
 			cli.log.Verbosity += 2
-		case slice.New("-conf", "-confdir", "-currency", "-date", "-portfolio").Has(opt):
+		case slice.New("-confdir", "-currency", "-date", "-portfolio").Has(opt):
 			// Process option argument.
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
 			}
 			arg := args[i+1]
 			switch opt {
-			case "-conf":
-				cli.configFile = arg
 			case "-confdir":
 				cli.configDir = arg
 			case "-currency":
@@ -169,7 +165,6 @@ Commands:
 Options:
 
     -aggregate              Combine portfolio valuations
-    -conf CONF              Configuration file (default: CONF_DIR/portfolios.toml)
     -confdir CONF_DIR       Directory containing data and cache files (default: $HOME/.cryptor)
     -currency CURRENCY      Display values in this CURRENCY
     -date DATE              Perform valuation using crypto prices as of DATE
@@ -205,7 +200,7 @@ func (cli *cli) plotAllocation() error {
 
 func (cli *cli) load() error {
 	var err error
-	ps, err := portfolio.LoadPortfoliosFile(cli.configFile)
+	ps, err := portfolio.LoadPortfoliosFile(filepath.Join(cli.configDir, "portfolios.toml"))
 	if err != nil {
 		return err
 	}
