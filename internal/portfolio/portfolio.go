@@ -3,7 +3,6 @@ package portfolio
 import (
 	"encoding/json"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -172,7 +171,7 @@ func LoadValuationsFile(valuationsFile string) (Portfolios, error) {
 }
 
 func (ps Portfolios) SaveValuationsFile(valuationsFile string) error {
-	ps.SortByDate()
+	ps.SortByDateAndName()
 	data, err := json.MarshalIndent(ps, "", "  ")
 	if err == nil {
 		err = fsx.WriteFile(valuationsFile, string(data))
@@ -180,7 +179,6 @@ func (ps Portfolios) SaveValuationsFile(valuationsFile string) error {
 	return err
 }
 
-// TODO tests
 func (ps *Portfolios) UpdateValuations(p Portfolio) {
 	i := ps.FindByNameAndDate(p.Name, p.Date)
 	if i == -1 {
@@ -263,9 +261,12 @@ func (ps Portfolios) FilterByName(names ...string) Portfolios {
 	return res
 }
 
-func (ps Portfolios) SortByDate() {
-	// Sort documents by ascending date.
+func (ps Portfolios) SortByDateAndName() {
+	// Sort documents by ascending date and name.
 	sort.Slice(ps, func(i, j int) bool {
-		return strings.Compare(ps[i].Date, ps[j].Date) == -1
+		if ps[i].Date != ps[j].Date {
+			return ps[i].Date < ps[j].Date
+		}
+		return ps[i].Name < ps[j].Name
 	})
 }

@@ -52,19 +52,31 @@ func exec(cli *cli, cmd string) (out string, err error) {
 }
 
 func TestEvaluateCmd(t *testing.T) {
-	out, err := exec(mockCli(), "cryptor valuate")
+	today := helpers.DateNowString()
+	cli := mockCli()
+	out, err := exec(cli, "cryptor valuate")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Contains(t, out, "Name:      personal\nNotes:     Personal holdings\n")
+	assert.Contains(t, out, "NAME:      personal\nNOTES:     Personal holdings\n")
 	assert.NotContains(t, out, "price request:")
 	fmt.Println(out)
+	assert.PassIf(t, cli.valuations.FindByNameAndDate("personal", today) != -1, "missing valuation: %v", today)
 
-	today := helpers.DateNowString()
-	out, err = exec(mockCli(), "cryptor valuate -date "+today+" -refresh -v")
+	cli = mockCli()
+	out, err = exec(cli, "cryptor valuate -date "+today+" -refresh -v")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Contains(t, out, "price request: BTC "+today+" 10000.00")
 	assert.Contains(t, out, "price request: ETH "+today+" 1000.00")
 	assert.Contains(t, out, "price request: USDC "+today+" 1.00")
 	fmt.Println(out)
+
+	cli = mockCli()
+	date := "2022-06-01"
+	out, err = exec(cli, "cryptor valuate -v -date "+date)
+	assert.Contains(t, out, "price request: BTC "+date+" 10000.00")
+	assert.Contains(t, out, "price request: ETH "+date+" 1000.00")
+	assert.Contains(t, out, "price request: USDC "+date+" 1.00")
+	assert.PassIf(t, err == nil, "%v", err)
+	assert.PassIf(t, cli.valuations.FindByNameAndDate("personal", date) == -1, "past valuation should not be saved: %v", date)
 }
 
 func TestHelpCmd(t *testing.T) {

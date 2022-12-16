@@ -226,11 +226,12 @@ func (cli *cli) load() error {
 }
 
 func (cli *cli) save() error {
+	cli.valuations.SortByDateAndName()
 	if err := cli.valuationsCache.Save(); err != nil {
 		return err
 	}
 	for k, _ := range *cli.xrates.CacheData {
-		// We only use the current exchange rates so delete non-current entries.
+		// Delete non-current entries (we only ever use current rates).
 		if k != helpers.DateNowString() {
 			delete(*cli.xrates.CacheData, k)
 		}
@@ -249,6 +250,8 @@ func (cli *cli) save() error {
 
 // valuate implements the valuate command.
 func (cli *cli) valuate() error {
+	date := cli.opts.date
+	today := helpers.DateNowString()
 	if err := cli.load(); err != nil {
 		return err
 	}
@@ -271,30 +274,30 @@ func (cli *cli) valuate() error {
 		aggregate := ps.Aggregate("__aggregate__", "Combined Portfolios")
 		ps = append(ps, aggregate)
 	}
-	prices, err := ps.GetPrices(cli.priceReader, cli.opts.date, cli.opts.refresh)
+	prices, err := ps.GetPrices(cli.priceReader, date, cli.opts.refresh)
 	if err != nil {
 		return err
 	}
 	currency := strings.ToUpper(cli.opts.currency)
-	xrate, err := cli.xrates.GetRate(currency, helpers.DateNowString(), cli.opts.refresh) // Use current exchange rates.
+	xrate, err := cli.xrates.GetRate(currency, today, cli.opts.refresh && date == today) // Use current exchange rates.
 	if err != nil {
 		return err
 	}
 	cli.log.Console("")
 	for _, p := range ps {
 		p.SetUSDValues(prices)
-		p.SetTimeStamp(cli.opts.date, cli.opts.refresh)
+		p.SetTimeStamp(date, cli.opts.refresh)
 		p.SetAllocations()
 		p.Assets.SortByValue()
 		if p.Name != "__aggregate__" && !cli.opts.aggregate || p.Name == "__aggregate__" {
-			s := fmt.Sprintf(`Name:      %s
-Notes:     %s
-TimeStamp: %s %s
-Value:     %.2f %s
+			s := fmt.Sprintf(`NAME:      %s
+NOTES:     %s
+TIMESTAMP: %s %s
+VALUE:     %.2f %s
 
 `,
 				p.Name, p.Notes, p.Date, p.Time, p.USD*xrate, currency)
-			s += "            AMOUNT            PRICE       UNIT PRICE\n"
+			s += "            AMOUNT            VALUE       UNIT PRICE\n"
 			for _, a := range p.Assets {
 				value := a.USD * xrate
 				s += fmt.Sprintf("%-5s %12.4f %12.2f %s %12.2f %s    %5.2f%%\n",
@@ -309,7 +312,7 @@ Value:     %.2f %s
 			cli.log.Console("%s\n", s)
 		}
 		// Save current portfolio valuations only.
-		if p.Name != "__aggregate__" && cli.opts.date == helpers.DateNowString() {
+		if p.Name != "__aggregate__" && date == today {
 			cli.valuations.UpdateValuations(p)
 		}
 	}

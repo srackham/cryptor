@@ -13,6 +13,23 @@ import (
 	"github.com/srackham/cryptor/internal/price"
 )
 
+func TestUpdateValuations(t *testing.T) {
+	ps := Portfolios{}
+	p := Portfolio{Name: "foo", Date: "2022-12-16", Notes: "baz"}
+	ps.UpdateValuations(p)
+	assert.Equal(t, 1, len(ps))
+	assert.Equal(t, "baz", p.Notes)
+
+	p = Portfolio{Name: "foo", Date: "2022-12-16", Notes: "qux"}
+	ps.UpdateValuations(p)
+	assert.Equal(t, 1, len(ps))
+	assert.Equal(t, "qux", p.Notes)
+
+	p = Portfolio{Name: "foo", Date: "2022-12-17"}
+	ps.UpdateValuations(p)
+	assert.Equal(t, 2, len(ps))
+}
+
 func TestLoadValuationsFile(t *testing.T) {
 	h, err := LoadValuationsFile("../../testdata/valuations.json")
 	assert.PassIf(t, err == nil, "error reading JSON file")
@@ -97,7 +114,7 @@ func TestSortAndFilter(t *testing.T) {
 
 	h2 = h.FilterByName("personal")
 	assert.Equal(t, 7, len(h2))
-	h2.SortByDate()
+	h2.SortByDateAndName()
 	assert.Equal(t, "2022-12-01", h2[0].Date)
 	assert.Equal(t, "2022-12-07", h2[6].Date)
 
