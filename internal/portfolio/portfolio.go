@@ -160,9 +160,6 @@ func LoadPortfoliosFile(filename string) (Portfolios, error) {
 
 func LoadValuationsFile(valuationsFile string) (Portfolios, error) {
 	res := Portfolios{}
-	if !fsx.FileExists(valuationsFile) {
-		return res, nil
-	}
 	s, err := fsx.ReadFile(valuationsFile)
 	if err == nil {
 		err = json.Unmarshal([]byte(s), &res)
