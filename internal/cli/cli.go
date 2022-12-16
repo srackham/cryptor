@@ -266,7 +266,7 @@ func (cli *cli) valuate() error {
 		ps = cli.portfolios
 	}
 	if cli.opts.aggregate {
-		aggregate := ps.Aggregate("__aggregate__", "Combined Portfolios")
+		aggregate := ps.Aggregate("aggregate")
 		ps = append(ps, aggregate)
 	}
 	prices, err := ps.GetPrices(cli.priceReader, date, cli.opts.refresh)
@@ -284,7 +284,7 @@ func (cli *cli) valuate() error {
 		p.SetTimeStamp(date, cli.opts.refresh)
 		p.SetAllocations()
 		p.Assets.SortByValue()
-		if p.Name != "__aggregate__" && !cli.opts.aggregate || p.Name == "__aggregate__" {
+		if (p.Name != "aggregate" && !cli.opts.aggregate) || (p.Name == "aggregate" && cli.opts.aggregate) {
 			s := fmt.Sprintf(`NAME:      %s
 NOTES:     %s
 TIMESTAMP: %s %s
@@ -306,8 +306,8 @@ VALUE:     %.2f %s
 			}
 			cli.log.Console("%s\n", s)
 		}
-		// Save current portfolio valuations only.
-		if p.Name != "__aggregate__" && date == today {
+		// Record current portfolio valuations only.
+		if p.Name != "aggregate" && date == today {
 			cli.valuations.UpdateValuations(p)
 		}
 	}

@@ -2,7 +2,9 @@ package portfolio
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -186,17 +188,18 @@ func (ps *Portfolios) UpdateValuations(p Portfolio) {
 }
 
 // Aggregate returns a new portfolio that combines assets from one or more portfolios.
-// Returns an aggregated portfolio with `name` and `notes`.
+// Portfilio notes are a list of combined portfolios.
 // Portfolio Date and Time fields are left unfilled.
 // Asset.Amount and Asset.USD asset fields are aggregated (summed).
 // TODO tests
-func (ps Portfolios) Aggregate(name, notes string) Portfolio {
+func (ps Portfolios) Aggregate(name string) Portfolio {
 	res := Portfolio{
 		Name:   name,
-		Notes:  notes,
 		Assets: Assets{},
 	}
+	var notes string
 	for _, p := range ps {
+		notes += fmt.Sprintf("'%s', ", p.Name)
 		for _, a := range p.Assets {
 			i := res.Assets.Find(a.Symbol)
 			if i == -1 {
@@ -207,6 +210,7 @@ func (ps Portfolios) Aggregate(name, notes string) Portfolio {
 			}
 		}
 	}
+	res.Notes = strings.TrimSuffix(notes, ", ")
 	return res
 }
 
