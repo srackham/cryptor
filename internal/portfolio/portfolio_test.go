@@ -16,17 +16,17 @@ import (
 func TestUpdateValuations(t *testing.T) {
 	ps := Portfolios{}
 	p := Portfolio{Name: "foo", Date: "2022-12-16", Notes: "baz"}
-	ps.UpdateValuations(p)
+	ps.UpdateValuations(p, true)
 	assert.Equal(t, 1, len(ps))
 	assert.Equal(t, "baz", p.Notes)
 
 	p = Portfolio{Name: "foo", Date: "2022-12-16", Notes: "qux"}
-	ps.UpdateValuations(p)
+	ps.UpdateValuations(p, true)
 	assert.Equal(t, 1, len(ps))
 	assert.Equal(t, "qux", p.Notes)
 
 	p = Portfolio{Name: "foo", Date: "2022-12-17"}
-	ps.UpdateValuations(p)
+	ps.UpdateValuations(p, true)
 	assert.Equal(t, 2, len(ps))
 }
 
@@ -36,7 +36,6 @@ func TestLoadValuationsFile(t *testing.T) {
 	assert.Equal(t, 14, len(h))
 	assert.Equal(t, "2022-12-02", h[0].Date)
 	assert.Equal(t, "2022-12-06", h[13].Date)
-	assert.Equal(t, "12:34:56", h[13].Time)
 	assert.Equal(t, 3, len(h[0].Assets))
 	assert.Equal(t, h[0].Assets[0], Asset{
 		Symbol: "BTC",

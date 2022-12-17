@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/srackham/cryptor/internal/cache"
@@ -27,7 +26,6 @@ type Portfolio struct {
 	Name   string
 	Notes  string
 	Date   string  // The valuation date formatted "YYYY-MM-DD"
-	Time   string  // The valuation time formatted "HH:MM:SS"
 	USD    float64 // Combined assets value in USD
 	Assets Assets
 }
@@ -99,19 +97,6 @@ func (p *Portfolio) SetAllocations() {
 	}
 }
 
-// SetTimeStamp timestamps the portfolio.
-// TODO tests
-func (p *Portfolio) SetTimeStamp(date string, refresh bool) {
-	if refresh {
-		now := time.Now()
-		p.Date = now.Format("2006-01-02")
-		p.Time = now.Format("15:04:05")
-	} else {
-		p.Date = date
-		p.Time = ""
-	}
-}
-
 // See [How to deep copy a struct in Go](https://www.educative.io/answers/how-to-deep-copy-a-struct-in-go)
 // TODO tests
 func (p Portfolio) DeepCopy() Portfolio {
@@ -178,8 +163,12 @@ func (ps Portfolios) SaveValuationsFile(valuationsFile string) error {
 	return err
 }
 
-func (ps *Portfolios) UpdateValuations(p Portfolio) {
+// UpdateValuations update the valuations list if `force` is `true` or there is no existing valuation,
+func (ps *Portfolios) UpdateValuations(p Portfolio, force bool) {
 	i := ps.FindByNameAndDate(p.Name, p.Date)
+	if !force && i != -1 {
+		return
+	}
 	if i == -1 {
 		*ps = append(*ps, p)
 	} else {
@@ -199,7 +188,7 @@ func (ps Portfolios) Aggregate(name string) Portfolio {
 	}
 	var notes string
 	for _, p := range ps {
-		notes += fmt.Sprintf("'%s', ", p.Name)
+		notes += fmt.Sprintf("%s, ", p.Name)
 		for _, a := range p.Assets {
 			i := res.Assets.Find(a.Symbol)
 			if i == -1 {

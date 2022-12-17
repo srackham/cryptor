@@ -282,17 +282,17 @@ func (cli *cli) valuate() error {
 	cli.log.Console("")
 	for _, p := range ps {
 		p.SetUSDValues(prices)
-		p.SetTimeStamp(date, cli.opts.refresh)
+		p.Date = date
 		p.SetAllocations()
 		p.Assets.SortByValue()
 		if (p.Name != "aggregate" && !cli.opts.aggregate) || (p.Name == "aggregate" && cli.opts.aggregate) {
-			s := fmt.Sprintf(`NAME:      %s
-NOTES:     %s
-TIMESTAMP: %s %s
-VALUE:     %.2f %s
+			s := fmt.Sprintf(`NAME:  %s
+NOTES: %s
+DATE:  %s
+VALUE: %.2f %s
 
 `,
-				p.Name, p.Notes, p.Date, p.Time, p.USD*xrate, currency)
+				p.Name, p.Notes, p.Date, p.USD*xrate, currency)
 			s += "            AMOUNT            VALUE       UNIT PRICE\n"
 			for _, a := range p.Assets {
 				value := a.USD * xrate
@@ -308,8 +308,8 @@ VALUE:     %.2f %s
 			cli.log.Console("%s\n", s)
 		}
 		// Record current portfolio valuations only.
-		if p.Name != "aggregate" && date == today {
-			cli.valuations.UpdateValuations(p)
+		if p.Name != "aggregate" {
+			cli.valuations.UpdateValuations(p, cli.opts.refresh)
 		}
 	}
 	if err := cli.save(); err != nil { // Don't update unless the command succeeds.
