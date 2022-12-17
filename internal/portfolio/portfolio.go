@@ -177,8 +177,8 @@ func (ps *Portfolios) UpdateValuations(p Portfolio, force bool) {
 }
 
 // Aggregate returns a new portfolio that combines assets from one or more portfolios.
-// Portfilio notes are a list of combined portfolios.
-// Portfolio Date and Time fields are left unfilled.
+// Portfolio Notes field is assigned the list of combined portfolios.
+// Portfolio Date field is left unfilled.
 // Asset.Amount and Asset.USD asset fields are aggregated (summed).
 // TODO tests
 func (ps Portfolios) Aggregate(name string) Portfolio {

@@ -26,13 +26,10 @@ func NewExchangeRates(log *logger.Log) ExchangeRates {
 
 // getRates fetches a list of currency exchange rates against the USD from https://exchangerate.host/
 // TODO getRates should be an interface and moved to exchangerateapi cf. prices.IPriceAPI.
-func getRates(date string) (Rates, error) {
+func getRates() (Rates, error) {
 	rates := make(Rates)
 	client := http.Client{}
-	if date == helpers.DateNowString() {
-		date = "latest"
-	}
-	url := fmt.Sprintf("https://api.exchangerate.host/%s", date)
+	url := "https://api.exchangerate.host/latest"
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return rates, err
@@ -57,39 +54,26 @@ func getRates(date string) (Rates, error) {
 	return rates, nil
 }
 
-// updateCache checks the cache for rates on `date`.
-// If the cache does not contain the rates for `date`  or `force` is `true`
-// they are fetched and the cache is updated.
-func (x *ExchangeRates) updateCache(date string, force bool) error {
-	var rates Rates
-	var ok bool
-	var err error
-	if _, ok = (*x.CacheData)[date]; !ok || force {
-		x.log.Verbose("exchange rates request: %s", date)
-		rates, err = getRates(date)
-		if err != nil {
-			return err
-		}
-		(*x.CacheData)[date] = rates
-	}
-	return nil
-}
-
-// GetRate returns the amount of `currency` that $1 USD would fetch on `date`.
+// GetRate returns the amount of `currency` that $1 USD would buy at today's rates.
 // `currency` is a currency symbol.
 // If `force` is `true` then then today's rates are unconditionally fetched and the cache updated.
-func (x *ExchangeRates) GetRate(currency string, date string, force bool) (float64, error) {
-	var err error
+func (x *ExchangeRates) GetRate(currency string, force bool) (float64, error) {
 	if currency == "USD" {
 		return 1.00, nil
 	}
-	err = x.updateCache(date, force)
-	if err != nil {
-		return 0.0, err
+	var rate float64
+	var ok bool
+	today := helpers.DateNowString()
+	if rate, ok = (*x.CacheData)[today][strings.ToUpper(currency)]; !ok || force {
+		x.log.Verbose("exchange rates request")
+		rates, err := getRates()
+		if err != nil {
+			return 0.0, err
+		}
+		x.CacheData = &RatesCache{today: rates}
+		if rate, ok = (*x.CacheData)[today][strings.ToUpper(currency)]; !ok {
+			return 0.0, fmt.Errorf("unknown currency: %s", currency)
+		}
 	}
-	if rate, ok := (*x.CacheData)[date][strings.ToUpper(currency)]; !ok {
-		return 0.0, fmt.Errorf("unknown currency: %s", currency)
-	} else {
-		return rate, nil
-	}
+	return rate, nil
 }

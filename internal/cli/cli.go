@@ -199,7 +199,6 @@ func (cli *cli) plotAllocation() error {
 }
 
 func (cli *cli) load() error {
-	var err error
 	ps, err := portfolio.LoadPortfoliosFile(filepath.Join(cli.configDir, "portfolios.toml"))
 	if err != nil {
 		return err
@@ -224,12 +223,6 @@ func (cli *cli) save() error {
 	cli.valuations.SortByDateAndName()
 	if err := cli.valuationsCache.Save(); err != nil {
 		return err
-	}
-	for k, _ := range *cli.xrates.CacheData {
-		// Delete non-current entries (we only ever use current rates).
-		if k != helpers.DateNowString() {
-			delete(*cli.xrates.CacheData, k)
-		}
 	}
 	if err := cli.xrates.Save(); err != nil {
 		return err
@@ -275,7 +268,7 @@ func (cli *cli) valuate() error {
 		return err
 	}
 	currency := strings.ToUpper(cli.opts.currency)
-	xrate, err := cli.xrates.GetRate(currency, today, cli.opts.force && date == today) // Use current exchange rates.
+	xrate, err := cli.xrates.GetRate(currency, cli.opts.force && date == today) // Use current exchange rates.
 	if err != nil {
 		return err
 	}
