@@ -163,19 +163,6 @@ func (ps Portfolios) SaveValuationsFile(valuationsFile string) error {
 	return err
 }
 
-// UpdateValuations update the valuations list if `force` is `true` or there is no existing valuation,
-func (ps *Portfolios) UpdateValuations(p Portfolio, force bool) {
-	i := ps.FindByNameAndDate(p.Name, p.Date)
-	if !force && i != -1 {
-		return
-	}
-	if i == -1 {
-		*ps = append(*ps, p)
-	} else {
-		(*ps)[i] = p
-	}
-}
-
 // Aggregate returns a new portfolio that combines assets from one or more portfolios.
 // Portfolio Notes field is assigned the list of combined portfolios.
 // Portfolio Date field is left unfilled.

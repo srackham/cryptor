@@ -268,7 +268,7 @@ func (cli *cli) valuate() error {
 		return err
 	}
 	currency := strings.ToUpper(cli.opts.currency)
-	xrate, err := cli.xrates.GetRate(currency, cli.opts.force && date == today) // Use current exchange rates.
+	xrate, err := cli.xrates.GetRate(currency, cli.opts.force && date == today)
 	if err != nil {
 		return err
 	}
@@ -300,12 +300,16 @@ VALUE: %.2f %s
 			}
 			cli.log.Console("%s\n", s)
 		}
-		// Record current portfolio valuations only.
 		if p.Name != "aggregate" {
-			cli.valuations.UpdateValuations(p, cli.opts.force)
+			i := cli.valuations.FindByNameAndDate(p.Name, p.Date)
+			if i == -1 {
+				cli.valuations = append(cli.valuations, p)
+			} else {
+				(cli.valuations)[i] = p
+			}
 		}
 	}
-	if err := cli.save(); err != nil { // Don't update unless the command succeeds.
+	if err := cli.save(); err != nil {
 		return err
 	}
 	return nil

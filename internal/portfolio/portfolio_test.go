@@ -13,23 +13,6 @@ import (
 	"github.com/srackham/cryptor/internal/price"
 )
 
-func TestUpdateValuations(t *testing.T) {
-	ps := Portfolios{}
-	p := Portfolio{Name: "foo", Date: "2022-12-16", Notes: "baz"}
-	ps.UpdateValuations(p, true)
-	assert.Equal(t, 1, len(ps))
-	assert.Equal(t, "baz", p.Notes)
-
-	p = Portfolio{Name: "foo", Date: "2022-12-16", Notes: "qux"}
-	ps.UpdateValuations(p, true)
-	assert.Equal(t, 1, len(ps))
-	assert.Equal(t, "qux", p.Notes)
-
-	p = Portfolio{Name: "foo", Date: "2022-12-17"}
-	ps.UpdateValuations(p, true)
-	assert.Equal(t, 2, len(ps))
-}
-
 func TestLoadValuationsFile(t *testing.T) {
 	h, err := LoadValuationsFile("../../testdata/valuations.json")
 	assert.PassIf(t, err == nil, "error reading JSON file")
