@@ -286,17 +286,17 @@ VALUE: %.2f %s
 
 `,
 				p.Name, p.Notes, p.Date, p.USD*xrate, currency)
-			s += "            AMOUNT            VALUE       UNIT PRICE\n"
+			s += "            AMOUNT            VALUE   PERCENT            PRICE\n"
 			for _, a := range p.Assets {
 				value := a.USD * xrate
-				s += fmt.Sprintf("%-5s %12.4f %12.2f %s %12.2f %s    %5.2f%%\n",
+				s += fmt.Sprintf("%-5s %12.4f %12.2f %s    %5.2f%% %12.2f %s\n",
 					a.Symbol,
 					a.Amount,
 					value,
 					currency,
+					a.Allocation,
 					helpers.If(a.Amount > 0.0, value/a.Amount, 0),
-					currency,
-					a.Allocation)
+					currency)
 			}
 			cli.log.Console("%s\n", s)
 		}
