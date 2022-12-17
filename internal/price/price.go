@@ -32,12 +32,12 @@ func NewPriceReader(reader IPriceAPI, log *logger.Log) PriceReader {
 // TODO Add GetPrices()
 
 // GetPrice returns the value in USD of the `symbol` crypto currency on `date`.
-// If `refresh` is `true` then then today's price is unconditionally fetched and the cache updated.
-func (r *PriceReader) GetPrice(symbol string, date string, refresh bool) (float64, error) {
+// If `force` is `true` then then today's price is unconditionally fetched and the cache updated.
+func (r *PriceReader) GetPrice(symbol string, date string, force bool) (float64, error) {
 	var val float64
 	var ok bool
 	var err error
-	if val, ok = (*r.CacheData)[date][symbol]; !ok || refresh {
+	if val, ok = (*r.CacheData)[date][symbol]; !ok || force {
 		val, err = r.API.GetPrice(symbol, date)
 		if err != nil {
 			return 0.0, err

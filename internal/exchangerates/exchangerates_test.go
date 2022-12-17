@@ -26,11 +26,6 @@ func TestExchangeRates(t *testing.T) {
 	assert.Equal(t, 1, len(*x.CacheData))
 	assert.PassIf(t, rate > 0, "invalid AUD rate: %f", rate)
 
-	rate, err = x.GetRate("AUD", "2022-06-01", false)
-	assert.PassIf(t, err == nil, "%v", err)
-	assert.Equal(t, 2, len(*x.CacheData))
-	assert.PassIf(t, rate > 0, "invalid AUD rate: %f", rate)
-
 	_, err = x.GetRate("FOOBAR", today, false)
 	assert.PassIf(t, err != nil, "should have return error for FOOBAR currency")
 	assert.Equal(t, "unknown currency: FOOBAR", err.Error())

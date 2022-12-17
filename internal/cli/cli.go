@@ -41,7 +41,7 @@ type cli struct {
 		aggregate  bool
 		currency   string
 		date       string
-		refresh    bool
+		force      bool
 		portfolios []string
 	}
 }
@@ -110,8 +110,8 @@ func (cli *cli) parseArgs(args []string) error {
 			cli.command = opt
 		case opt == "-aggregate":
 			cli.opts.aggregate = true
-		case opt == "-refresh":
-			cli.opts.refresh = true
+		case opt == "-force":
+			cli.opts.force = true
 		case opt == "-v":
 			cli.log.Verbosity++
 		case opt == "-vv":
@@ -169,7 +169,7 @@ Options:
     -currency CURRENCY      Display values in this CURRENCY
     -date DATE              Perform valuation using crypto prices as of DATE
     -portfolio PORTFOLIO    Process named portfolio (can be specified multiple times)
-    -refresh                Fetch the latest prices and exchange rates
+    -force                  Unconditionally fetch prices and exchange rates
     -v, -vv                 Increased verbosity
 
 Version:    ` + VERS + " (" + OS + ")" + `
@@ -270,12 +270,12 @@ func (cli *cli) valuate() error {
 		aggregate := ps.Aggregate("aggregate")
 		ps = append(ps, aggregate)
 	}
-	prices, err := ps.GetPrices(cli.priceReader, date, cli.opts.refresh)
+	prices, err := ps.GetPrices(cli.priceReader, date, cli.opts.force)
 	if err != nil {
 		return err
 	}
 	currency := strings.ToUpper(cli.opts.currency)
-	xrate, err := cli.xrates.GetRate(currency, today, cli.opts.refresh && date == today) // Use current exchange rates.
+	xrate, err := cli.xrates.GetRate(currency, today, cli.opts.force && date == today) // Use current exchange rates.
 	if err != nil {
 		return err
 	}
@@ -309,7 +309,7 @@ VALUE: %.2f %s
 		}
 		// Record current portfolio valuations only.
 		if p.Name != "aggregate" {
-			cli.valuations.UpdateValuations(p, cli.opts.refresh)
+			cli.valuations.UpdateValuations(p, cli.opts.force)
 		}
 	}
 	if err := cli.save(); err != nil { // Don't update unless the command succeeds.

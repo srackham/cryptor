@@ -54,7 +54,7 @@ func (assets Assets) Find(symbol string) int {
 
 // GetPrices gets the prices of all portfolio crypto assets.
 // TODO tests
-func (ps *Portfolios) GetPrices(reader price.PriceReader, date string, refresh bool) (cache.Rates, error) {
+func (ps *Portfolios) GetPrices(reader price.PriceReader, date string, force bool) (cache.Rates, error) {
 	ss := set.New[string]()
 	for _, p := range *ps {
 		for _, a := range p.Assets {
@@ -65,7 +65,7 @@ func (ps *Portfolios) GetPrices(reader price.PriceReader, date string, refresh b
 	sort.Strings(symbols)
 	prices := make(cache.Rates)
 	for _, sym := range symbols {
-		price, err := reader.GetPrice(sym, date, refresh)
+		price, err := reader.GetPrice(sym, date, force)
 		if err != nil {
 			return prices, err
 		}

@@ -58,13 +58,13 @@ func getRates(date string) (Rates, error) {
 }
 
 // updateCache checks the cache for rates on `date`.
-// If the cache does not contain the rates for `date`  or `refresh` is `true`
+// If the cache does not contain the rates for `date`  or `force` is `true`
 // they are fetched and the cache is updated.
-func (x *ExchangeRates) updateCache(date string, refresh bool) error {
+func (x *ExchangeRates) updateCache(date string, force bool) error {
 	var rates Rates
 	var ok bool
 	var err error
-	if _, ok = (*x.CacheData)[date]; !ok || refresh {
+	if _, ok = (*x.CacheData)[date]; !ok || force {
 		x.log.Verbose("exchange rates request: %s", date)
 		rates, err = getRates(date)
 		if err != nil {
@@ -77,13 +77,13 @@ func (x *ExchangeRates) updateCache(date string, refresh bool) error {
 
 // GetRate returns the amount of `currency` that $1 USD would fetch on `date`.
 // `currency` is a currency symbol.
-// If `refresh` is `true` then then today's rates are unconditionally fetched and the cache updated.
-func (x *ExchangeRates) GetRate(currency string, date string, refresh bool) (float64, error) {
+// If `force` is `true` then then today's rates are unconditionally fetched and the cache updated.
+func (x *ExchangeRates) GetRate(currency string, date string, force bool) (float64, error) {
 	var err error
 	if currency == "USD" {
 		return 1.00, nil
 	}
-	err = x.updateCache(date, refresh)
+	err = x.updateCache(date, force)
 	if err != nil {
 		return 0.0, err
 	}
