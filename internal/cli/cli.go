@@ -285,10 +285,10 @@ DATE:  %s
 VALUE: %.2f %s
 
 `,
-				p.Name, p.Notes, p.Date, p.USD*xrate, currency)
+				p.Name, p.Notes, p.Date, p.Value*xrate, currency)
 			s += "            AMOUNT            VALUE   PERCENT            PRICE\n"
 			for _, a := range p.Assets {
-				value := a.USD * xrate
+				value := a.Value * xrate
 				s += fmt.Sprintf("%-5s %12.4f %12.2f %s    %5.2f%% %12.2f %s\n",
 					a.Symbol,
 					a.Amount,

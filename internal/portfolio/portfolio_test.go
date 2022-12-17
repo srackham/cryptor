@@ -23,12 +23,12 @@ func TestLoadValuationsFile(t *testing.T) {
 	assert.Equal(t, h[0].Assets[0], Asset{
 		Symbol: "BTC",
 		Amount: 0.5,
-		USD:    5000.0,
+		Value:  5000.0,
 	})
 	assert.Equal(t, h[2].Assets[2], Asset{
 		Symbol: "USDC",
 		Amount: 100.0,
-		USD:    100.00,
+		Value:  100.00,
 	})
 }
 
@@ -56,14 +56,14 @@ func TestEvaluate(t *testing.T) {
 	assert.PassIf(t, err == nil, "error pricing portfolio: %v", err)
 	p.SetUSDValues(prices)
 	p.Assets.SortByValue()
-	assert.Equal(t, 5000.0, p.Assets[0].USD)
-	assert.Equal(t, 2500.0, p.Assets[1].USD)
-	assert.Equal(t, 100.0, p.Assets[2].USD)
-	p.Assets[0].USD = 1000.00
+	assert.Equal(t, 5000.0, p.Assets[0].Value)
+	assert.Equal(t, 2500.0, p.Assets[1].Value)
+	assert.Equal(t, 100.0, p.Assets[2].Value)
+	p.Assets[0].Value = 1000.00
 	p.Assets.SortByValue()
-	assert.Equal(t, 2500.0, p.Assets[0].USD)
-	assert.Equal(t, 1000.0, p.Assets[1].USD)
-	assert.Equal(t, 100.0, p.Assets[2].USD)
+	assert.Equal(t, 2500.0, p.Assets[0].Value)
+	assert.Equal(t, 1000.0, p.Assets[1].Value)
+	assert.Equal(t, 100.0, p.Assets[2].Value)
 }
 
 func TestLoadPortfoliosFile(t *testing.T) {
@@ -76,7 +76,7 @@ func TestLoadPortfoliosFile(t *testing.T) {
 	assert.Equal(t, ps[0].Assets[0], Asset{
 		Symbol: "BTC",
 		Amount: 0.5,
-		USD:    0.0,
+		Value:  0.0,
 	})
 
 	assert.Equal(t, 2, len(ps[1].Assets))
@@ -84,7 +84,7 @@ func TestLoadPortfoliosFile(t *testing.T) {
 	assert.Equal(t, ps[1].Assets[1], Asset{
 		Symbol: "ETH",
 		Amount: 2.5,
-		USD:    0.0,
+		Value:  0.0,
 	})
 }
 func TestSortAndFilter(t *testing.T) {

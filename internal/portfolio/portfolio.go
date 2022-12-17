@@ -16,7 +16,7 @@ import (
 type Asset struct {
 	Symbol     string
 	Amount     float64
-	USD        float64 // Value in USD at the time of valuation
+	Value      float64 // Value in USD at the time of valuation
 	Allocation float64 // Percentage of total portfolio USD value
 }
 
@@ -26,7 +26,7 @@ type Portfolio struct {
 	Name   string
 	Notes  string
 	Date   string  // The valuation date formatted "YYYY-MM-DD"
-	USD    float64 // Combined assets value in USD
+	Value  float64 // Combined assets value in USD
 	Assets Assets
 }
 
@@ -34,9 +34,9 @@ type Portfolios []Portfolio
 
 func (assets Assets) SortByValue() {
 	// TODO tests
-	// Sort assets by descending USD value.
+	// Sort assets by descending value.
 	sort.Slice(assets, func(i, j int) bool {
-		return assets[i].USD > assets[j].USD
+		return assets[i].Value > assets[j].Value
 	})
 }
 
@@ -81,18 +81,18 @@ func (p *Portfolio) SetUSDValues(prices cache.Rates) {
 	for i, a := range p.Assets {
 		rate := prices[a.Symbol]
 		val := a.Amount * rate
-		p.Assets[i].USD = val
+		p.Assets[i].Value = val
 		total += val
 	}
-	p.USD = total
+	p.Value = total
 }
 
-// SetAllocations synthesizes asset allocation as a percentage of the total portfolio USD value.
+// SetAllocations synthesizes asset allocation as a percentage of the total portfolio value.
 // TODO tests
 func (p *Portfolio) SetAllocations() {
 	for i, a := range p.Assets {
-		if p.USD != 0.00 {
-			p.Assets[i].Allocation = a.USD / p.USD * 100
+		if p.Value != 0.00 {
+			p.Assets[i].Allocation = a.Value / p.Value * 100
 		}
 	}
 }
@@ -166,7 +166,7 @@ func (ps Portfolios) SaveValuationsFile(valuationsFile string) error {
 // Aggregate returns a new portfolio that combines assets from one or more portfolios.
 // Portfolio Notes field is assigned the list of combined portfolios.
 // Portfolio Date field is left unfilled.
-// Asset.Amount and Asset.USD asset fields are aggregated (summed).
+// Asset.Amount and Asset.Value asset fields are aggregated (summed).
 // TODO tests
 func (ps Portfolios) Aggregate(name string) Portfolio {
 	res := Portfolio{
@@ -179,10 +179,10 @@ func (ps Portfolios) Aggregate(name string) Portfolio {
 		for _, a := range p.Assets {
 			i := res.Assets.Find(a.Symbol)
 			if i == -1 {
-				res.Assets = append(res.Assets, Asset{Symbol: a.Symbol, Amount: a.Amount, USD: a.USD})
+				res.Assets = append(res.Assets, Asset{Symbol: a.Symbol, Amount: a.Amount, Value: a.Value})
 			} else {
 				res.Assets[i].Amount += a.Amount
-				res.Assets[i].USD += a.USD
+				res.Assets[i].Value += a.Value
 			}
 		}
 	}

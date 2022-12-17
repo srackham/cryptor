@@ -8,17 +8,17 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             },
             {
                 "Symbol": "USDC",
                 "Amount": 100,
-                "USD": 100
+                "Value": 100
             }
         ]
     },
@@ -31,12 +31,12 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             }
         ]
     },
@@ -49,17 +49,17 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             },
             {
                 "Symbol": "USDC",
                 "Amount": 100,
-                "USD": 100
+                "Value": 100
             }
         ]
     },
@@ -72,12 +72,12 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             }
         ]
     },
@@ -90,17 +90,17 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             },
             {
                 "Symbol": "USDC",
                 "Amount": 100,
-                "USD": 100
+                "Value": 100
             }
         ]
     },
@@ -113,12 +113,12 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             }
         ]
     },
@@ -131,17 +131,17 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             },
             {
                 "Symbol": "USDC",
                 "Amount": 100,
-                "USD": 100
+                "Value": 100
             }
         ]
     },
@@ -154,12 +154,12 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             }
         ]
     },
@@ -172,17 +172,17 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             },
             {
                 "Symbol": "USDC",
                 "Amount": 100,
-                "USD": 100
+                "Value": 100
             }
         ]
     },
@@ -195,12 +195,12 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             }
         ]
     },
@@ -213,17 +213,17 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             },
             {
                 "Symbol": "USDC",
                 "Amount": 100,
-                "USD": 100
+                "Value": 100
             }
         ]
     },
@@ -236,12 +236,12 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             }
         ]
     },
@@ -254,17 +254,17 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             },
             {
                 "Symbol": "USDC",
                 "Amount": 100,
-                "USD": 100
+                "Value": 100
             }
         ]
     },
@@ -277,12 +277,12 @@
             {
                 "Symbol": "BTC",
                 "Amount": 0.5,
-                "USD": 5000
+                "Value": 5000
             },
             {
                 "Symbol": "ETH",
                 "Amount": 2.5,
-                "USD": 2500
+                "Value": 2500
             }
         ]
     }
