@@ -290,6 +290,9 @@ func (cli *cli) valuate() error {
 				pcgains := helpers.If(cost != 0.00, gains/cost*100, 0)
 				s += fmt.Sprintf("\nCOST:  %.2f %s\nGAINS: %.2f (%.2f%%)", cost*xrate, currency, gains*xrate, pcgains)
 			}
+			if cli.opts.currency != "USD" {
+				s += fmt.Sprintf("\nXRATE: 1 USD = %.2f %s", xrate, currency)
+			}
 			s += "\n            AMOUNT            VALUE   PERCENT            PRICE\n"
 			for _, a := range p.Assets {
 				value := a.Value * xrate
