@@ -263,10 +263,6 @@ func (cli *cli) valuate() error {
 		aggregate := ps.Aggregate("aggregate")
 		ps = append(ps, aggregate)
 	}
-	prices, err := ps.GetPrices(cli.priceReader, date, cli.opts.force)
-	if err != nil {
-		return err
-	}
 	currency := strings.ToUpper(cli.opts.currency)
 	xrate, err := cli.xrates.GetRate(currency, cli.opts.force && date == today)
 	if err != nil {
@@ -274,7 +270,9 @@ func (cli *cli) valuate() error {
 	}
 	cli.log.Console("")
 	for _, p := range ps {
-		p.SetUSDValues(prices)
+		if err := p.SetUSDValues(cli.priceReader, date, cli.opts.force); err != nil {
+			return err
+		}
 		p.Date = date
 		p.SetAllocations()
 		p.Assets.SortByValue()

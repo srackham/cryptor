@@ -9,10 +9,8 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	"github.com/srackham/cryptor/internal/cache"
 	"github.com/srackham/cryptor/internal/fsx"
 	"github.com/srackham/cryptor/internal/price"
-	"github.com/srackham/cryptor/internal/set"
 )
 
 type Asset struct {
@@ -77,39 +75,21 @@ func (assets Assets) Find(symbol string) int {
 	return -1
 }
 
-// GetPrices gets the prices of all portfolio crypto assets.
-// TODO tests
-func (ps *Portfolios) GetPrices(reader price.PriceReader, date string, force bool) (cache.Rates, error) {
-	ss := set.New[string]()
-	for _, p := range *ps {
-		for _, a := range p.Assets {
-			ss.Add(a.Symbol)
-		}
-	}
-	symbols := ss.Values()
-	sort.Strings(symbols)
-	prices := make(cache.Rates)
-	for _, sym := range symbols {
-		price, err := reader.GetPrice(sym, date, force)
-		if err != nil {
-			return prices, err
-		}
-		prices[sym] = price
-	}
-	return prices, nil
-}
-
 // SetUSDValues calculates the current USD value of portfolio assets and their total value.
 // TODO tests
-func (p *Portfolio) SetUSDValues(prices cache.Rates) {
+func (p *Portfolio) SetUSDValues(reader price.PriceReader, date string, force bool) error {
 	total := 0.0
 	for i, a := range p.Assets {
-		rate := prices[a.Symbol]
+		rate, err := reader.GetPrice(a.Symbol, date, force)
+		if err != nil {
+			return err
+		}
 		val := a.Amount * rate
 		p.Assets[i].Value = val
 		total += val
 	}
 	p.Value = total
+	return nil
 }
 
 // SetAllocations synthesizes asset allocation as a percentage of the total portfolio value.
