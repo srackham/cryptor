@@ -3,7 +3,9 @@ package portfolio
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -27,10 +29,33 @@ type Portfolio struct {
 	Notes  string
 	Date   string  // The valuation date formatted "YYYY-MM-DD"
 	Value  float64 // Combined assets value in USD
+	Cost   string  // Combined assets cost, format = "<amount> <currency>"
 	Assets Assets
 }
 
 type Portfolios []Portfolio
+
+// ParseCurrency extracts the amount and currency symbol from a string formatted like "<amount>[ <currency>]".
+func ParseCurrency(cstr string) (value float64, currency string, err error) {
+	s := strings.ReplaceAll(cstr, "$", "")
+	s = strings.ReplaceAll(s, ",", "")
+	split := regexp.MustCompile(`\s+`).Split(s, -1)
+	switch len(split) {
+	case 1:
+		currency = "USD"
+	case 2:
+		currency = split[1]
+	default:
+		err = fmt.Errorf("invalid currency value: %q", cstr)
+		return
+	}
+	value, err = strconv.ParseFloat(split[0], 64)
+	if err != nil {
+		err = fmt.Errorf("invalid currency value: %q", cstr)
+		return
+	}
+	return
+}
 
 func (assets Assets) SortByValue() {
 	// TODO tests
@@ -118,6 +143,7 @@ func LoadPortfoliosFile(filename string) (Portfolios, error) {
 		Portfolios []struct {
 			Name   string `toml:"name"`
 			Notes  string `toml:"notes"`
+			Cost   string `toml:"cost"`
 			Assets []struct {
 				Symbol string  `toml:"symbol"`
 				Amount float64 `toml:"amount"`
@@ -133,6 +159,7 @@ func LoadPortfoliosFile(filename string) (Portfolios, error) {
 		p := Portfolio{}
 		p.Name = c.Name
 		p.Notes = c.Notes
+		p.Cost = c.Cost
 		p.Assets = []Asset{}
 		for _, a := range c.Assets {
 			asset := Asset{}

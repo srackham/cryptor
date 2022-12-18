@@ -279,14 +279,18 @@ func (cli *cli) valuate() error {
 		p.SetAllocations()
 		p.Assets.SortByValue()
 		if (p.Name != "aggregate" && !cli.opts.aggregate) || (p.Name == "aggregate" && cli.opts.aggregate) {
-			s := fmt.Sprintf(`NAME:  %s
-NOTES: %s
-DATE:  %s
-VALUE: %.2f %s
-
-`,
+			s := fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nVALUE: %.2f %s",
 				p.Name, p.Notes, p.Date, p.Value*xrate, currency)
-			s += "            AMOUNT            VALUE   PERCENT            PRICE\n"
+			if p.Cost != "" {
+				cost, err := cli.toUSD(p.Cost)
+				if err != nil {
+					return err
+				}
+				gains := p.Value - cost
+				pcgains := helpers.If(cost != 0.00, gains/cost*100, 0)
+				s += fmt.Sprintf("\nCOST:  %.2f %s\nGAINS: %.2f (%.2f%%)", cost*xrate, currency, gains*xrate, pcgains)
+			}
+			s += "\n            AMOUNT            VALUE   PERCENT            PRICE\n"
 			for _, a := range p.Assets {
 				value := a.Value * xrate
 				s += fmt.Sprintf("%-5s %12.4f %12.2f %s    %5.2f%% %12.2f %s\n",
@@ -313,4 +317,21 @@ VALUE: %.2f %s
 		return err
 	}
 	return nil
+}
+
+func (cli *cli) toUSD(s string) (value float64, err error) {
+	value, currency, err := portfolio.ParseCurrency(s)
+	if err != nil {
+		return
+	}
+	rate, err := cli.xrates.GetRate(currency, false)
+	if err != nil {
+		return
+	}
+	if rate == 0.00 {
+		err = fmt.Errorf("exchange rate is zero: %s", currency)
+		return
+	}
+	value = value / rate
+	return
 }

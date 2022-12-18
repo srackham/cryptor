@@ -47,6 +47,30 @@ func TestSaveValuationsFile(t *testing.T) {
 		"expected:\n%v\n\ngot:\n%v", savedValuations, h)
 }
 
+func TestParseCurrency(t *testing.T) {
+	value, currency, err := ParseCurrency("$1,234.56")
+	assert.PassIf(t, err == nil, "%v", err)
+	assert.Equal(t, 1234.56, value)
+	assert.Equal(t, "USD", currency)
+
+	value, currency, err = ParseCurrency("$1,234.56 NZD")
+	assert.PassIf(t, err == nil, "%v", err)
+	assert.Equal(t, 1234.56, value)
+	assert.Equal(t, "NZD", currency)
+
+	_, _, err = ParseCurrency("")
+	assert.PassIf(t, err != nil, "%v", err)
+	assert.Equal(t, "invalid currency value: \"\"", err.Error())
+
+	_, _, err = ParseCurrency("foo")
+	assert.PassIf(t, err != nil, "%v", err)
+	assert.Equal(t, "invalid currency value: \"foo\"", err.Error())
+
+	_, _, err = ParseCurrency("$1,234.56 NZD qux")
+	assert.PassIf(t, err != nil, "%v", err)
+	assert.Equal(t, "invalid currency value: \"$1,234.56 NZD qux\"", err.Error())
+}
+
 func TestEvaluate(t *testing.T) {
 	ps, err := LoadPortfoliosFile("../../testdata/portfolios.toml")
 	assert.PassIf(t, err == nil, "error reading portfolios file")

@@ -4,6 +4,7 @@
 [[portfolios]]
 name = "personal"
 notes = "Personal holdings"
+cost = "$10,000.00 NZD"
 
 [[portfolios.assets]]
 symbol = "BTC"
