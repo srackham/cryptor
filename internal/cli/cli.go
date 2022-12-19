@@ -308,7 +308,7 @@ func (cli *cli) valuate() error {
 			i := cli.valuations.FindByNameAndDate(p.Name, p.Date)
 			if i == -1 {
 				cli.valuations = append(cli.valuations, p)
-			} else {
+			} else if date == helpers.DateNowString() || cli.opts.force {
 				(cli.valuations)[i] = p
 			}
 		}
