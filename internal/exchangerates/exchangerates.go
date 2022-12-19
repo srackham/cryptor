@@ -14,13 +14,15 @@ import (
 type ExchangeRates struct {
 	log *logger.Log
 	Cache[RatesCache]
+	fetched bool
 }
 
 func NewExchangeRates(log *logger.Log) ExchangeRates {
 	data := make(RatesCache)
 	return ExchangeRates{
-		log:   log,
-		Cache: *NewCache(&data),
+		log:     log,
+		Cache:   *NewCache(&data),
+		fetched: false,
 	}
 }
 
@@ -57,6 +59,7 @@ func getRates() (Rates, error) {
 // GetRate returns the amount of `currency` that $1 USD would buy at today's rates.
 // `currency` is a currency symbol.
 // If `force` is `true` then then today's rates are unconditionally fetched and the cache updated.
+// TODO tests
 func (x *ExchangeRates) GetRate(currency string, force bool) (float64, error) {
 	if currency == "USD" {
 		return 1.00, nil
@@ -64,6 +67,7 @@ func (x *ExchangeRates) GetRate(currency string, force bool) (float64, error) {
 	var rate float64
 	var ok bool
 	today := helpers.DateNowString()
+	force = force && !x.fetched // Don't force if rates have previously been fetched during this session.
 	if rate, ok = (*x.CacheData)[today][strings.ToUpper(currency)]; !ok || force {
 		x.log.Verbose("exchange rates request")
 		rates, err := getRates()
@@ -74,6 +78,7 @@ func (x *ExchangeRates) GetRate(currency string, force bool) (float64, error) {
 		if rate, ok = (*x.CacheData)[today][strings.ToUpper(currency)]; !ok {
 			return 0.0, fmt.Errorf("unknown currency: %s", currency)
 		}
+		x.fetched = true
 	}
 	return rate, nil
 }
