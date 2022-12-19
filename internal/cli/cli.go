@@ -126,7 +126,7 @@ func (cli *cli) parseArgs(args []string) error {
 			case "-confdir":
 				cli.configDir = arg
 			case "-currency":
-				cli.opts.currency = arg
+				cli.opts.currency = strings.ToUpper(arg)
 			case "-date":
 				if _, err := helpers.ParseDateString(arg, nil); err != nil {
 					return fmt.Errorf("invalid date: %q", arg)
@@ -239,7 +239,7 @@ func (cli *cli) save() error {
 // valuate implements the valuate command.
 func (cli *cli) valuate() error {
 	date := cli.opts.date
-	today := helpers.DateNowString()
+	currency := cli.opts.currency
 	if err := cli.load(); err != nil {
 		return err
 	}
@@ -263,8 +263,7 @@ func (cli *cli) valuate() error {
 		aggregate := ps.Aggregate("aggregate")
 		ps = append(ps, aggregate)
 	}
-	currency := strings.ToUpper(cli.opts.currency)
-	xrate, err := cli.xrates.GetRate(currency, cli.opts.force && date == today)
+	xrate, err := cli.xrates.GetRate(cli.opts.currency, cli.opts.force)
 	if err != nil {
 		return err
 	}
@@ -280,7 +279,7 @@ func (cli *cli) valuate() error {
 			s := fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nVALUE: %.2f %s",
 				p.Name, p.Notes, p.Date, p.Value*xrate, currency)
 			if p.Cost != "" {
-				cost, err := cli.toUSD(p.Cost)
+				cost, err := cli.currencyToUSD(p.Cost)
 				if err != nil {
 					return err
 				}
@@ -320,13 +319,18 @@ func (cli *cli) valuate() error {
 	return nil
 }
 
-func (cli *cli) toUSD(s string) (value float64, err error) {
-	value, currency, err := portfolio.ParseCurrency(s)
+// currencyToUSD parses "<value>[<currency]" string and converts to USD.
+func (cli *cli) currencyToUSD(cs string) (value float64, err error) {
+	value, currency, err := portfolio.ParseCurrency(cs)
 	if err != nil {
 		return
 	}
-	rate, err := cli.xrates.GetRate(currency, false)
+	rate, err := cli.xrates.GetRate(currency, cli.opts.force)
 	if err != nil {
+		return
+	}
+	if currency == "USD" && rate != 1.00 {
+		err = fmt.Errorf("USD exchange rate should be 1.00: %f", rate)
 		return
 	}
 	if rate == 0.00 {

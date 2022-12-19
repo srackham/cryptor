@@ -29,7 +29,7 @@ func NewExchangeRates(log *logger.Log) ExchangeRates {
 func getRates() (Rates, error) {
 	rates := make(Rates)
 	client := http.Client{}
-	url := "https://api.exchangerate.host/latest"
+	url := "https://api.exchangerate.host/latest?base=usd"
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return rates, err

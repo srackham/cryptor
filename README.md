@@ -60,6 +60,8 @@ TODO
 ## Implementation Notes
 - To ensure minimal use of Web currency APIs (which are often throttled) Portfolio valuations, crypto prices and exchange rates are cached to the local `$HOME/.cryptor` default configuration directory. Use the `-refresh` option to bypass the cache and fetch the latest asset prices and exchange rates.
 
+- By convention, crypto and currency symbols are converted to upper case.
+
 - The configuration directory can be specified with the `-confdir` option.
 
 - Portfolio valuations for the current day are saved to the `$HOME/.cryptor/valuations.json` file. Valuations for past dates (using the `-date` option) are not saved.

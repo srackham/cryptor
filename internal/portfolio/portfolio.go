@@ -42,7 +42,7 @@ func ParseCurrency(cstr string) (value float64, currency string, err error) {
 	case 1:
 		currency = "USD"
 	case 2:
-		currency = split[1]
+		currency = strings.ToUpper(split[1])
 	default:
 		err = fmt.Errorf("invalid currency value: %q", cstr)
 		return
