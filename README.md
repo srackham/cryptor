@@ -20,6 +20,17 @@ Test it by running:
     cryptor help
 
 
+## Glossary
+- _Allocation_: TODO
+- _Amount_: TODO
+- _Asset_: TODO
+- _Cost_: TODO
+- _Currency_: TODO
+- _Portfolio_: TODO
+- _Price_: TODO
+- _Value_: TODO
+
+
 ## Commands
 TODO
 
@@ -40,22 +51,23 @@ The _valuate_ command calculates portfolio asset values in USD (or some other sp
     -refresh
 
 - Use the `-currency` option to display values in non-USD currencies.
-- All non-USD valuations are based on the current exchange rate against the USD.
+- Valuations with non-USD currencies are based on current exchange rates against the USD.
 - The `-date DATE` option specifies the date of the crypto prices; the default date is today's date.
 
 ### Examples
 TODO
 
 ## Implementation Notes
-- To ensure minimal use of Web currency APIs (which are often throttled) Portfolio valuations, crypto prices and exchange rates are cached to the local `$HOME/.cryptor` directory. Use the `-refresh` option to bypass the cache and fetch the latest asset prices and exchange rates.
+- To ensure minimal use of Web currency APIs (which are often throttled) Portfolio valuations, crypto prices and exchange rates are cached to the local `$HOME/.cryptor` default configuration directory. Use the `-refresh` option to bypass the cache and fetch the latest asset prices and exchange rates.
 
-- Current portfolio valuations are saved to the `$HOME/.cryptor/valuations.json` file. Historic valuations (using the `-date` option) are not saved.
+- The configuration directory can be specified with the `-confdir` option.
+
+- Portfolio valuations for the current day are saved to the `$HOME/.cryptor/valuations.json` file. Valuations for past dates (using the `-date` option) are not saved.
+The reason they are not saved is that a portfolio represents the current assets so saving it would be ahistorical.
 
 - Asset values are saved in USD.
-
-- Saved portfolio valuations are date stamped. Current valuations fetched with the `-refresh` option are also time stamped (otherwise the time is left blank).
-
-- Dates are specified and saved as YYYY-DD-MM formatted strings; times are saved as HH:MM:SS formatted strings. Local dates and times are used.
+- Saved portfolio valuations are date stamped.
+- Dates are specified and saved as YYYY-DD-MM formatted strings in the local time zone.
 
 
 ## Tips
