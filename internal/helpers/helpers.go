@@ -97,8 +97,8 @@ func ParseDateString(text string, loc *time.Location) (time.Time, error) {
 	return d, err
 }
 
-// DateNowString returns the current date as a string.
-func DateNowString() string {
+// TodaysDate returns the current date as a string.
+func TodaysDate() string {
 	return time.Now().Format("2006-01-02")
 }
 

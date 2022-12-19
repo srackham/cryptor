@@ -10,6 +10,6 @@ import (
 func (r *Reader) TestPrice(t *testing.T) {
 	// TODO test Symbol XXX returns error
 	reader := Reader{}
-	amt, _ := reader.GetPrice("BTC", helpers.DateNowString())
+	amt, _ := reader.GetPrice("BTC", helpers.TodaysDate())
 	assert.Equal(t, 10000, amt)
 }

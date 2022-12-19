@@ -18,7 +18,7 @@ func TestPrice(t *testing.T) {
 	cg.SetCacheDir(tmpdir)
 	cg.LoadCacheFiles()
 
-	today := helpers.DateNowString()
+	today := helpers.TodaysDate()
 	amt, err := cg.GetPrice("BTC", today)
 	assert.PassIf(t, err == nil, "%#v", err)
 	assert.PassIf(t, amt > 0.00, "expected BTC price to be greater than zero")

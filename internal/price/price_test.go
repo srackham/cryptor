@@ -11,7 +11,7 @@ import (
 
 func TestPrice(t *testing.T) {
 	r := NewPriceReader(&mockprice.Reader{}, &logger.Log{})
-	date := helpers.DateNowString()
+	date := helpers.TodaysDate()
 
 	amt, err := r.GetPrice("BTC", date, true)
 	assert.PassIf(t, err == nil, "%v", err)

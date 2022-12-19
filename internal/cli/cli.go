@@ -67,7 +67,7 @@ func (cli *cli) Execute(args []string) error {
 	user, _ := user.Current()
 	cli.configDir = filepath.Join(user.HomeDir, ".cryptor")
 	cli.opts.currency = "USD"
-	cli.opts.date = helpers.DateNowString()
+	cli.opts.date = helpers.TodaysDate()
 	err = cli.parseArgs(args)
 	if err == nil {
 		cli.priceReader.CacheFile = filepath.Join(cli.configDir, "crypto-prices.json")
@@ -308,7 +308,7 @@ func (cli *cli) valuate() error {
 			i := cli.valuations.FindByNameAndDate(p.Name, p.Date)
 			if i == -1 {
 				cli.valuations = append(cli.valuations, p)
-			} else if date == helpers.DateNowString() || cli.opts.force {
+			} else if date == helpers.TodaysDate() || cli.opts.force {
 				(cli.valuations)[i] = p
 			}
 		}

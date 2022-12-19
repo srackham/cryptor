@@ -58,7 +58,7 @@ func exec(cli *cli, cmd string) (out string, err error) {
 }
 
 func TestEvaluateCmd(t *testing.T) {
-	today := helpers.DateNowString()
+	today := helpers.TodaysDate()
 	cli := mockCli()
 	out, err := exec(cli, "cryptor valuate")
 	assert.PassIf(t, err == nil, "%v", err)

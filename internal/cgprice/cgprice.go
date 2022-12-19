@@ -62,7 +62,7 @@ func (r *Reader) GetPrice(symbol string, date string) (float64, error) {
 	}
 	var pd PriceData
 	vc := "usd" // Must be lowercase.
-	if date == helpers.DateNowString() {
+	if date == helpers.TodaysDate() {
 		pd, err = getCurrentPriceData(id, vc)
 	} else {
 		date = date[8:10] + "-" + date[5:7] + "-" + date[0:4] // Convert YYYY-MM-DD date to DD-MM-YYYY
