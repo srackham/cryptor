@@ -23,12 +23,13 @@ type Asset struct {
 type Assets []Asset
 
 type Portfolio struct {
-	Name   string
-	Notes  string
-	Date   string  // The valuation date formatted "YYYY-MM-DD"
-	Value  float64 // Combined assets value in USD
-	Cost   string  // Combined assets cost, format = "<amount> <currency>"
-	Assets Assets
+	Name    string
+	Notes   string
+	Date    string  // The valuation date formatted "YYYY-MM-DD"
+	Value   float64 // Combined assets value in USD
+	Cost    string  // Combined assets cost, format = "<amount> <currency>"
+	USDCost float64 // Calculated cost in USD.
+	Assets  Assets
 }
 
 type Portfolios []Portfolio
@@ -170,19 +171,20 @@ func (ps Portfolios) SaveValuationsFile(valuationsFile string) error {
 	return err
 }
 
-// Aggregate returns a new portfolio that combines assets from one or more portfolios.
+// Aggregate returns a new portfolio that combines the receiver portfolios.
 // Portfolio Notes field is assigned the list of combined portfolios.
-// Portfolio Date field is left unfilled.
-// Asset.Amount and Asset.Value asset fields are aggregated (summed).
 // TODO tests
-func (ps Portfolios) Aggregate(name string) Portfolio {
+func (ps Portfolios) Aggregate(name string, date string) Portfolio {
 	res := Portfolio{
 		Name:   name,
+		Date:   date,
 		Assets: Assets{},
 	}
 	var notes string
 	for _, p := range ps {
 		notes += fmt.Sprintf("%s, ", p.Name)
+		res.Value += p.Value
+		res.USDCost += p.USDCost
 		for _, a := range p.Assets {
 			i := res.Assets.Find(a.Symbol)
 			if i == -1 {
@@ -194,6 +196,8 @@ func (ps Portfolios) Aggregate(name string) Portfolio {
 		}
 	}
 	res.Notes = strings.TrimSuffix(notes, ", ")
+	res.SetAllocations()
+	res.Assets.SortByValue()
 	return res
 }
 

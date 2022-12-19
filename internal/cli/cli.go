@@ -243,6 +243,7 @@ func (cli *cli) valuate() error {
 	if err := cli.load(); err != nil {
 		return err
 	}
+	// Select portfolios.
 	var ps portfolio.Portfolios
 	if len(cli.opts.portfolios) > 0 {
 		for _, name := range cli.opts.portfolios {
@@ -258,61 +259,65 @@ func (cli *cli) valuate() error {
 	} else {
 		ps = cli.portfolios
 	}
-	ps.SortByDateAndName()
-	if cli.opts.aggregate {
-		aggregate := ps.Aggregate("aggregate")
-		ps = append(ps, aggregate)
+	// Evaluate portfolios.
+	for i, _ := range ps {
+		ps[i].Date = date
+		if err := ps[i].SetUSDValues(cli.priceReader, date, cli.opts.force); err != nil {
+			return err
+		}
+		ps[i].SetAllocations()
+		ps[i].Assets.SortByValue()
+		if ps[i].Cost != "" {
+			cost, err := cli.currencyToUSD(ps[i].Cost)
+			if err != nil {
+				return err
+			}
+			ps[i].USDCost = cost
+		}
+		// Update valuations history.
+		j := cli.valuations.FindByNameAndDate(ps[i].Name, ps[i].Date)
+		if j == -1 {
+			cli.valuations = append(cli.valuations, ps[i])
+		} else if date == helpers.TodaysDate() || cli.opts.force {
+			cli.valuations[j] = ps[i]
+		}
 	}
+	if cli.opts.aggregate {
+		ps = []portfolio.Portfolio{ps.Aggregate("aggregate", date)}
+	}
+	// Print portfolios.
 	xrate, err := cli.xrates.GetRate(cli.opts.currency, cli.opts.force)
 	if err != nil {
 		return err
 	}
+	ps.SortByDateAndName()
 	cli.log.Console("")
 	for _, p := range ps {
-		if err := p.SetUSDValues(cli.priceReader, date, cli.opts.force); err != nil {
-			return err
+		s := fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nVALUE: %.2f %s",
+			p.Name, p.Notes, p.Date, p.Value*xrate, currency)
+		if p.USDCost > 0.00 {
+			gains := p.Value - p.USDCost
+			pcgains := gains / p.USDCost * 100
+			s += fmt.Sprintf("\nCOST:  %.2f %s\nGAINS: %.2f (%.2f%%)", p.USDCost*xrate, currency, gains*xrate, pcgains)
 		}
-		p.Date = date
-		p.SetAllocations()
-		p.Assets.SortByValue()
-		if (p.Name != "aggregate" && !cli.opts.aggregate) || (p.Name == "aggregate" && cli.opts.aggregate) {
-			s := fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nVALUE: %.2f %s",
-				p.Name, p.Notes, p.Date, p.Value*xrate, currency)
-			if p.Cost != "" {
-				cost, err := cli.currencyToUSD(p.Cost)
-				if err != nil {
-					return err
-				}
-				gains := p.Value - cost
-				pcgains := helpers.If(cost != 0.00, gains/cost*100, 0)
-				s += fmt.Sprintf("\nCOST:  %.2f %s\nGAINS: %.2f (%.2f%%)", cost*xrate, currency, gains*xrate, pcgains)
-			}
-			if cli.opts.currency != "USD" {
-				s += fmt.Sprintf("\nXRATE: 1 USD = %.2f %s", xrate, currency)
-			}
-			s += "\n            AMOUNT            VALUE   PERCENT            PRICE\n"
-			for _, a := range p.Assets {
-				value := a.Value * xrate
-				s += fmt.Sprintf("%-5s %12.4f %12.2f %s    %5.2f%% %12.2f %s\n",
-					a.Symbol,
-					a.Amount,
-					value,
-					currency,
-					a.Allocation,
-					helpers.If(a.Amount > 0.0, value/a.Amount, 0),
-					currency)
-			}
-			cli.log.Console("%s\n", s)
+		if cli.opts.currency != "USD" {
+			s += fmt.Sprintf("\nXRATE: 1 USD = %.2f %s", xrate, currency)
 		}
-		if p.Name != "aggregate" {
-			i := cli.valuations.FindByNameAndDate(p.Name, p.Date)
-			if i == -1 {
-				cli.valuations = append(cli.valuations, p)
-			} else if date == helpers.TodaysDate() || cli.opts.force {
-				(cli.valuations)[i] = p
-			}
+		s += "\n            AMOUNT            VALUE   PERCENT            PRICE\n"
+		for _, a := range p.Assets {
+			value := a.Value * xrate
+			s += fmt.Sprintf("%-5s %12.4f %12.2f %s    %5.2f%% %12.2f %s\n",
+				a.Symbol,
+				a.Amount,
+				value,
+				currency,
+				a.Allocation,
+				helpers.If(a.Amount > 0.0, value/a.Amount, 0),
+				currency)
 		}
+		cli.log.Console("%s\n", s)
 	}
+	// Save valuations and cache files.
 	if err := cli.save(); err != nil {
 		return err
 	}
