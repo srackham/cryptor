@@ -164,10 +164,10 @@ Commands:
 
 Options:
 
-    -aggregate              Combine portfolio valuations
+    -aggregate              Display combined portfolio valuations
     -confdir CONF_DIR       Directory containing data and cache files (default: $HOME/.cryptor)
     -currency CURRENCY      Display values in this CURRENCY
-    -date DATE              Perform valuation using crypto prices as of DATE
+    -date YYYY-MM-DD        Perform valuation using crypto prices as of date YYYY-MM-DD
     -portfolio PORTFOLIO    Process named portfolio (can be specified multiple times)
     -force                  Unconditionally fetch prices and exchange rates
     -v, -vv                 Increased verbosity
@@ -298,9 +298,13 @@ func (cli *cli) valuate() error {
 			gains := p.Value - p.USDCost
 			pcgains := gains / p.USDCost * 100
 			s += fmt.Sprintf("\nCOST:  %.2f %s\nGAINS: %.2f (%.2f%%)", p.USDCost*xrate, currency, gains*xrate, pcgains)
+		} else {
+			s += "\nCOST:\nGAINS:"
 		}
 		if cli.opts.currency != "USD" {
 			s += fmt.Sprintf("\nXRATE: 1 USD = %.2f %s", xrate, currency)
+		} else {
+			s += "\nXRATE:"
 		}
 		s += "\n            AMOUNT            VALUE   PERCENT            PRICE\n"
 		for _, a := range p.Assets {
