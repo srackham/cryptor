@@ -131,6 +131,9 @@ func (cli *cli) parseArgs(args []string) error {
 				if _, err := helpers.ParseDateString(arg, nil); err != nil {
 					return fmt.Errorf("invalid date: %q", arg)
 				}
+				if strings.Compare(arg, helpers.TodaysDate()) == 1 {
+					return fmt.Errorf("future date is not allowed: %q", arg)
+				}
 				cli.opts.date = arg
 			case "-portfolio":
 				cli.opts.portfolios = append(cli.opts.portfolios, arg)
