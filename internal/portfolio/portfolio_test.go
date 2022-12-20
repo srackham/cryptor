@@ -72,7 +72,7 @@ func TestParseCurrency(t *testing.T) {
 }
 
 func TestEvaluate(t *testing.T) {
-	ps, err := LoadPortfoliosFile("../../testdata/portfolios.toml")
+	ps, err := LoadPortfoliosFile("../../testdata/portfolios.yaml")
 	assert.PassIf(t, err == nil, "error reading portfolios file")
 	p := ps[0]
 	reader := price.NewPriceReader(&mockprice.Reader{}, &logger.Log{})
@@ -90,9 +90,9 @@ func TestEvaluate(t *testing.T) {
 }
 
 func TestLoadPortfoliosFile(t *testing.T) {
-	ps, err := LoadPortfoliosFile("../../testdata/portfolios.toml")
+	ps, err := LoadPortfoliosFile("../../testdata/portfolios.yaml")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Equal(t, 2, len(ps))
+	assert.Equal(t, 3, len(ps))
 
 	assert.Equal(t, 3, len(ps[0].Assets))
 	assert.Equal(t, "personal", ps[0].Name)

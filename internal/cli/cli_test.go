@@ -38,7 +38,7 @@ func exec(cli *cli, cmd string) (out string, err error) {
 	if err != nil {
 		return
 	}
-	err = fsx.CopyFile("../../testdata/portfolios.toml", path.Join(tmpdir, "portfolios.toml"))
+	err = fsx.CopyFile("../../testdata/portfolios.yaml", path.Join(tmpdir, "portfolios.yaml"))
 	if err != nil {
 		return
 	}
@@ -62,7 +62,7 @@ func TestEvaluateCmd(t *testing.T) {
 	cli := mockCli()
 	out, err := exec(cli, "cryptor valuate")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Contains(t, out, "NAME:  personal\nNOTES: Personal holdings\n")
+	assert.Contains(t, out, "NAME:  personal\nNOTES: Personal portfolio\n")
 	assert.NotContains(t, out, "price request:")
 	fmt.Println(out)
 	assert.PassIf(t, cli.valuations.FindByNameAndDate("personal", today) != -1, "missing valuation: %v", today)
@@ -82,7 +82,9 @@ func TestEvaluateCmd(t *testing.T) {
 	assert.Contains(t, out, "price request: ETH "+date+" 1000.00")
 	assert.Contains(t, out, "price request: USDC "+date+" 1.00")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.PassIf(t, cli.valuations.FindByNameAndDate("personal", date) != -1, "missing valuation: %v", date)
+	assert.PassIf(t, cli.valuations.FindByNameAndDate("personal", date) != -1, "missing personal valuation: %v", date)
+	assert.PassIf(t, cli.valuations.FindByNameAndDate("joint", date) != -1, "missing joint valuation: %v", date)
+	assert.PassIf(t, cli.valuations.FindByNameAndDate("portfolio1", date) != -1, "missing portfolio1 valuation: %v", date)
 }
 
 func TestHelpCmd(t *testing.T) {

@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/BurntSushi/toml"
 	"github.com/srackham/cryptor/internal/fsx"
 	"github.com/srackham/cryptor/internal/price"
+	"gopkg.in/yaml.v3"
 )
 
 type Asset struct {
@@ -112,7 +112,7 @@ func (p Portfolio) DeepCopy() Portfolio {
 	return res
 }
 
-// LoadPortfoliosFile reads TOML portfolios file.
+// LoadPortfoliosFile reads portfolios configuration file.
 // Returns a Portfolios slice.
 func LoadPortfoliosFile(filename string) (Portfolios, error) {
 	res := Portfolios{}
@@ -120,35 +120,50 @@ func LoadPortfoliosFile(filename string) (Portfolios, error) {
 	if err != nil {
 		return res, err
 	}
-	raw := struct {
-		Portfolios []struct {
-			Name   string `toml:"name"`
-			Notes  string `toml:"notes"`
-			Cost   string `toml:"cost"`
-			Assets []struct {
-				Symbol string  `toml:"symbol"`
-				Amount float64 `toml:"amount"`
-			} `toml:"assets"`
-		} `toml:"portfolios"`
+	config := []struct {
+		Name   string             `yaml:"name"`
+		Notes  string             `yaml:"notes"`
+		Cost   string             `yaml:"cost"`
+		Assets map[string]float64 `yaml:"assets"`
 	}{}
-	_, err = toml.Decode(s, &raw)
+	err = yaml.Unmarshal([]byte(s), &config)
 	if err != nil {
 		return res, err
 	}
 	// Copy parsed portfolios configuration to Portfolios slice.
-	for _, c := range raw.Portfolios {
+	for _, c := range config {
 		p := Portfolio{}
 		p.Name = c.Name
 		p.Notes = c.Notes
 		p.Cost = c.Cost
 		p.Assets = []Asset{}
-		for _, a := range c.Assets {
+		for k, v := range c.Assets {
 			asset := Asset{}
-			asset.Symbol = a.Symbol
-			asset.Amount = a.Amount
+			asset.Symbol = strings.ToUpper(k)
+			asset.Amount = v
 			p.Assets = append(p.Assets, asset)
 		}
 		res = append(res, p)
+	}
+	// Check for duplicate portfolio names.
+	for i := range res {
+		for j := range res {
+			if i != j && res[i].Name == res[j].Name {
+				return res, fmt.Errorf("duplicate portfolio name: %q", res[j].Name)
+			}
+		}
+	}
+	// Synthesise missing portfolio names.
+	for i := range res {
+		if res[i].Name == "" {
+			for j := 1; ; j++ {
+				name := fmt.Sprintf("portfolio%d", j)
+				if res.FindByName(name) == -1 {
+					res[i].Name = name
+					break
+				}
+			}
+		}
 	}
 	return res, err
 }

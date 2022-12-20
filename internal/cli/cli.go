@@ -199,7 +199,7 @@ func (cli *cli) plotAllocation() error {
 }
 
 func (cli *cli) load() error {
-	ps, err := portfolio.LoadPortfoliosFile(filepath.Join(cli.configDir, "portfolios.toml"))
+	ps, err := portfolio.LoadPortfoliosFile(filepath.Join(cli.configDir, "portfolios.yaml"))
 	if err != nil {
 		return err
 	}
@@ -275,8 +275,7 @@ func (cli *cli) valuate() error {
 			ps[i].USDCost = cost
 		}
 		// Update valuations history.
-		j := cli.valuations.FindByNameAndDate(ps[i].Name, ps[i].Date)
-		if j == -1 {
+		if j := cli.valuations.FindByNameAndDate(ps[i].Name, ps[i].Date); j == -1 {
 			cli.valuations = append(cli.valuations, ps[i])
 		} else if date == helpers.TodaysDate() || cli.opts.force {
 			cli.valuations[j] = ps[i]
