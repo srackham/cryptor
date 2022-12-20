@@ -14,22 +14,22 @@ import (
 )
 
 type Asset struct {
-	Symbol     string
-	Amount     float64
-	Value      float64 // Value in USD at the time of valuation
-	Allocation float64 // Percentage of total portfolio USD value
+	Symbol     string  `json:"symbol"`
+	Amount     float64 `json:"amount"`
+	Value      float64 `json:"value"`      // Value in USD at the time of valuation
+	Allocation float64 `json:"allocation"` // Percentage of total portfolio USD value
 }
 
 type Assets []Asset
 
 type Portfolio struct {
-	Name    string
-	Notes   string
-	Date    string  // The valuation date formatted "YYYY-MM-DD"
-	Value   float64 // Combined assets value in USD
-	Cost    string  // Combined assets cost, format = "<amount> <currency>"
-	USDCost float64 // Calculated cost in USD.
-	Assets  Assets
+	Name    string  `json:"name"`
+	Notes   string  `json:"notes"`
+	Date    string  `json:"date"`    // The valuation date formatted "YYYY-MM-DD"
+	Value   float64 `json:"value"`   // Combined assets value in USD
+	Cost    string  `json:"cost"`    // Combined assets cost, format = "<amount> <currency>"
+	USDCost float64 `json:"usdcost"` // Calculated cost in USD.
+	Assets  Assets  `json:"assets"`
 }
 
 type Portfolios []Portfolio

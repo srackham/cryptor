@@ -1,302 +1,302 @@
 [
     {
-        "Name": "personal",
-        "Notes": "Personal holdings",
-        "Date": "2022-12-02",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "personal",
+        "notes": "Personal holdings",
+        "date": "2022-12-02",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             },
             {
-                "Symbol": "USDC",
-                "Amount": 100,
-                "Value": 100
+                "symbol": "USDC",
+                "amount": 100,
+                "value": 100
             }
         ]
     },
     {
-        "Name": "joint",
-        "Notes": "Joint holdings",
-        "Date": "2022-12-02",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "joint",
+        "notes": "Joint holdings",
+        "date": "2022-12-02",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             }
         ]
     },
     {
-        "Name": "personal",
-        "Notes": "Personal holdings",
-        "Date": "2022-12-01",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "personal",
+        "notes": "Personal holdings",
+        "date": "2022-12-01",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             },
             {
-                "Symbol": "USDC",
-                "Amount": 100,
-                "Value": 100
+                "symbol": "USDC",
+                "amount": 100,
+                "value": 100
             }
         ]
     },
     {
-        "Name": "joint",
-        "Notes": "Joint holdings",
-        "Date": "2022-12-01",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "joint",
+        "notes": "Joint holdings",
+        "date": "2022-12-01",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             }
         ]
     },
     {
-        "Name": "personal",
-        "Notes": "Personal holdings",
-        "Date": "2022-12-03",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "personal",
+        "notes": "Personal holdings",
+        "date": "2022-12-03",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             },
             {
-                "Symbol": "USDC",
-                "Amount": 100,
-                "Value": 100
+                "symbol": "USDC",
+                "amount": 100,
+                "value": 100
             }
         ]
     },
     {
-        "Name": "joint",
-        "Notes": "Joint holdings",
-        "Date": "2022-12-03",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "joint",
+        "notes": "Joint holdings",
+        "date": "2022-12-03",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             }
         ]
     },
     {
-        "Name": "personal",
-        "Notes": "Personal holdings",
-        "Date": "2022-12-04",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "personal",
+        "notes": "Personal holdings",
+        "date": "2022-12-04",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             },
             {
-                "Symbol": "USDC",
-                "Amount": 100,
-                "Value": 100
+                "symbol": "USDC",
+                "amount": 100,
+                "value": 100
             }
         ]
     },
     {
-        "Name": "joint",
-        "Notes": "Joint holdings",
-        "Date": "2022-12-04",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "joint",
+        "notes": "Joint holdings",
+        "date": "2022-12-04",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             }
         ]
     },
     {
-        "Name": "personal",
-        "Notes": "Personal holdings",
-        "Date": "2022-12-05",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "personal",
+        "notes": "Personal holdings",
+        "date": "2022-12-05",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             },
             {
-                "Symbol": "USDC",
-                "Amount": 100,
-                "Value": 100
+                "symbol": "USDC",
+                "amount": 100,
+                "value": 100
             }
         ]
     },
     {
-        "Name": "joint",
-        "Notes": "Joint holdings",
-        "Date": "2022-12-05",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "joint",
+        "notes": "Joint holdings",
+        "date": "2022-12-05",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             }
         ]
     },
     {
-        "Name": "personal",
-        "Notes": "Personal holdings",
-        "Date": "2022-12-07",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "personal",
+        "notes": "Personal holdings",
+        "date": "2022-12-07",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             },
             {
-                "Symbol": "USDC",
-                "Amount": 100,
-                "Value": 100
+                "symbol": "USDC",
+                "amount": 100,
+                "value": 100
             }
         ]
     },
     {
-        "Name": "joint",
-        "Notes": "Joint holdings",
-        "Date": "2022-12-07",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "joint",
+        "notes": "Joint holdings",
+        "date": "2022-12-07",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             }
         ]
     },
     {
-        "Name": "personal",
-        "Notes": "Personal holdings",
-        "Date": "2022-12-06",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "personal",
+        "notes": "Personal holdings",
+        "date": "2022-12-06",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             },
             {
-                "Symbol": "USDC",
-                "Amount": 100,
-                "Value": 100
+                "symbol": "USDC",
+                "amount": 100,
+                "value": 100
             }
         ]
     },
     {
-        "Name": "joint",
-        "Notes": "Joint holdings",
-        "Date": "2022-12-06",
-        "Cost": "$10,000.00 NZD",
-        "USDCost": 6372.05,
-        "Assets": [
+        "name": "joint",
+        "notes": "Joint holdings",
+        "date": "2022-12-06",
+        "cost": "$10,000.00 NZD",
+        "usdcost": 6372.05,
+        "assets": [
             {
-                "Symbol": "BTC",
-                "Amount": 0.5,
-                "Value": 5000
+                "symbol": "BTC",
+                "amount": 0.5,
+                "value": 5000
             },
             {
-                "Symbol": "ETH",
-                "Amount": 2.5,
-                "Value": 2500
+                "symbol": "ETH",
+                "amount": 2.5,
+                "value": 2500
             }
         ]
     }

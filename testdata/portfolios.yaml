@@ -9,7 +9,6 @@
     USDC: 100
 
 - name:  joint
-  notes: Joint portfolio
   assets:
       BTC: 0.5
       ETH: 2.5
