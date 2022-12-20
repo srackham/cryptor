@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/srackham/cryptor/internal/cache"
@@ -128,6 +129,10 @@ func (cli *cli) parseArgs(args []string) error {
 			case "-currency":
 				cli.opts.currency = strings.ToUpper(arg)
 			case "-date":
+				re := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+				if !re.MatchString(arg) {
+					return fmt.Errorf("invalid date: %q", arg)
+				}
 				if _, err := helpers.ParseDateString(arg, nil); err != nil {
 					return fmt.Errorf("invalid date: %q", arg)
 				}
