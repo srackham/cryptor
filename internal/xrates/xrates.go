@@ -51,7 +51,7 @@ func getRates() (Rates, error) {
 	}
 	m = m["rates"].(map[string]any)
 	for k, v := range m {
-		rates[strings.ToUpper(k)] = v.(float64)
+		rates[strings.ToLower(k)] = v.(float64)
 	}
 	return rates, nil
 }
@@ -68,14 +68,14 @@ func (x *ExchangeRates) GetRate(currency string, force bool) (float64, error) {
 	var ok bool
 	today := helpers.TodaysDate()
 	force = force && !x.fetched // Don't force if rates have previously been fetched during this session.
-	if rate, ok = (*x.CacheData)[today][strings.ToUpper(currency)]; !ok || force {
+	if rate, ok = (*x.CacheData)[today][strings.ToLower(currency)]; !ok || force {
 		x.log.Verbose("exchange rates request")
 		rates, err := getRates()
 		if err != nil {
 			return 0.0, err
 		}
 		x.CacheData = &RatesCache{today: rates}
-		if rate, ok = (*x.CacheData)[today][strings.ToUpper(currency)]; !ok {
+		if rate, ok = (*x.CacheData)[today][strings.ToLower(currency)]; !ok {
 			return 0.0, fmt.Errorf("unknown currency: %s", currency)
 		}
 		x.fetched = true
