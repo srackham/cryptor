@@ -1,5 +1,4 @@
 // Reads crypto currency prices in USD.
-// TODO cache/save/restore all prices (cf. exchangerates package)
 package price
 
 import (

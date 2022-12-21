@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	"github.com/srackham/cryptor/internal/cache"
-	"github.com/srackham/cryptor/internal/exchangerates"
 	"github.com/srackham/cryptor/internal/helpers"
 	"github.com/srackham/cryptor/internal/logger"
 	"github.com/srackham/cryptor/internal/portfolio"
 	"github.com/srackham/cryptor/internal/price"
 	"github.com/srackham/cryptor/internal/slice"
+	"github.com/srackham/cryptor/internal/xrates"
 )
 
 // Build ldflags.
@@ -37,7 +37,7 @@ type cli struct {
 	valuations      portfolio.Portfolios
 	valuationsCache cache.Cache[portfolio.Portfolios]
 	priceReader     price.PriceReader
-	xrates          exchangerates.ExchangeRates
+	xrates          xrates.ExchangeRates
 	opts            struct {
 		aggregate  bool
 		currency   string
@@ -53,7 +53,7 @@ func New(api price.IPriceAPI) *cli {
 	cli.valuations = portfolio.Portfolios{}
 	cli.valuationsCache = *cache.NewCache(&cli.valuations)
 	cli.priceReader = price.NewPriceReader(api, &cli.log)
-	cli.xrates = exchangerates.NewExchangeRates(&cli.log)
+	cli.xrates = xrates.NewExchangeRates(&cli.log)
 	return &cli
 }
 

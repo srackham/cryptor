@@ -1,4 +1,4 @@
-package exchangerates
+package xrates
 
 import (
 	"testing"
