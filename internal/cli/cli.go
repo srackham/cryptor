@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/srackham/cryptor/internal/cache"
+	"github.com/srackham/cryptor/internal/fsx"
 	"github.com/srackham/cryptor/internal/helpers"
 	"github.com/srackham/cryptor/internal/logger"
 	"github.com/srackham/cryptor/internal/portfolio"
@@ -77,6 +78,8 @@ func (cli *cli) Execute(args []string) error {
 		switch cli.command {
 		case "help":
 			cli.help()
+		case "init":
+			err = cli.init()
 		case "valuate":
 			err = cli.valuate()
 		default:
@@ -147,6 +150,43 @@ func (cli *cli) parseArgs(args []string) error {
 	return nil
 }
 
+// init implements the init command.
+func (cli *cli) init() error {
+	if !fsx.DirExists(cli.configDir) {
+		cli.log.Highlight("creating configuration directory: %q", cli.configDir)
+		if err := fsx.MkMissingDir(cli.configDir); err != nil {
+			return err
+		}
+	}
+	if fsx.FileExists(cli.configFile()) {
+		return fmt.Errorf("configuration file already exists: %q", cli.configFile())
+	}
+	cli.log.Highlight("creating configuration file: %q", cli.configFile())
+	conf := `# Example cryptor portfolio configuration file
+
+- name:  personal
+  notes: Personal portfolio
+  cost: $10,000.00 NZD
+  assets:
+    BTC: 0.5
+    ETH: 2.5
+    USDC: 100
+
+- name:  joint
+  assets:
+      BTC: 0.5
+      ETH: 2.5
+
+# Minimal portfolio
+- assets:
+      BTC: 0.25
+`
+	if err := fsx.WriteFile(cli.configFile(), conf); err != nil {
+		return err
+	}
+	return nil
+}
+
 // help implements the help command.
 func (cli *cli) help() {
 	github := "https://github.com/srackham/cryptor"
@@ -158,8 +198,9 @@ Usage:
 
 Commands:
 
-    valuate    list portfolio valuations
-    help       display documentation
+    init     create configuration directory and install example portfolios file
+    valuate  list portfolio valuations
+    help     display documentation
 
 Options:
 
@@ -179,7 +220,7 @@ Github:     ` + github + ``
 }
 
 func isCommand(name string) bool {
-	return slice.New("help", "nop", "valuate").Has(name)
+	return slice.New("help", "init", "valuate").Has(name)
 }
 
 // plotValuations implements the `plot valuations` command.
@@ -196,8 +237,12 @@ func (cli *cli) plotAllocation() error {
 	return nil
 }
 
+func (cli *cli) configFile() string {
+	return filepath.Join(cli.configDir, "portfolios.yaml")
+}
+
 func (cli *cli) load() error {
-	ps, err := portfolio.LoadPortfoliosFile(filepath.Join(cli.configDir, "portfolios.yaml"))
+	ps, err := portfolio.LoadPortfoliosFile(cli.configFile())
 	if err != nil {
 		return err
 	}
@@ -258,7 +303,7 @@ func (cli *cli) valuate() error {
 		ps = cli.portfolios
 	}
 	// Evaluate portfolios.
-	for i, _ := range ps {
+	for i := range ps {
 		ps[i].Date = date
 		if err := ps[i].SetUSDValues(cli.priceReader, date, cli.opts.force); err != nil {
 			return err
