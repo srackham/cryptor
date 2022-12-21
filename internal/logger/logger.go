@@ -47,9 +47,7 @@ func (log *Log) Console(format string, v ...any) {
 
 // logVerbose prints a line to stdout if `-v` logVerbose option was specified.
 func (log *Log) Verbose(format string, v ...any) {
-	colorize(highlightColor, func() {
-		log.output(os.Stdout, 1, format, v...)
-	})
+	log.output(os.Stdout, 1, format, v...)
 }
 
 // logVerbose2 prints a a line to stdout the `-v` verbose option was specified more
