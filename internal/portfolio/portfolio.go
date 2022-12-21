@@ -188,6 +188,7 @@ func (ps Portfolios) SaveValuationsFile(valuationsFile string) error {
 
 // Aggregate returns a new portfolio that combines the receiver portfolios.
 // Portfolio Notes field is assigned the list of combined portfolios.
+// Aggregated costs are valid only if all portfolios are costed.
 // TODO tests
 func (ps Portfolios) Aggregate(name string, date string) Portfolio {
 	res := Portfolio{
@@ -196,9 +197,13 @@ func (ps Portfolios) Aggregate(name string, date string) Portfolio {
 		Assets: Assets{},
 	}
 	var notes string
+	missingCosts := false
 	for _, p := range ps {
 		notes += fmt.Sprintf("%s, ", p.Name)
 		res.Value += p.Value
+		if p.USDCost == 0 {
+			missingCosts = true
+		}
 		res.USDCost += p.USDCost
 		for _, a := range p.Assets {
 			i := res.Assets.Find(a.Symbol)
@@ -213,6 +218,9 @@ func (ps Portfolios) Aggregate(name string, date string) Portfolio {
 	res.Notes = strings.TrimSuffix(notes, ", ")
 	res.SetAllocations()
 	res.Assets.SortByValue()
+	if missingCosts {
+		res.USDCost = 0.00
+	}
 	return res
 }
 

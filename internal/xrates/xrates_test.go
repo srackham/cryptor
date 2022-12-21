@@ -1,6 +1,7 @@
 package xrates
 
 import (
+	"os"
 	"testing"
 
 	"github.com/srackham/cryptor/internal/assert"
@@ -8,6 +9,10 @@ import (
 )
 
 func TestExchangeRates(t *testing.T) {
+	if os.Getenv("CI") != "" {
+		t.Skip("skip on Github Actions because this test requires HTTP access")
+	}
+
 	x := NewExchangeRates(&logger.Log{})
 
 	rate, err := x.GetRate("USD", false)
