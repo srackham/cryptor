@@ -113,10 +113,6 @@ func (cli *cli) parseArgs(args []string) error {
 			cli.opts.aggregate = true
 		case opt == "-force":
 			cli.opts.force = true
-		case opt == "-v":
-			cli.log.Verbosity++
-		case opt == "-vv":
-			cli.log.Verbosity += 2
 		case slice.New("-confdir", "-currency", "-date", "-portfolio").Has(opt):
 			// Process option argument.
 			if i+1 >= len(args) {
@@ -159,7 +155,7 @@ func (cli *cli) parseArgs(args []string) error {
 // help implements the help command.
 func (cli *cli) help() {
 	github := "https://github.com/srackham/cryptor"
-	summary := `Cryptor reports crypto currency portfolio statistics.
+	summary := `Cryptor valuates crypto currency portfolios.
 
 Usage:
 
@@ -167,8 +163,8 @@ Usage:
 
 Commands:
 
-    valuate    list portfolio valuations (default command)
-    help        display documentation
+    valuate    list portfolio valuations
+    help       display documentation
 
 Options:
 
@@ -178,7 +174,6 @@ Options:
     -date YYYY-MM-DD        Perform valuation using crypto prices as of date YYYY-MM-DD
     -portfolio PORTFOLIO    Process named portfolio (can be specified multiple times)
     -force                  Unconditionally fetch prices and exchange rates
-    -v, -vv                 Increased verbosity
 
 Version:    ` + VERS + " (" + OS + ")" + `
 Git commit: ` + COMMIT + `

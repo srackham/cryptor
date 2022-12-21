@@ -2,10 +2,10 @@
 
 <!-- [![Go Report Card](https://goreportcard.com/badge/github.com/srackham/cryptor)](https://goreportcard.com/report/github.com/srackham/cryptor) -->
 
-Cryptor reports crypto currency portfolio statistics (current and historical).
+Cryptor valuates crypto currency portfolios.
 
 - Cryptor is a CLI application written in Go.
-- Cryptor handles multiple asset portfolios and historic positions.
+- Cryptor handles multiple asset portfolios and historic valuations.
 - Cryptor tracks the value and performance of crypto assets, it does not communicate or integrate with blockchains or wallets.
 
 ## Quick Start
@@ -60,7 +60,7 @@ TODO
 ## Implementation Notes
 - Crypto prices and exchange rates are cached locally to the cryptor configuration directory (defaults to `$HOME/.cryptor`). Unless the `-force` option is specified, updates are only fetched over the Internet when they are not found in the local cache files. Caching ensure minimal use of Web APIs which require an Internet connection, can be slow and are sometimes throttled.
 
-- By convention, crypto and currency symbols are converted to upper case.
+- By convention, crypto and currency symbols are displayed in uppercase.
 
 - The configuration directory can be specified with the `-confdir` option.
 

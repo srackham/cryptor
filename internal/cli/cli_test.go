@@ -67,7 +67,7 @@ func TestEvaluateCmd(t *testing.T) {
 	assert.PassIf(t, cli.valuations.FindByNameAndDate("personal", today) != -1, "missing valuation: %v", today)
 
 	cli = mockCli()
-	out, err = exec(cli, "cryptor valuate -date "+today+" -force -v")
+	out, err = exec(cli, "cryptor valuate -date "+today+" -force")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Contains(t, out, "price request: BTC "+today+" 10000.00")
 	assert.Contains(t, out, "price request: ETH "+today+" 1000.00")
@@ -76,7 +76,7 @@ func TestEvaluateCmd(t *testing.T) {
 
 	cli = mockCli()
 	date := "2022-06-01"
-	out, err = exec(cli, "cryptor valuate -v -date "+date)
+	out, err = exec(cli, "cryptor valuate -date "+date)
 	assert.Contains(t, out, "price request: BTC "+date+" 10000.00")
 	assert.Contains(t, out, "price request: ETH "+date+" 1000.00")
 	assert.Contains(t, out, "price request: USDC "+date+" 1.00")
@@ -89,14 +89,14 @@ func TestEvaluateCmd(t *testing.T) {
 func TestHelpCmd(t *testing.T) {
 	out, err := exec(mockCli(), "cryptor help")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Contains(t, out, "Cryptor reports crypto currency portfolio statistics")
+	assert.Contains(t, out, "Cryptor valuates crypto currency portfolios")
 
 	out, err = exec(mockCli(), "cryptor --help")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Contains(t, out, "Cryptor reports crypto currency portfolio statistics")
+	assert.Contains(t, out, "Cryptor valuates crypto currency portfolios")
 
 	out, err = exec(mockCli(), "cryptor -h")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Contains(t, out, "Cryptor reports crypto currency portfolio statistics")
+	assert.Contains(t, out, "Cryptor valuates crypto currency portfolios")
 
 }
