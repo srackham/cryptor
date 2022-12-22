@@ -159,9 +159,9 @@ func (cli *cli) init() error {
 		}
 	}
 	if fsx.FileExists(cli.configFile()) {
-		return fmt.Errorf("configuration file already exists: %q", cli.configFile())
+		return fmt.Errorf("portfolios file already exists: %q", cli.configFile())
 	}
-	cli.log.Highlight("creating configuration file: %q", cli.configFile())
+	cli.log.Highlight("installing example portfolios file: %q", cli.configFile())
 	conf := `# Example cryptor portfolio configuration file
 
 - name:  personal
@@ -190,7 +190,7 @@ func (cli *cli) init() error {
 // help implements the help command.
 func (cli *cli) help() {
 	github := "https://github.com/srackham/cryptor"
-	summary := `Cryptor valuates crypto currency portfolios.
+	summary := `Cryptor valuates crypto currency asset portfolios.
 
 Usage:
 
@@ -199,24 +199,24 @@ Usage:
 Commands:
 
     init     create configuration directory and install example portfolios file
-    valuate  list portfolio valuations
+    valuate  calculate and display portfolio valuations
     help     display documentation
 
 Options:
 
     -aggregate              Display combined portfolio valuations
-    -confdir CONF_DIR       Directory containing data and cache files (default: $HOME/.cryptor)
-    -currency CURRENCY      Display values in this CURRENCY
+    -confdir CONF_DIR       Specify directory containing data and cache files (default: $HOME/.cryptor)
+    -currency CURRENCY      Display values in this fiat CURRENCY
     -date YYYY-MM-DD        Perform valuation using crypto prices as of date YYYY-MM-DD
     -portfolio PORTFOLIO    Process named portfolio (can be specified multiple times)
-    -force                  Unconditionally fetch prices and exchange rates
+    -force                  Unconditionally fetch crypto prices and exchange rates
 
 Version:    ` + VERS + " (" + OS + ")" + `
 Git commit: ` + COMMIT + `
 Built:      ` + BUILT + `
-Github:     ` + github + ``
+Github:     ` + github
 
-	cli.log.Console("\n" + summary)
+	cli.log.Console("\n" + summary + "\n")
 }
 
 func isCommand(name string) bool {

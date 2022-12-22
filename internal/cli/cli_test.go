@@ -89,14 +89,14 @@ func TestEvaluateCmd(t *testing.T) {
 func TestHelpCmd(t *testing.T) {
 	out, err := exec(mockCli(), "cryptor help")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Contains(t, out, "Cryptor valuates crypto currency portfolios")
+	assert.Contains(t, out, "Cryptor valuates")
 
 	out, err = exec(mockCli(), "cryptor --help")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Contains(t, out, "Cryptor valuates crypto currency portfolios")
+	assert.Contains(t, out, "Cryptor valuates")
 
 	out, err = exec(mockCli(), "cryptor -h")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Contains(t, out, "Cryptor valuates crypto currency portfolios")
+	assert.Contains(t, out, "Cryptor valuates")
 
 }

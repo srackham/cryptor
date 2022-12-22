@@ -69,7 +69,7 @@ func (x *ExchangeRates) GetRate(currency string, force bool) (float64, error) {
 	today := helpers.TodaysDate()
 	force = force && !x.fetched // Don't force if rates have previously been fetched during this session.
 	if rate, ok = (*x.CacheData)[today][strings.ToLower(currency)]; !ok || force {
-		x.log.Highlight("exchange rates request")
+		x.log.Highlight("exchange rates request: " + helpers.TodaysDate())
 		rates, err := getRates()
 		if err != nil {
 			return 0.0, err
