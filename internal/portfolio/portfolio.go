@@ -45,12 +45,12 @@ func ParseCurrency(cstr string) (value float64, currency string, err error) {
 	case 2:
 		currency = strings.ToUpper(split[1])
 	default:
-		err = fmt.Errorf("invalid currency value: %q", cstr)
+		err = fmt.Errorf("invalid currency value: \"%s\"", cstr)
 		return
 	}
 	value, err = strconv.ParseFloat(split[0], 64)
 	if err != nil {
-		err = fmt.Errorf("invalid currency value: %q", cstr)
+		err = fmt.Errorf("invalid currency value: \"%s\"", cstr)
 		return
 	}
 	return
@@ -149,7 +149,7 @@ func LoadPortfoliosFile(filename string) (Portfolios, error) {
 	for i := range res {
 		for j := range res {
 			if i != j && res[i].Name == res[j].Name {
-				return res, fmt.Errorf("duplicate portfolio name: %q", res[j].Name)
+				return res, fmt.Errorf("duplicate portfolio name: \"%s\"", res[j].Name)
 			}
 		}
 	}

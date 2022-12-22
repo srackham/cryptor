@@ -108,7 +108,7 @@ func (cli *cli) parseArgs(args []string) error {
 				opt = "help"
 			}
 			if !isCommand(opt) {
-				return fmt.Errorf("illegal command: %q", opt)
+				return fmt.Errorf("illegal command: \"%s\"", opt)
 			}
 			cli.command = opt
 		case opt == "-aggregate":
@@ -128,20 +128,20 @@ func (cli *cli) parseArgs(args []string) error {
 				cli.opts.currency = strings.ToUpper(arg)
 			case "-date":
 				if !helpers.IsDateString(arg) {
-					return fmt.Errorf("invalid date: %q", arg)
+					return fmt.Errorf("invalid date: \"%s\"", arg)
 				}
 				if strings.Compare(arg, helpers.TodaysDate()) == 1 {
-					return fmt.Errorf("future date is not allowed: %q", arg)
+					return fmt.Errorf("future date is not allowed: \"%s\"", arg)
 				}
 				cli.opts.date = arg
 			case "-portfolio":
 				cli.opts.portfolios = append(cli.opts.portfolios, arg)
 			default:
-				return fmt.Errorf("unexpected option: %q", opt)
+				return fmt.Errorf("unexpected option: \"%s\"", opt)
 			}
 			skip = true
 		default:
-			return fmt.Errorf("illegal argument: %q", opt)
+			return fmt.Errorf("illegal argument: \"%s\"", opt)
 		}
 	}
 	if cli.command == "help" {
@@ -153,15 +153,15 @@ func (cli *cli) parseArgs(args []string) error {
 // init implements the init command.
 func (cli *cli) init() error {
 	if !fsx.DirExists(cli.configDir) {
-		cli.log.Highlight("creating configuration directory: %q", cli.configDir)
+		cli.log.Highlight("creating configuration directory: \"%s\"", cli.configDir)
 		if err := fsx.MkMissingDir(cli.configDir); err != nil {
 			return err
 		}
 	}
 	if fsx.FileExists(cli.configFile()) {
-		return fmt.Errorf("portfolios file already exists: %q", cli.configFile())
+		return fmt.Errorf("portfolios file already exists: \"%s\"", cli.configFile())
 	}
-	cli.log.Highlight("installing example portfolios file: %q", cli.configFile())
+	cli.log.Highlight("installing example portfolios file: \"%s\"", cli.configFile())
 	conf := `# Example cryptor portfolio configuration file
 
 - name:  personal
@@ -208,7 +208,7 @@ Options:
     -confdir CONF_DIR       Specify directory containing data and cache files (default: $HOME/.cryptor)
     -currency CURRENCY      Display values in this fiat CURRENCY
     -date YYYY-MM-DD        Perform valuation using crypto prices as of date YYYY-MM-DD
-    -portfolio PORTFOLIO    Process named portfolio (can be specified multiple times)
+    -portfolio PORTFOLIO    Process named portfolio (default: all portfolios)
     -force                  Unconditionally fetch crypto prices and exchange rates
 
 Version:    ` + VERS + " (" + OS + ")" + `
@@ -292,10 +292,10 @@ func (cli *cli) valuate() error {
 		for _, name := range cli.opts.portfolios {
 			i := cli.portfolios.FindByName(name)
 			if i == -1 {
-				return fmt.Errorf("missing portfolio: %q", name)
+				return fmt.Errorf("missing portfolio: \"%s\"", name)
 			}
 			if ps.FindByName(name) != -1 {
-				return fmt.Errorf("portfolio name can only be specified once: %q", name)
+				return fmt.Errorf("portfolio name can only be specified once: \"%s\"", name)
 			}
 			ps = append(ps, cli.portfolios[i])
 		}
