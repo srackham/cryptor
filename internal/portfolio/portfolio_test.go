@@ -96,19 +96,25 @@ func TestLoadPortfoliosFile(t *testing.T) {
 
 	assert.Equal(t, 3, len(ps[0].Assets))
 	assert.Equal(t, "personal", ps[0].Name)
-	assert.Equal(t, ps[0].Assets[0], Asset{
+	i := ps[0].Assets.Find("BTC")
+	assert.PassIf(t, i != -1, "missing asset: BTC")
+	assert.Equal(t, Asset{
 		Symbol: "BTC",
 		Amount: 0.5,
 		Value:  0.0,
-	})
+	},
+		ps[0].Assets[i])
 
+	i = ps[1].Assets.Find("ETH")
+	assert.PassIf(t, i != -1, "missing asset: ETH")
 	assert.Equal(t, 2, len(ps[1].Assets))
 	assert.Equal(t, "joint", ps[1].Name)
-	assert.Equal(t, ps[1].Assets[1], Asset{
+	assert.Equal(t, Asset{
 		Symbol: "ETH",
 		Amount: 2.5,
 		Value:  0.0,
-	})
+	},
+		ps[1].Assets[i])
 }
 func TestSortAndFilter(t *testing.T) {
 	h, err := LoadValuationsFile("../../testdata/valuations.json")
