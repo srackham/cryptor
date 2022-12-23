@@ -320,7 +320,7 @@ func (cli *cli) valuate() error {
 		// Update valuations history.
 		if j := cli.valuations.FindByNameAndDate(ps[i].Name, ps[i].Date); j == -1 {
 			cli.valuations = append(cli.valuations, ps[i])
-		} else if date == helpers.TodaysDate() || cli.opts.force {
+		} else if cli.opts.force {
 			cli.valuations[j] = ps[i]
 		}
 	}
