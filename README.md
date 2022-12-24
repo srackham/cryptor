@@ -1,78 +1,124 @@
 # Cryptor
 
-<!-- [![Go Report Card](https://goreportcard.com/badge/github.com/srackham/cryptor)](https://goreportcard.com/report/github.com/srackham/cryptor) -->
+Cryptor valuates crypto currency asset portfolios.
 
-Cryptor valuates crypto currency portfolios.
-
+- Cryptor can process multiple asset portfolios and historic valuations.
+- Cryptor tracks the values and performance of crypto assets
+- Cryptor uses publicly available crypto prices and exchange rates, it does not communicate or integrate with blockchains or wallets.
 - Cryptor is a CLI application written in Go.
-- Cryptor handles multiple asset portfolios and historic valuations.
-- Cryptor tracks the value and performance of crypto assets, it does not communicate or integrate with blockchains or wallets.
 
 ## Quick Start
-To compile and install the `cryptor` executable you will first need to [Download and install the Go Programming Language](https://go.dev/doc/install).
+Install `cryptor` with this command (prerequisite:
+[the Go Programming Language](https://go.dev/doc/install)):
 
-Next run this command:
+    go install github.com/srackham/cryptor@latest
 
-    go install TODO
+Install an example portfolios configuration file using the `cryptor init` command. For example:
 
-Test it by running:
+```
+$ cryptor init
+creating configuration directory: "/home/srackham/.cryptor"
+installing example portfolios file: "/home/srackham/.cryptor/portfolios.yaml"
+```
 
-    cryptor help
+Edit the YAML portfolios configuration file (`$HOME/.cryptor/portfolios.yaml`) to match your own:
 
+```yaml
+# Example cryptor portfolio configuration file
 
-## Glossary
-- _Allocation_: TODO
-- _Amount_: TODO
-- _Asset_: TODO
-- _Cost_: TODO
-- _Currency_: TODO
-- _Portfolio_: TODO
-- _Price_: TODO
-- _Value_: TODO
+- name:  personal
+  notes: Personal portfolio
+  cost: $10,000.00 NZD
+  assets:
+    BTC: 0.5
+    ETH: 2.5
+    USDC: 100
 
+- name:  joint
+  assets:
+      BTC: 0.5
+      ETH: 2.5
 
-## Commands
-TODO
+# Minimal portfolio
+- assets:
+      BTC: 0.25
+```
 
+Use the `cryptor valuate` command to value the portfolios. For example:
 
-## Valuate Command
-The _valuate_ command calculates portfolio asset values in USD (or some other specified currency).
+```
+$ cryptor valuate
 
-### Syntax
+NAME:  personal
+NOTES: Personal portfolio
+DATE:  2022-12-22
+VALUE: 11574.20 USD
+COST:  6319.93 USD
+GAINS: 5254.27 (83.14%)
+XRATE:
+            AMOUNT            VALUE   PERCENT            PRICE
+BTC         0.5000      8430.65 USD    72.84%     16861.30 USD
+ETH         2.5000      3043.78 USD    26.30%      1217.51 USD
+USDC      100.0000        99.77 USD     0.86%         1.00 USD
+```
 
-    cryptor valuate [OPTION]...
+Run the `cryptor help` command to view all the commands and command options:
 
-### Options
-[Common command options](#common-command-options) plus:
+```
+$ cryptor help
 
-    -aggregate
-    -currency CURRENCY
-    -date DATE
-    -refresh
+Cryptor valuates crypto currency asset portfolios.
 
-- Use the `-currency` option to display values in non-USD currencies.
-- Valuations with non-USD currencies are based on current exchange rates against the USD.
-- The `-date DATE` option specifies the date of the crypto prices; the default date is today's date.
+Usage:
 
-### Examples
-TODO
+    cryptor COMMAND [OPTION]...
 
-## Implementation Notes
-- Crypto prices and exchange rates are cached locally to the cryptor configuration directory (defaults to `$HOME/.cryptor`). Unless the `-force` option is specified, updates are only fetched over the Internet when they are not found in the local cache files. Caching ensure minimal use of Web APIs which require an Internet connection, can be slow and are sometimes throttled.
+Commands:
 
-- By convention, crypto and currency symbols are displayed in uppercase.
+    init     create configuration directory and install example portfolios file
+    valuate  calculate and display portfolio valuations
+    help     display documentation
 
-- The configuration directory can be specified with the `-confdir` option.
+Options:
 
-- Portfolio valuations are saved to the `$HOME/.cryptor/valuations.json` file:
-    * Valuations of past dates (using the `-date` option) are not saved unless the `-force` option is also used.
-    * Valuations for the current day always update the valuations history.
-    * A current valuation made with the `-force` option ensures that the latest crypto prices are used.
+    -aggregate              Display combined portfolio valuations
+    -confdir CONF_DIR       Specify directory containing data and cache files (default: $HOME/.cryptor)
+    -currency CURRENCY      Display values in this fiat CURRENCY
+    -date YYYY-MM-DD        Perform valuation using crypto prices as of date YYYY-MM-DD
+    -portfolio PORTFOLIO    Process named portfolio (default: all portfolios)
+    -force                  Unconditionally fetch crypto prices and exchange rates
 
-- All values are saved in USD.
+Version:    v0.0.1 (linux/amd64)
+Git commit: -
+Built:      2022-12-22T19:26:45+13:00
+Github:     https://github.com/srackham/cryptor
+```
+
+## Implementation and Usage Notes
+- Crypto prices and exchange rates are cached locally to the cryptor configuration directory (default: `$HOME/.cryptor`). Price updates are only fetched when they are not found in the local cache files (unless the `-force` option is specified). Caching ensures minimal use of Web APIs which can be slow and are sometimes throttled.
+
+- The `valuate` command values portfolio assets in the `portfolios.yaml` configuration file.
+
+- Portfolio valuations are saved to the `$HOME/.cryptor/valuations.json` valuation history file.
+
+- Valuations do not overwrite previously recorded valuations (this can be overridden with the `-force` option).
+
+- Valuations of past dates (using the`-date` option) are made using historic crypto prices, otherwise today's crypto prices are used.
+
+- All values are saved in USD (use the `-currency` option to display values in other fiat currencies).
+
+- Values displayed in non-USD currencies are converted from USD values using today's exchange rates.
+
+- If you specify the portfolio's `cost` (the portfolio's total cost in fiat currency) then portfolio gains and losses are calculated.
+
+- The `cost` value is formatted like `<amount> <currency>`. The amount is mandatory; the currency is optional and defaults to `USD`; dollar and comma characters are ignored. Examples:
+
+            $5,000.00 NZD     # Five thousand New Zealand dollars.
+            1000              # One thousand US dollars
+
+- Crypto and currency symbols are displayed in uppercase.
 - Saved portfolio valuations are date stamped.
-- Dates are specified and saved as YYYY-DD-MM formatted strings in the local time zone.
+- Dates are specified and recorded as `YYYY-DD-MM` formatted strings.
+- The `-portfolio` option can be specified multiple times.
 
-
-## Tips
--
+- Crypto prices are fetched from [CoinGecko](https://www.coingecko.com/en/api); exchange rates are fetched from [exchangerate.host](https://exchangerate.host/).
