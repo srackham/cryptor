@@ -282,7 +282,6 @@ func (cli *cli) save() error {
 // valuate implements the valuate command.
 func (cli *cli) valuate() error {
 	date := cli.opts.date
-	currency := cli.opts.currency
 	if err := cli.load(); err != nil {
 		return err
 	}
@@ -333,36 +332,7 @@ func (cli *cli) valuate() error {
 		return err
 	}
 	ps.SortByDateAndName()
-	cli.log.Console("")
-	for _, p := range ps {
-		s := fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nVALUE: %.2f %s",
-			p.Name, p.Notes, p.Date, p.Value*xrate, currency)
-		if p.USDCost > 0.00 {
-			gains := p.Value - p.USDCost
-			pcgains := gains / p.USDCost * 100
-			s += fmt.Sprintf("\nCOST:  %.2f %s\nGAINS: %.2f (%.2f%%)", p.USDCost*xrate, currency, gains*xrate, pcgains)
-		} else {
-			s += "\nCOST:\nGAINS:"
-		}
-		if cli.opts.currency != "USD" {
-			s += fmt.Sprintf("\nXRATE: 1 USD = %.2f %s", xrate, currency)
-		} else {
-			s += "\nXRATE:"
-		}
-		s += "\n            AMOUNT            VALUE   PERCENT            PRICE\n"
-		for _, a := range p.Assets {
-			value := a.Value * xrate
-			s += fmt.Sprintf("%-5s %12.4f %12.2f %s    %5.2f%% %12.2f %s\n",
-				a.Symbol,
-				a.Amount,
-				value,
-				currency,
-				a.Allocation,
-				helpers.If(a.Amount > 0.0, value/a.Amount, 0),
-				currency)
-		}
-		cli.log.Console("%s\n", s)
-	}
+	cli.log.Console("%s", ps.ToString(cli.opts.currency, xrate))
 	// Save valuations and cache files.
 	if err := cli.save(); err != nil {
 		return err

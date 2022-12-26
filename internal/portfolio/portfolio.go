@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/srackham/cryptor/internal/fsx"
+	"github.com/srackham/cryptor/internal/helpers"
 	"github.com/srackham/cryptor/internal/price"
 	"gopkg.in/yaml.v3"
 )
@@ -280,4 +281,48 @@ func (ps Portfolios) SortByDateAndName() {
 		}
 		return ps[i].Name < ps[j].Name
 	})
+}
+
+func (p Portfolio) gains() float64 {
+	return p.Value - p.USDCost
+}
+
+func (p Portfolio) pcgains() float64 {
+	if p.USDCost > 0.00 {
+		return p.gains() / p.USDCost * 100
+	} else {
+		return 0.0
+	}
+}
+
+func (ps *Portfolios) ToString(currency string, xrate float64) string {
+	res := ""
+	for _, p := range *ps {
+		res += fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nVALUE: %.2f %s",
+			p.Name, p.Notes, p.Date, p.Value*xrate, currency)
+		if p.USDCost > 0.00 {
+			res += fmt.Sprintf("\nCOST:  %.2f %s\nGAINS: %.2f (%.2f%%)", p.USDCost*xrate, currency, p.gains()*xrate, p.pcgains())
+		} else {
+			res += "\nCOST:\nGAINS:"
+		}
+		if currency != "USD" {
+			res += fmt.Sprintf("\nXRATE: 1 USD = %.2f %s", xrate, currency)
+		} else {
+			res += "\nXRATE:"
+		}
+		res += "\n            AMOUNT            VALUE    PERCENT            PRICE\n"
+		for _, a := range p.Assets {
+			value := a.Value * xrate
+			res += fmt.Sprintf("%-5s %12.4f %12.2f %s    %6.2f%% %12.2f %s\n",
+				a.Symbol,
+				a.Amount,
+				value,
+				currency,
+				a.Allocation,
+				helpers.If(a.Amount > 0.0, value/a.Amount, 0),
+				currency)
+		}
+		res += "\n"
+	}
+	return res
 }
