@@ -11,6 +11,7 @@ import (
 	"github.com/srackham/cryptor/internal/fsx"
 	"github.com/srackham/cryptor/internal/helpers"
 	"github.com/srackham/cryptor/internal/price"
+	"github.com/srackham/cryptor/internal/set"
 	"gopkg.in/yaml.v3"
 )
 
@@ -187,14 +188,29 @@ func (ps Portfolios) SaveValuationsFile(valuationsFile string) error {
 	return err
 }
 
+// AggregateByDate aggregates portfolios by date and returns a slice the aggregated portfolios.
+// TODO tests
+func (ps Portfolios) AggregateByDate(name string) Portfolios {
+	res := Portfolios{}
+	dates := set.New[string]()
+	for _, p := range ps {
+		dates.Add(p.Date)
+	}
+	for _, d := range dates.Values() {
+		p := ps.FilterByDate(d).Aggregate(name)
+		p.Date = d
+		res = append(res, p)
+	}
+	return res
+}
+
 // Aggregate returns a new portfolio that combines the receiver portfolios.
 // Portfolio Notes field is assigned the list of combined portfolios.
 // Aggregated costs are valid only if all portfolios are costed.
 // TODO tests
-func (ps Portfolios) Aggregate(name string, date string) Portfolio {
+func (ps Portfolios) Aggregate(name string) Portfolio {
 	res := Portfolio{
 		Name:   name,
-		Date:   date,
 		Assets: Assets{},
 	}
 	var notes string
@@ -325,4 +341,8 @@ func (ps *Portfolios) ToString(currency string, xrate float64) string {
 		res += "\n"
 	}
 	return res
+}
+
+func (ps *Portfolios) ToJSON(currency string, xrate float64) string {
+	return ""
 }

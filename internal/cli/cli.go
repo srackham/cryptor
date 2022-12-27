@@ -68,7 +68,6 @@ func (cli *cli) Execute(args []string) error {
 	user, _ := user.Current()
 	cli.configDir = filepath.Join(user.HomeDir, ".cryptor")
 	cli.opts.currency = "USD"
-	cli.opts.date = helpers.TodaysDate()
 	err = cli.parseArgs(args)
 	if err == nil {
 		cli.priceReader.CacheFile = filepath.Join(cli.configDir, "crypto-prices.json")
@@ -77,11 +76,13 @@ func (cli *cli) Execute(args []string) error {
 		cli.priceReader.API.SetCacheDir(cli.configDir)
 		switch cli.command {
 		case "help":
-			cli.help()
+			cli.helpCmd()
 		case "init":
-			err = cli.init()
+			err = cli.initCmd()
 		case "valuate":
-			err = cli.valuate()
+			err = cli.valuateCmd()
+		case "history":
+			err = cli.historyCmd()
 		default:
 			err = fmt.Errorf("illegal command: " + cli.command)
 		}
@@ -150,8 +151,8 @@ func (cli *cli) parseArgs(args []string) error {
 	return nil
 }
 
-// init implements the init command.
-func (cli *cli) init() error {
+// initCmd implements the initCmd command.
+func (cli *cli) initCmd() error {
 	if !fsx.DirExists(cli.configDir) {
 		cli.log.Highlight("creating configuration directory: \"%s\"", cli.configDir)
 		if err := fsx.MkMissingDir(cli.configDir); err != nil {
@@ -187,8 +188,8 @@ func (cli *cli) init() error {
 	return nil
 }
 
-// help implements the help command.
-func (cli *cli) help() {
+// helpCmd implements the helpCmd command.
+func (cli *cli) helpCmd() {
 	github := "https://github.com/srackham/cryptor"
 	summary := `Cryptor valuates crypto currency asset portfolios.
 
@@ -200,6 +201,7 @@ Commands:
 
     init     create configuration directory and install example portfolios file
     valuate  calculate and display portfolio valuations
+    history  display saved portfolio valuations from the valuations history
     help     display documentation
 
 Options:
@@ -220,21 +222,7 @@ Github:     ` + github
 }
 
 func isCommand(name string) bool {
-	return slice.New("help", "init", "valuate").Has(name)
-}
-
-// plotValuations implements the `plot valuations` command.
-// Plots the aggregate of the specified portfolios.
-func (cli *cli) plotValuations() error {
-	// TODO
-	return nil
-}
-
-// plotAllocation implements the `plot allocation` command.
-// Plots the aggregate of the specified portfolios.
-func (cli *cli) plotAllocation() error {
-	// TODO
-	return nil
+	return slice.New("help", "history", "init", "valuate").Has(name)
 }
 
 func (cli *cli) configFile() string {
@@ -279,9 +267,39 @@ func (cli *cli) save() error {
 	return nil
 }
 
-// valuate implements the valuate command.
-func (cli *cli) valuate() error {
+// historyCmd implements the valuate command.
+func (cli *cli) historyCmd() error {
+	if err := cli.load(); err != nil {
+		return err
+	}
+	ps := portfolio.Portfolios{}
+	if len(cli.opts.portfolios) > 0 {
+		ps = cli.valuations.FilterByName(cli.opts.portfolios...)
+	} else {
+		ps = cli.valuations
+	}
+	if cli.opts.date != "" {
+		ps = ps.FilterByDate(cli.opts.date)
+	}
+	if cli.opts.aggregate {
+		ps = ps.AggregateByDate("aggregate")
+	}
+	// Print portfolios.
+	xrate, err := cli.xrates.GetRate(cli.opts.currency, cli.opts.force)
+	if err != nil {
+		return err
+	}
+	ps.SortByDateAndName()
+	cli.log.Console("%s", ps.ToString(cli.opts.currency, xrate))
+	return nil
+}
+
+// valuateCmd implements the valuateCmd command.
+func (cli *cli) valuateCmd() error {
 	date := cli.opts.date
+	if date == "" {
+		date = helpers.TodaysDate()
+	}
 	if err := cli.load(); err != nil {
 		return err
 	}
@@ -324,7 +342,7 @@ func (cli *cli) valuate() error {
 		}
 	}
 	if cli.opts.aggregate {
-		ps = []portfolio.Portfolio{ps.Aggregate("aggregate", date)}
+		ps = ps.AggregateByDate("aggregate")
 	}
 	// Print portfolios.
 	xrate, err := cli.xrates.GetRate(cli.opts.currency, cli.opts.force)
