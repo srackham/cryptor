@@ -43,6 +43,7 @@ type cli struct {
 		currency   string
 		date       string
 		force      bool
+		format     string
 		portfolios []string
 	}
 }
@@ -68,6 +69,7 @@ func (cli *cli) Execute(args []string) error {
 	user, _ := user.Current()
 	cli.configDir = filepath.Join(user.HomeDir, ".cryptor")
 	cli.opts.currency = "USD"
+	cli.opts.format = "digest"
 	err = cli.parseArgs(args)
 	if err == nil {
 		cli.priceReader.CacheFile = filepath.Join(cli.configDir, "crypto-prices.json")
@@ -116,7 +118,7 @@ func (cli *cli) parseArgs(args []string) error {
 			cli.opts.aggregate = true
 		case opt == "-force":
 			cli.opts.force = true
-		case slice.New("-confdir", "-currency", "-date", "-portfolio").Has(opt):
+		case slice.New("-confdir", "-currency", "-date", "-format", "-portfolio").Has(opt):
 			// Process option argument.
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
@@ -135,6 +137,11 @@ func (cli *cli) parseArgs(args []string) error {
 					return fmt.Errorf("future date is not allowed: \"%s\"", arg)
 				}
 				cli.opts.date = arg
+			case "-format":
+				if !slice.New("digest", "json", "list", "csv").Has(arg) {
+					return fmt.Errorf("illegal -format argument: \"%s\"", arg)
+				}
+				cli.opts.format = arg
 			case "-portfolio":
 				cli.opts.portfolios = append(cli.opts.portfolios, arg)
 			default:
@@ -210,6 +217,7 @@ Options:
     -confdir CONF_DIR       Specify directory containing data and cache files (default: $HOME/.cryptor)
     -currency CURRENCY      Display values in this fiat CURRENCY
     -date YYYY-MM-DD        Perform valuation using crypto prices as of date YYYY-MM-DD
+    -format FORMAT          Print format: default, csv, json, list
     -portfolio PORTFOLIO    Process named portfolio (default: all portfolios)
     -force                  Unconditionally fetch crypto prices and exchange rates
 
@@ -284,13 +292,15 @@ func (cli *cli) historyCmd() error {
 	if cli.opts.aggregate {
 		ps = ps.AggregateByDate("aggregate")
 	}
-	// Print portfolios.
 	xrate, err := cli.xrates.GetRate(cli.opts.currency, cli.opts.force)
 	if err != nil {
 		return err
 	}
-	ps.SortByDateAndName()
-	cli.log.Console("%s", ps.ToString(cli.opts.currency, xrate))
+	if s, err := ps.ToString(cli.opts.format, cli.opts.currency, xrate); err != nil {
+		return err
+	} else {
+		cli.log.Console("%s", s)
+	}
 	return nil
 }
 
@@ -349,8 +359,11 @@ func (cli *cli) valuateCmd() error {
 	if err != nil {
 		return err
 	}
-	ps.SortByDateAndName()
-	cli.log.Console("%s", ps.ToString(cli.opts.currency, xrate))
+	if s, err := ps.ToString(cli.opts.format, cli.opts.currency, xrate); err != nil {
+		return err
+	} else {
+		cli.log.Console("%s", s)
+	}
 	// Save valuations and cache files.
 	if err := cli.save(); err != nil {
 		return err

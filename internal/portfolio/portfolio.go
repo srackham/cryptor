@@ -170,6 +170,11 @@ func LoadPortfoliosFile(filename string) (Portfolios, error) {
 	return res, err
 }
 
+func (ps Portfolios) ToJSON() (string, error) {
+	data, err := json.MarshalIndent(ps, "", "  ")
+	return string(data), err
+}
+
 func LoadValuationsFile(valuationsFile string) (Portfolios, error) {
 	res := Portfolios{}
 	s, err := fsx.ReadFile(valuationsFile)
@@ -181,9 +186,9 @@ func LoadValuationsFile(valuationsFile string) (Portfolios, error) {
 
 func (ps Portfolios) SaveValuationsFile(valuationsFile string) error {
 	ps.SortByDateAndName()
-	data, err := json.MarshalIndent(ps, "", "  ")
+	s, err := ps.ToJSON()
 	if err == nil {
-		err = fsx.WriteFile(valuationsFile, string(data))
+		err = fsx.WriteFile(valuationsFile, s)
 	}
 	return err
 }
@@ -213,10 +218,10 @@ func (ps Portfolios) Aggregate(name string) Portfolio {
 		Name:   name,
 		Assets: Assets{},
 	}
-	var notes string
+	notes := []string{}
 	missingCosts := false
 	for _, p := range ps {
-		notes += fmt.Sprintf("%s, ", p.Name)
+		notes = append(notes, p.Name)
 		res.Value += p.Value
 		if p.USDCost == 0 {
 			missingCosts = true
@@ -232,7 +237,8 @@ func (ps Portfolios) Aggregate(name string) Portfolio {
 			}
 		}
 	}
-	res.Notes = strings.TrimSuffix(notes, ", ")
+	sort.Strings(notes)
+	res.Notes = strings.Join(notes, ", ")
 	res.SetAllocations()
 	res.Assets.SortByValue()
 	if missingCosts {
@@ -311,7 +317,7 @@ func (p Portfolio) pcgains() float64 {
 	}
 }
 
-func (ps *Portfolios) ToString(currency string, xrate float64) string {
+func (ps *Portfolios) ToDigest(currency string, xrate float64) string {
 	res := ""
 	for _, p := range *ps {
 		res += fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nVALUE: %.2f %s",
@@ -343,6 +349,19 @@ func (ps *Portfolios) ToString(currency string, xrate float64) string {
 	return res
 }
 
-func (ps *Portfolios) ToJSON(currency string, xrate float64) string {
-	return ""
+func (ps Portfolios) ToString(format string, currency string, xrate float64) (res string, err error) {
+	ps.SortByDateAndName()
+	switch format {
+	case "digest":
+		res = ps.ToDigest(currency, xrate)
+	case "json":
+		res, err = ps.ToJSON()
+		if err != nil {
+			return
+		}
+	default:
+		panic(fmt.Sprintf("illegal format: \"%s\"", format))
+	}
+	res = strings.TrimSpace(res)
+	return
 }
