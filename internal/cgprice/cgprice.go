@@ -3,7 +3,6 @@
 package cgprice
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -62,6 +61,7 @@ func (r *Reader) GetPrice(symbol string, date string) (float64, error) {
 	}
 	var pd PriceData
 	vc := "usd" // Must be lowercase.
+	// TODO if there is an error retry using all IDs that map to symbol.
 	if date == helpers.TodaysDate() {
 		pd, err = getCurrentPriceData(id, vc)
 	} else {
@@ -121,8 +121,11 @@ func getHistoricalPriceData(id, vc, d string) (PriceData, error) {
 		return pd, err
 	}
 	c := (*sp)
+	if c.MarketData == nil {
+		return pd, fmt.Errorf("missing historical price data: id: %q: versus currency: %q: date: %q", id, vc, d)
+	}
 	if c.MarketData.CurrentPrice[vc] == 0 {
-		return pd, errors.New("incompatible versus currency")
+		return pd, fmt.Errorf("incompatible versus currency: %q", vc)
 	}
 	pd.Coin = id
 	pd.VC = vc
