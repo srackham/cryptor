@@ -40,17 +40,17 @@ func (log *Log) output(out io.Writer, verbosity int, format string, v ...any) {
 	}
 }
 
-// logConsole prints a line to stdout.
+// Console prints a line to stdout.
 func (log *Log) Console(format string, v ...any) {
 	log.output(os.Stdout, 0, format, v...)
 }
 
-// logVerbose prints a line to stdout if `-v` logVerbose option was specified.
+// Verbose prints a line to stdout if `-v` logVerbose option was specified.
 func (log *Log) Verbose(format string, v ...any) {
 	log.output(os.Stdout, 1, format, v...)
 }
 
-// logVerbose2 prints a a line to stdout the `-v` verbose option was specified more
+// Verbose2 prints a a line to stdout the `-v` verbose option was specified more
 // than once.
 func (log *Log) Verbose2(format string, v ...any) {
 	colorize(highlightColor, func() {
@@ -58,19 +58,21 @@ func (log *Log) Verbose2(format string, v ...any) {
 	})
 }
 
-// logColorize prints a colorized line to stdout.
+// Colorize prints a colorized line to stdout.
 func (log *Log) Colorize(attributes []color.Attribute, format string, v ...any) {
 	colorize(attributes, func() {
 		log.Console(format, v...)
 	})
 }
 
-// logHighlight prints a highlighted line to stdout.
-func (log *Log) Highlight(format string, v ...any) {
-	log.Colorize(highlightColor, format, v...)
+// Note prints a highlighted line to stderr.
+func (log *Log) Note(format string, v ...any) {
+	colorize(highlightColor, func() {
+		log.output(os.Stderr, 0, format, v...)
+	})
 }
 
-// logError prints a line to stderr and increments the error count.
+// Error prints a line to stderr and increments the error count.
 func (log *Log) Error(format string, v ...any) {
 	colorize(errorColor, func() {
 		log.output(os.Stderr, 0, "error: "+format, v...)
@@ -78,10 +80,10 @@ func (log *Log) Error(format string, v ...any) {
 	log.Errors++
 }
 
-// logWarning prints a line to stdout and increments the warnings count.
+// Warning prints a line to stderr and increments the warnings count.
 func (log *Log) Warning(format string, v ...any) {
 	colorize(warningColor, func() {
-		log.output(os.Stdout, 0, "warning: "+format, v...)
+		log.output(os.Stderr, 0, "warning: "+format, v...)
 	})
 	log.Warnings++
 }

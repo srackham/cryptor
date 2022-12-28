@@ -161,7 +161,7 @@ func (cli *cli) parseArgs(args []string) error {
 // initCmd implements the initCmd command.
 func (cli *cli) initCmd() error {
 	if !fsx.DirExists(cli.configDir) {
-		cli.log.Highlight("creating configuration directory: \"%s\"", cli.configDir)
+		cli.log.Note("creating configuration directory: \"%s\"", cli.configDir)
 		if err := fsx.MkMissingDir(cli.configDir); err != nil {
 			return err
 		}
@@ -169,7 +169,7 @@ func (cli *cli) initCmd() error {
 	if fsx.FileExists(cli.configFile()) {
 		return fmt.Errorf("portfolios file already exists: \"%s\"", cli.configFile())
 	}
-	cli.log.Highlight("installing example portfolios file: \"%s\"", cli.configFile())
+	cli.log.Note("installing example portfolios file: \"%s\"", cli.configFile())
 	conf := `# Example cryptor portfolio configuration file
 
 - name:  personal

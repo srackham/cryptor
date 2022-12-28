@@ -45,7 +45,7 @@ func (r *PriceReader) GetPrice(symbol string, date string, force bool) (float64,
 			if err != nil {
 				return 0.0, err
 			}
-			r.log.Highlight("price request: %s %s %.2f USD", symbol, date, val)
+			r.log.Note("price request: %s %s %.2f USD", symbol, date, val)
 			if (*r.CacheData)[date] == nil {
 				(*r.CacheData)[date] = make(cache.Rates)
 			}
