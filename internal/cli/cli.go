@@ -217,7 +217,7 @@ Options:
     -confdir CONF_DIR       Specify directory containing data and cache files (default: $HOME/.cryptor)
     -currency CURRENCY      Display values in this fiat CURRENCY
     -date YYYY-MM-DD        Perform valuation using crypto prices as of date YYYY-MM-DD
-    -format FORMAT          Print format: default, csv, json, list
+    -format FORMAT          Print format: digest, csv, json, list
     -portfolio PORTFOLIO    Process named portfolio (default: all portfolios)
     -force                  Unconditionally fetch crypto prices and exchange rates
 
@@ -299,7 +299,7 @@ func (cli *cli) historyCmd() error {
 	if s, err := ps.ToString(cli.opts.format, cli.opts.currency, xrate); err != nil {
 		return err
 	} else {
-		cli.log.Console("%s", s)
+		cli.log.Console("\n%s", s)
 	}
 	return nil
 }
@@ -362,7 +362,7 @@ func (cli *cli) valuateCmd() error {
 	if s, err := ps.ToString(cli.opts.format, cli.opts.currency, xrate); err != nil {
 		return err
 	} else {
-		cli.log.Console("%s", s)
+		cli.log.Console("\n%s", s)
 	}
 	// Save valuations and cache files.
 	if err := cli.save(); err != nil {
