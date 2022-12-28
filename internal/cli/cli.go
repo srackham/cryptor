@@ -69,7 +69,7 @@ func (cli *cli) Execute(args []string) error {
 	user, _ := user.Current()
 	cli.configDir = filepath.Join(user.HomeDir, ".cryptor")
 	cli.opts.currency = "USD"
-	cli.opts.format = "digest"
+	cli.opts.format = "text"
 	err = cli.parseArgs(args)
 	if err == nil {
 		cli.priceReader.CacheFile = filepath.Join(cli.configDir, "crypto-prices.json")
@@ -138,7 +138,7 @@ func (cli *cli) parseArgs(args []string) error {
 				}
 				cli.opts.date = arg
 			case "-format":
-				if !slice.New("digest", "json", "list", "csv").Has(arg) {
+				if !slice.New("text", "json").Has(arg) {
 					return fmt.Errorf("illegal -format argument: \"%s\"", arg)
 				}
 				cli.opts.format = arg
@@ -217,7 +217,7 @@ Options:
     -confdir CONF_DIR       Specify directory containing data and cache files (default: $HOME/.cryptor)
     -currency CURRENCY      Display values in this fiat CURRENCY
     -date YYYY-MM-DD        Perform valuation using crypto prices as of date YYYY-MM-DD
-    -format FORMAT          Print format: digest, csv, json, list
+    -format FORMAT          Print format: text, json
     -portfolio PORTFOLIO    Process named portfolio (default: all portfolios)
     -force                  Unconditionally fetch crypto prices and exchange rates
 

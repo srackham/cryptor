@@ -317,7 +317,7 @@ func (p Portfolio) pcgains() float64 {
 	}
 }
 
-func (ps *Portfolios) ToDigest(currency string, xrate float64) string {
+func (ps *Portfolios) ToText(currency string, xrate float64) string {
 	res := ""
 	for _, p := range *ps {
 		res += fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nVALUE: %.2f %s",
@@ -352,8 +352,8 @@ func (ps *Portfolios) ToDigest(currency string, xrate float64) string {
 func (ps Portfolios) ToString(format string, currency string, xrate float64) (res string, err error) {
 	ps.SortByDateAndName()
 	switch format {
-	case "digest":
-		res = ps.ToDigest(currency, xrate)
+	case "text":
+		res = ps.ToText(currency, xrate)
 	case "json":
 		res, err = ps.ToJSON()
 		if err != nil {
