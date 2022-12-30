@@ -121,3 +121,69 @@ Built:      2022-12-24T15:26:28+13:00
 - The `-portfolio` option can be specified multiple times.
 
 - Crypto prices are fetched from [CoinGecko](https://www.coingecko.com/en/api); exchange rates are fetched from [exchangerate.host](https://exchangerate.host/).
+
+
+## Portfolio Valuations Data
+There are two formats for printing portfolio valuations:
+
+- `text`: human-readable text format.
+- `json`: JSON format.
+
+Other formats such as CSV can be extracted from the JSON formatted data using external tools. One such tool is [jq](https://stedolan.github.io/jq/). Here are some examples of `jq` filters:
+
+### CSV assets history
+The following command pipes JSON valuations history through a `jq` filter transforming it into CSV asset records: `<name>, <date>, <symbol>, <amount>, <value>, <allocation percentage>` records:
+
+```
+cryptor history -format json | jq -r '.[] | . as $p | .assets[] | [$p.name, $p.date,.symbol,.amount,.value,.allocation] | @csv'
+```
+Output:
+
+```
+"joint","2022-12-24","BTC",0.5,8414.9052734375,73.43150301510853
+"joint","2022-12-24","ETH",2.5,3044.6249389648438,26.56849698489147
+"personal","2022-12-24","BTC",0.5,8414.9052734375,72.79373770058
+"personal","2022-12-24","ETH",2.5,3044.6249389648438,26.33774498962544
+"personal","2022-12-24","USDC",100,100.39999485015869,0.8685173097945648
+"portfolio1","2022-12-24","BTC",0.25,4207.45263671875,100
+```
+
+### CSV portfolio ROI history
+The following command pipes JSON valuations history through a `jq` filter transforming costed valuations (valuations with `usdcost>0`) into CSV portfolio ROI (return on investment) records: `<name>, <date>, <value>, <percent ROI>` records:
+
+```
+cryptor history -format json | jq -r '.[] | select(.usdcost>0) | [.name, .date, .value, (.value-.usdcost)/.usdcost*100] | @csv'
+```
+Output:
+
+```
+"personal","2022-11-01",14278.401210995735,126.2568306455474
+"personal","2022-12-24",11559.930207252502,83.40291671014384
+```
+
+The same query with a CSV header row and numbers rounded to two decimal places:
+
+```
+$ cryptor history -format json | jq -r '["NAME","DATE","VALUE","ROI"], (.[] | select(.usdcost>0) | [.name, .date, (.value*100 | floor | ./100), ((.value-.usdcost)/.usdcost*100*100 | floor | ./100)]) | @csv'
+```
+Output:
+
+```
+"NAME","DATE","VALUE","ROI"
+"personal","2022-11-01",14278.4,126.25
+"personal","2022-12-24",11559.93,83.4
+```
+
+## Plotting Portfolio Valuation Data
+The cryptor repository includes an `examples` folder which contains bash scripts for plotting portfolio valuations. These scripts:
+
+- Use [jq](https://stedolan.github.io/jq/) (to extract CSV plot data from JSON) and [gnuplot](http://www.gnuplot.info/) (to plot the data).
+- Consume JSON formatted `cryptor` portfolio valuations from `stdin`.
+- Accept an optional chart title as first script argument.
+
+### Portfolio valuation pie chart
+The bash script `examples/plot-valuation.sh` plots a `cryptor` valuation. For example:
+
+    cryptor valuate -format json -portfolio personal | examples/plot-valuation.sh
+
+![Portfolio valuation pie chart](valuation-plot.png)
