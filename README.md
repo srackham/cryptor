@@ -65,7 +65,7 @@ USDC      100.0000        99.77 USD     0.86%         1.00 USD
 Run the `cryptor help` command to view all the commands and command options:
 
 ```
-$ cryptor help
+$ cryptor
 
 Cryptor valuates crypto currency asset portfolios.
 
@@ -77,20 +77,23 @@ Commands:
 
     init     create configuration directory and install example portfolios file
     valuate  calculate and display portfolio valuations
+    history  display saved portfolio valuations from the valuations history
     help     display documentation
 
 Options:
 
-    -aggregate              Display combined portfolio valuations
-    -confdir CONF_DIR       Specify directory containing data and cache files (default: $HOME/.cryptor)
+    -aggregate              Display portfolio valuations aggregated by date
+    -confdir CONF_DIR       Directory containing data and cache files (default: $HOME/.cryptor)
     -currency CURRENCY      Display values in this fiat CURRENCY
-    -date YYYY-MM-DD        Perform valuation using crypto prices as of date YYYY-MM-DD
+    -date DATE              Valuation date, YYYY-MM-DD format or integer day offset: 0,-1,-2...
+    -format FORMAT          Print format: text, json
     -portfolio PORTFOLIO    Process named portfolio (default: all portfolios)
     -force                  Unconditionally fetch crypto prices and exchange rates
 
 Version:    v0.1.0 (linux/amd64)
 Git commit: -
-Built:      2022-12-24T15:26:28+13:00
+Built:      2022-12-31T15:02:13+13:00
+Github:     https://github.com/srackham/cryptor
 ```
 
 ## Implementation and Usage Notes
@@ -103,6 +106,8 @@ Built:      2022-12-24T15:26:28+13:00
 - Valuations do not overwrite previously recorded valuations (this can be overridden with the `-force` option).
 
 - Valuations of past dates (using the`-date` option) are made using historic crypto prices, otherwise today's crypto prices are used.
+
+- The `history` command displays previously saved valuations from the valuations history file, if no matching valuations are found nothing will be displayed.
 
 - All values are saved in USD (use the `-currency` option to display values in other fiat currencies).
 
@@ -117,7 +122,8 @@ Built:      2022-12-24T15:26:28+13:00
 
 - Crypto and currency symbols are displayed in uppercase.
 - Saved portfolio valuations are date stamped.
-- Dates are specified and recorded as `YYYY-DD-MM` formatted strings.
+- Dates are specified either as `YYYY-DD-MM` formatted strings or as an integer date offset: `0` for today, `-1` for yesterday etc. For example `-date -7` specifies the date one week ago.
+- Dates are recorded as `YYYY-DD-MM` formatted strings.
 - The `-portfolio` option can be specified multiple times.
 
 - Crypto prices are fetched from [CoinGecko](https://www.coingecko.com/en/api); exchange rates are fetched from [exchangerate.host](https://exchangerate.host/).

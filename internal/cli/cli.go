@@ -50,12 +50,12 @@ type cli struct {
 
 // New creates a new cli context.
 func New(api price.IPriceAPI) *cli {
-	cli := cli{}
-	cli.valuations = portfolio.Portfolios{}
-	cli.valuationsCache = *cache.NewCache(&cli.valuations)
-	cli.priceReader = price.NewPriceReader(api, &cli.log)
-	cli.xrates = xrates.NewExchangeRates(&cli.log)
-	return &cli
+	c := cli{}
+	c.valuations = portfolio.Portfolios{}
+	c.valuationsCache = *cache.NewCache(&c.valuations)
+	c.priceReader = price.NewPriceReader(api, &c.log)
+	c.xrates = xrates.NewExchangeRates(&c.log)
+	return &c
 }
 
 // Execute runs a command specified by CLI args.
@@ -130,7 +130,8 @@ func (cli *cli) parseArgs(args []string) error {
 			case "-currency":
 				cli.opts.currency = strings.ToUpper(arg)
 			case "-date":
-				if !helpers.IsDateString(arg) {
+				var err error
+				if arg, err = helpers.ParseDateOrOffset(arg, helpers.TodaysDate()); err != nil {
 					return fmt.Errorf("invalid date: \"%s\"", arg)
 				}
 				if strings.Compare(arg, helpers.TodaysDate()) == 1 {
@@ -213,10 +214,10 @@ Commands:
 
 Options:
 
-    -aggregate              Display combined portfolio valuations
-    -confdir CONF_DIR       Specify directory containing data and cache files (default: $HOME/.cryptor)
+    -aggregate              Display portfolio valuations aggregated by date
+    -confdir CONF_DIR       Directory containing data and cache files (default: $HOME/.cryptor)
     -currency CURRENCY      Display values in this fiat CURRENCY
-    -date YYYY-MM-DD        Perform valuation using crypto prices as of date YYYY-MM-DD
+    -date DATE              Valuation date, YYYY-MM-DD format or integer day offset: 0,-1,-2...
     -format FORMAT          Print format: text, json
     -portfolio PORTFOLIO    Process named portfolio (default: all portfolios)
     -force                  Unconditionally fetch crypto prices and exchange rates
@@ -280,7 +281,7 @@ func (cli *cli) historyCmd() error {
 	if err := cli.load(); err != nil {
 		return err
 	}
-	ps := portfolio.Portfolios{}
+	var ps portfolio.Portfolios
 	if len(cli.opts.portfolios) > 0 {
 		ps = cli.valuations.FilterByName(cli.opts.portfolios...)
 	} else {

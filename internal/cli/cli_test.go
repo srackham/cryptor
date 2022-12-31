@@ -18,17 +18,17 @@ func mockCli() *cli {
 }
 
 func TestParseArgs(t *testing.T) {
-	var cli cli
+	var c cli
 	var err error
 	parse := func(cmd string) {
 		args := strings.Split(cmd, " ")
-		cli = *mockCli()
-		err = cli.parseArgs(args)
+		c = *mockCli()
+		err = c.parseArgs(args)
 	}
 
 	parse("cryptor")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Equal(t, "help", cli.command)
+	assert.Equal(t, "help", c.command)
 	parse("cryptor illegal-command")
 	assert.Equal(t, `illegal command: "illegal-command"`, err.Error())
 }
@@ -68,6 +68,14 @@ func TestEvaluateCmd(t *testing.T) {
 
 	cli = mockCli()
 	out, err = exec(cli, "cryptor valuate -date "+today+" -force")
+	assert.PassIf(t, err == nil, "%v", err)
+	assert.Contains(t, out, "price request: BTC "+today+" 10000.00")
+	assert.Contains(t, out, "price request: ETH "+today+" 1000.00")
+	assert.Contains(t, out, "price request: USDC "+today+" 1.00")
+	fmt.Println(out)
+
+	cli = mockCli()
+	out, err = exec(cli, "cryptor valuate -date 0 -force")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Contains(t, out, "price request: BTC "+today+" 10000.00")
 	assert.Contains(t, out, "price request: ETH "+today+" 1000.00")

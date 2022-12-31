@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -114,4 +115,24 @@ func IsDateString(date string) bool {
 // TimeNowString returns the current time as a string.
 func TimeNowString() string {
 	return time.Now().Format("15:04:05")
+}
+
+// ParseDateOrOffset attempts to parse the `date` string which can be a YYYY-MM-DD
+// formatted date or an integer offset (0=today, -1=yesterday, ...).
+// The `fromDate` is a YYYY-MM-DD date string representing the date offset origin.
+func ParseDateOrOffset(date string, fromDate string) (string, error) {
+	if IsDateString(date) {
+		return date, nil
+	}
+	var offset int
+	var err error
+	if offset, err = strconv.Atoi(date); err != nil {
+		return "", fmt.Errorf("invalid date: \"%s\"", date)
+	}
+	d, err := time.Parse("2006-01-02", fromDate)
+	if err != nil {
+		return "", fmt.Errorf("invalid date: \"%s\"", fromDate)
+	}
+	d = d.AddDate(0, 0, offset)
+	return d.Format("2006-01-02"), nil
 }
