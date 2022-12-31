@@ -20,6 +20,6 @@ else
 fi
 cat - | jq -r '.[] | . as $p | .assets[] | [$p.name, $p.date, .symbol, .allocation] | @csv' > "$tmpfile"
 cat "$tmpfile"
-plotscript="$(dirname "$0")/valuation.gnuplot"
+plotscript="$(dirname "$(readlink -e "$0")")/valuation.gnuplot"
 gnuplot -p -e "data='$tmpfile'; title='$title'" "$plotscript"
 rm "$tmpfile"
