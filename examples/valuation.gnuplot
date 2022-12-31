@@ -5,6 +5,7 @@
 # Plot title passed as variable `title`.
 #
 
+# set terminal qt size 1024,768
 set datafile separator comma
 date_fmt="%Y-%m-%d"
 set size square
