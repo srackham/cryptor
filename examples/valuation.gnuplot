@@ -2,17 +2,22 @@
 # Plot pie chart of portfolio currency allocation by value.
 # This script is called from `examples/plot-valuation.sh`
 # Data file name passed as variable `data`.
-# Plot title passed as variable `title`.
 #
 
 # set terminal qt size 1024,768
 set datafile separator comma
 date_fmt="%Y-%m-%d"
+stats data using (strptime(date_fmt,stringcolumn(2))) noout
+date=STATS_max # The most recent dataset date.
+portfolio = system('cat "'.data.'" | tail -1 | awk -F "," "{print \$1}" | tr -d "\""')
+title = portfolio.' assets by value '.strftime("%d-%b-%Y", date)
+
 set size square
 set style fill solid 1
 unset border
 unset tics
 unset key
+
 stats data using 4 noout
 set title title font 'Helvetica,16' offset -4,-3
 set yrange [-1.25:1.25]

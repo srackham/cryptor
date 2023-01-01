@@ -5,21 +5,12 @@
 #
 #   cryptor valuate -format json -portfolio personal | examples/plot-valuation.sh
 #
-# Accepts optional chart title as first script argument e.g.
-#
-#   cryptor valuate -format json -portfolio personal | examples/plot-valuation.sh "Personal Portfolio"
-#
 # Makes use of the `jq(1)` command and the accompanying `valuation.gnuplot` gnuplot script.
 
 set -u -e -o pipefail
 tmpfile="$(mktemp)"
-if [ $# -gt 0 ]; then
-    title="$1"
-else
-    title="Portfolio Assets by Value"
-fi
 cat - | jq -r '.[] | . as $p | .assets[] | [$p.name, $p.date, .symbol, .allocation] | @csv' > "$tmpfile"
 cat "$tmpfile"
 plotscript="$(dirname "$(readlink -e "$0")")/valuation.gnuplot"
-gnuplot -p -e "data='$tmpfile'; title='$title'" "$plotscript"
+gnuplot -p -e "data='$tmpfile'" "$plotscript"
 rm "$tmpfile"

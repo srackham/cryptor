@@ -5,21 +5,12 @@
 #
 #   cryptor history -format json -portfolio personal | examples/plot-history.sh
 #
-# Accepts optional chart title as first script argument e.g.
-#
-#   cryptor history -format json -portfolio personal | examples/plot-history.sh "Personal Portfolio"
-#
 # Makes use of the `jq(1)` command and the accompanying `history.gnuplot` gnuplot script.
 
 set -u -e -o pipefail
 tmpfile="$(mktemp)"
-if [ $# -gt 0 ]; then
-    title="$1"
-else
-    title="Portfolio Valuation History"
-fi
 cat - | jq -r '.[] | [.name, .date, .usdcost, .value] | @csv' > "$tmpfile"
 cat "$tmpfile"
 plotscript="$(dirname "$(readlink -e "$0")")/history.gnuplot"
-gnuplot -p -e "data='$tmpfile'; title='$title'" "$plotscript"
+gnuplot -p -e "data='$tmpfile'" "$plotscript"
 rm "$tmpfile"
