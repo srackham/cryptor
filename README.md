@@ -193,3 +193,10 @@ The bash script `examples/plot-valuation.sh` plots a `cryptor` valuation. For ex
     cryptor valuate -format json -portfolio personal | examples/plot-valuation.sh
 
 ![Portfolio valuation pie chart](valuation-plot.png)
+
+### Portfolio history chart
+The bash script `examples/plot-history.sh` plots `cryptor` history data. For example:
+
+    cryptor history -format json -portfolio personal | examples/plot-history.sh
+
+![Portfolio history chart](history-plot.png)
