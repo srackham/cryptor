@@ -113,6 +113,8 @@ Github:     https://github.com/srackham/cryptor
 
 - Values displayed in non-USD currencies are converted from USD values using today's exchange rates.
 
+- Portfolio names are unique and can only contain alphanumeric characters, underscores and dashes.
+
 - If you specify the portfolio's `cost` (the portfolio's total cost in fiat currency) then portfolio gains and losses are calculated.
 
 - The `cost` value is formatted like `<amount> <currency>`. The amount is mandatory; the currency is optional and defaults to `USD`; dollar and comma characters are ignored. Examples:
@@ -123,6 +125,10 @@ Github:     https://github.com/srackham/cryptor
 - Crypto and currency symbols are displayed in uppercase.
 - Saved portfolio valuations are date stamped.
 - Dates are specified either as `YYYY-DD-MM` formatted strings or as an integer date offset: `0` for today, `-1` for yesterday etc. For example `-date -7` specifies the date one week ago.
+- You can use integer date offsets to back-fill missing valuations. The following example back-fills missing valuations for the last 31 days (insert a `sleep(1)` between iterations if you encounter API rate limit errors):
+
+        for i in $(seq -30 0); do cryptor valuate -date $i; done
+
 - Dates are recorded as `YYYY-DD-MM` formatted strings.
 - The `-portfolio` option can be specified multiple times.
 
@@ -181,11 +187,7 @@ Output:
 ```
 
 ## Plotting Portfolio Valuation Data
-The cryptor repository includes an `examples` folder which contains bash scripts for plotting portfolio valuations. These scripts:
-
-- Use [jq](https://stedolan.github.io/jq/) (to extract CSV plot data from JSON) and [gnuplot](http://www.gnuplot.info/) (to plot the data).
-- Consume JSON formatted `cryptor` portfolio valuations from `stdin`.
-- Accept an optional chart title as first script argument.
+The cryptor repository includes an `examples` folder which contains bash scripts for plotting portfolio valuations. The scripts read `cryptor` output on `stdin` and use [jq](https://stedolan.github.io/jq/) (to generate CSV plot data) and [gnuplot](http://www.gnuplot.info/) (to plot the CSV data).
 
 ### Portfolio valuation pie chart
 The bash script `examples/plot-valuation.sh` plots a `cryptor` valuation. For example:
