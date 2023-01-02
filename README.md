@@ -90,9 +90,9 @@ Options:
     -portfolio PORTFOLIO    Process named portfolio (default: all portfolios)
     -force                  Unconditionally fetch crypto prices and exchange rates
 
-Version:    v0.1.0 (linux/amd64)
+Version:    v0.2.0 (linux/amd64)
 Git commit: -
-Built:      2022-12-31T15:02:13+13:00
+Built:      2023-01-02T19:33:54+13:00
 Github:     https://github.com/srackham/cryptor
 ```
 
