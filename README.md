@@ -8,10 +8,14 @@ Cryptor valuates crypto currency asset portfolios.
 - Cryptor is a CLI application written in Go.
 
 ## Quick Start
-Install `cryptor` with this command (prerequisite:
-[the Go Programming Language](https://go.dev/doc/install)):
+If you have [Go](https://go.dev/) installed on your
+system then you can download and compile the latest version with this command:
 
     go install github.com/srackham/cryptor@latest
+
+Pre-compiled binaries are also available on the
+[Cryptor releases page](https://github.com/srackham/cryptor/releases).
+Download the relevant release and extract the `cryptor` executable.
 
 Install an example portfolios configuration file using the `cryptor init` command. For example:
 
