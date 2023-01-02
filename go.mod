@@ -10,7 +10,7 @@ require (
 
 require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.16 // indirect
-	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15
+	github.com/mattn/go-isatty v0.0.17 // indirect
+	golang.org/x/exp v0.0.0-20221230185412-738e83a70c30
 	golang.org/x/sys v0.3.0 // indirect
 )
