@@ -29,8 +29,8 @@ func TestParseArgs(t *testing.T) {
 	parse("cryptor")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Equal(t, "help", c.command)
-	parse("cryptor illegal-command")
-	assert.Equal(t, `illegal command: "illegal-command"`, err.Error())
+	parse("cryptor invalid-command")
+	assert.Equal(t, `invalid command: "invalid-command"`, err.Error())
 }
 
 func exec(cli *cli, cmd string) (out string, err error) {

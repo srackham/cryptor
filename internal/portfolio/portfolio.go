@@ -36,6 +36,12 @@ type Portfolio struct {
 
 type Portfolios []Portfolio
 
+// Returns `true` if the portfolio `name` is valid.
+func IsValidName(name string) bool {
+	re := regexp.MustCompile(`^\w[-\w]*$`)
+	return re.MatchString(name)
+}
+
 // ParseCurrency extracts the amount and currency symbol from a string formatted like "<amount>[ <currency>]".
 func ParseCurrency(cstr string) (value float64, currency string, err error) {
 	s := strings.ReplaceAll(cstr, "$", "")
@@ -282,6 +288,40 @@ func (ps Portfolios) FindByName(name string) int {
 	return -1
 }
 
+// Validate returns `true` if the portfolio fields pass basic sanity checks.
+// If `nodups` is `true` duplicate portfolio names are disallowed.
+// TODO tests
+func (ps Portfolios) Validate(nodups bool) error {
+	names := set.New[string]()
+	for _, p := range ps {
+		if !IsValidName(p.Name) {
+			return fmt.Errorf("invalid portfolio name: \"%s\"", p.Name)
+		}
+		if p.Cost != "" {
+			if _, _, err := ParseCurrency(p.Cost); err != nil {
+				return err
+			}
+		}
+		assets := set.New[string]()
+		for _, a := range p.Assets {
+			if !IsValidName(a.Symbol) {
+				return fmt.Errorf("invalid portfolio asset name: \"%s\"", a.Symbol)
+			}
+			if assets.Has(a.Symbol) {
+				return fmt.Errorf("duplicate asset name: \"%s\"", a.Symbol)
+			}
+			assets.Add(a.Symbol)
+		}
+		if nodups {
+			if names.Has(p.Name) {
+				return fmt.Errorf("duplicate portfolio name: \"%s\"", p.Name)
+			}
+			names.Add(p.Name)
+		}
+	}
+	return nil
+}
+
 // FilterByName returns a list of named portfolios.
 func (ps Portfolios) FilterByName(names ...string) Portfolios {
 	res := []Portfolio{}
@@ -360,7 +400,7 @@ func (ps Portfolios) ToString(format string, currency string, xrate float64) (re
 			return
 		}
 	default:
-		panic(fmt.Sprintf("illegal format: \"%s\"", format))
+		panic(fmt.Sprintf("invalid format: \"%s\"", format))
 	}
 	res = strings.TrimSpace(res)
 	return

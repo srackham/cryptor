@@ -13,6 +13,23 @@ import (
 	"github.com/srackham/cryptor/internal/price"
 )
 
+func TestIsValidName(t *testing.T) {
+	type test struct {
+		input string
+		want  bool
+	}
+	tests := []test{
+		{input: "", want: false},
+		{input: "-foo", want: false},
+		{input: "foo bar", want: false},
+		{input: "foo", want: true},
+	}
+	for _, tc := range tests {
+		got := IsValidName(tc.input)
+		assert.PassIf(t, tc.want == got, "input: %q: wanted: %v: got: %v", tc.input, tc.want, got)
+	}
+}
+
 func TestLoadValuationsFile(t *testing.T) {
 	h, err := LoadValuationsFile("../../testdata/valuations.json")
 	assert.PassIf(t, err == nil, "error reading JSON file")

@@ -86,7 +86,7 @@ func (cli *cli) Execute(args []string) error {
 		case "history":
 			err = cli.historyCmd()
 		default:
-			err = fmt.Errorf("illegal command: " + cli.command)
+			err = fmt.Errorf("invalid command: " + cli.command)
 		}
 	}
 	return err
@@ -111,7 +111,7 @@ func (cli *cli) parseArgs(args []string) error {
 				opt = "help"
 			}
 			if !isCommand(opt) {
-				return fmt.Errorf("illegal command: \"%s\"", opt)
+				return fmt.Errorf("invalid command: \"%s\"", opt)
 			}
 			cli.command = opt
 		case opt == "-aggregate":
@@ -140,21 +140,21 @@ func (cli *cli) parseArgs(args []string) error {
 				cli.opts.date = arg
 			case "-format":
 				if !slice.New("text", "json").Has(arg) {
-					return fmt.Errorf("illegal -format argument: \"%s\"", arg)
+					return fmt.Errorf("invalid -format argument: \"%s\"", arg)
 				}
 				cli.opts.format = arg
 			case "-portfolio":
+				if !portfolio.IsValidName(arg) {
+					return fmt.Errorf("invalid -portfolio argument: \"%s\"", arg)
+				}
 				cli.opts.portfolios = append(cli.opts.portfolios, arg)
 			default:
 				return fmt.Errorf("unexpected option: \"%s\"", opt)
 			}
 			skip = true
 		default:
-			return fmt.Errorf("illegal argument: \"%s\"", opt)
+			return fmt.Errorf("invalid argument: \"%s\"", opt)
 		}
-	}
-	if cli.command == "help" {
-		return nil
 	}
 	return nil
 }
@@ -243,9 +243,15 @@ func (cli *cli) load() error {
 	if err != nil {
 		return err
 	}
+	if err := ps.Validate(true); err != nil {
+		return fmt.Errorf("config file: \"%s\": %s", cli.configFile(), err.Error())
+	}
 	cli.portfolios = ps
 	if err := cli.valuationsCache.Load(); err != nil {
 		return err
+	}
+	if err := cli.valuations.Validate(false); err != nil {
+		return fmt.Errorf("valuations file: \"%s\": %s", cli.valuationsCache.CacheFile, err.Error())
 	}
 	if err := cli.xrates.Load(); err != nil {
 		return err
@@ -314,7 +320,7 @@ func (cli *cli) valuateCmd() error {
 	if err := cli.load(); err != nil {
 		return err
 	}
-	// Select portfolios.
+	// Select portfolios to be valuated.
 	var ps portfolio.Portfolios
 	if len(cli.opts.portfolios) > 0 {
 		for _, name := range cli.opts.portfolios {

@@ -61,6 +61,7 @@ func (r *Reader) GetPrice(symbol string, date string) (float64, error) {
 	}
 	var pd PriceData
 	vc := "usd" // Must be lowercase.
+	// TODO if there is a rate limit error back off and retry for 3x10s.
 	// TODO if there is an error retry using all IDs that map to symbol.
 	if date == helpers.TodaysDate() {
 		pd, err = getCurrentPriceData(id, vc)
