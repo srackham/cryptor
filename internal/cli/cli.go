@@ -174,7 +174,9 @@ func (cli *cli) initCmd() error {
 	conf := `# Example cryptor portfolio configuration file
 
 - name:  personal
-  notes: Personal portfolio
+  notes: |
+    ## Personal Portfolio
+    - 7-Jan-2023: Migrated to new h/w wallet.
   cost: $10,000.00 NZD
   assets:
     BTC: 0.5
@@ -182,6 +184,7 @@ func (cli *cli) initCmd() error {
     USDC: 100
 
 - name:  joint
+  notes: Joint Portfolio
   assets:
       BTC: 0.5
       ETH: 2.5

@@ -62,7 +62,7 @@ func TestEvaluateCmd(t *testing.T) {
 	cli := mockCli()
 	out, err := exec(cli, "cryptor valuate")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.Contains(t, out, "NAME:  personal\nNOTES: Personal portfolio\n")
+	assert.Contains(t, out, "NAME:  personal\nNOTES: ## Personal Portfolio\n")
 	fmt.Println(out)
 	assert.PassIf(t, cli.valuations.FindByNameAndDate("personal", today) != -1, "missing valuation: %v", today)
 

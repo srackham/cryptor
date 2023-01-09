@@ -31,7 +31,9 @@ Edit the YAML portfolios configuration file (`$HOME/.cryptor/portfolios.yaml`) t
 # Example cryptor portfolio configuration file
 
 - name:  personal
-  notes: Personal portfolio
+  notes: |
+    ## Personal Portfolio
+    - 7-Jan-2023: Migrated to new h/w wallet.
   cost: $10,000.00 NZD
   assets:
     BTC: 0.5
@@ -39,6 +41,7 @@ Edit the YAML portfolios configuration file (`$HOME/.cryptor/portfolios.yaml`) t
     USDC: 100
 
 - name:  joint
+  notes: Joint Portfolio
   assets:
       BTC: 0.5
       ETH: 2.5
