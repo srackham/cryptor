@@ -1,280 +1,251 @@
 package fsx
 
 import (
-	"reflect"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"testing"
-	"time"
 )
 
 func TestDirExists(t *testing.T) {
-	type args struct {
-		name string
+	tempDir, err := ioutil.TempDir("", "fsx")
+	if err != nil {
+		t.Errorf("TempDir failed with error: %v", err)
 	}
-	tests := []struct {
-		name   string
-		args   args
-		wanted bool
-	}{
-		// TODO: Add test cases.
+	defer os.RemoveAll(tempDir)
+
+	dir := filepath.Join(tempDir, "test_dir_exists")
+	err = os.MkdirAll(dir, 0775)
+	if err != nil {
+		t.Errorf("MkdirAll failed with error: %v", err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := DirExists(tt.args.name); got != tt.wanted {
-				t.Errorf("DirExists() = %v, wanted %v", got, tt.wanted)
-			}
-		})
+
+	exists := DirExists(dir)
+	if !exists {
+		t.Errorf("DirExists returned false for existing directory")
+	}
+
+	notExist := DirExists(filepath.Join(tempDir, "test_dir_not_exist"))
+	if notExist {
+		t.Errorf("DirExists returned true for non-existing directory")
 	}
 }
 
 func TestFileExists(t *testing.T) {
-	type args struct {
-		name string
+	tempDir, err := ioutil.TempDir("", "fsx")
+	if err != nil {
+		t.Errorf("TempDir failed with error: %v", err)
 	}
-	tests := []struct {
-		name   string
-		args   args
-		wanted bool
-	}{
-		// TODO: Add test cases.
+	defer os.RemoveAll(tempDir)
+
+	fileName := filepath.Join(tempDir, "test_file_exists")
+	err = ioutil.WriteFile(fileName, []byte("Test"), 0644)
+	if err != nil {
+		t.Errorf("WriteFile failed with error: %v", err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := FileExists(tt.args.name); got != tt.wanted {
-				t.Errorf("FileExists() = %v, wanted %v", got, tt.wanted)
-			}
-		})
+
+	exists := FileExists(fileName)
+	if !exists {
+		t.Errorf("FileExists returned false for existing file")
+	}
+
+	notExist := FileExists(filepath.Join(tempDir, "test_file_not_exist"))
+	if notExist {
+		t.Errorf("FileExists returned true for non-existing file")
 	}
 }
 
-func TestReadFile(t *testing.T) {
-	type args struct {
-		name string
+func TestReadAndWriteFile(t *testing.T) {
+	tempDir, err := ioutil.TempDir("", "fsx")
+	if err != nil {
+		t.Errorf("TempDir failed with error: %v", err)
 	}
-	tests := []struct {
-		name    string
-		args    args
-		wanted  string
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := ReadFile(tt.args.name)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ReadFile() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.wanted {
-				t.Errorf("ReadFile() = %v, wanted %v", got, tt.wanted)
-			}
-		})
-	}
-}
+	defer os.RemoveAll(tempDir)
 
-func TestWriteFile(t *testing.T) {
-	type args struct {
-		name string
-		text string
+	fileName := filepath.Join(tempDir, "test_read_and_write_file")
+	text := "Test"
+
+	err = WriteFile(fileName, text)
+	if err != nil {
+		t.Errorf("WriteFile failed with error: %v", err)
 	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
+
+	readText, err := ReadFile(fileName)
+	if err != nil {
+		t.Errorf("ReadFile failed with error: %v", err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := WriteFile(tt.args.name, tt.args.text); (err != nil) != tt.wantErr {
-				t.Errorf("WriteFile() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+
+	if readText != text {
+		t.Errorf("ReadFile did not read the same text as written, got: %s, want: %s", readText, text)
 	}
 }
 
 func TestWritePath(t *testing.T) {
-	type args struct {
-		path string
-		text string
+	tempDir, err := ioutil.TempDir("", "fsx")
+	if err != nil {
+		t.Errorf("TempDir failed with error: %v", err)
 	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
+	defer os.RemoveAll(tempDir)
+
+	dir := filepath.Join(tempDir, "test_write_path")
+	err = os.MkdirAll(dir, 0775)
+	if err != nil {
+		t.Errorf("MkdirAll failed with error: %v", err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := WritePath(tt.args.path, tt.args.text); (err != nil) != tt.wantErr {
-				t.Errorf("WritePath() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+
+	fileName := filepath.Join(dir, "test_write_path.txt")
+	text := "Test"
+
+	err = WritePath(fileName, text)
+	if err != nil {
+		t.Errorf("WritePath failed with error: %v", err)
 	}
 }
 
 func TestFileName(t *testing.T) {
-	type args struct {
-		name string
-	}
-	tests := []struct {
-		name   string
-		args   args
-		wanted string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := FileName(tt.args.name); got != tt.wanted {
-				t.Errorf("FileName() = %v, wanted %v", got, tt.wanted)
-			}
-		})
+	name := "/path/to/file/test_file.txt"
+	fileName := FileName(name)
+	expected := "test_file"
+	if fileName != expected {
+		t.Errorf("FileName did not return the expected file name, got: %s, want: %s", fileName, expected)
 	}
 }
 
 func TestReplaceExt(t *testing.T) {
-	type args struct {
-		name string
-		ext  string
-	}
-	tests := []struct {
-		name   string
-		args   args
-		wanted string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := ReplaceExt(tt.args.name, tt.args.ext); got != tt.wanted {
-				t.Errorf("ReplaceExt() = %v, wanted %v", got, tt.wanted)
-			}
-		})
+	name := "/path/to/file/test_file.txt"
+	newExt := ".md"
+	newName := ReplaceExt(name, newExt)
+	expected := "/path/to/file/test_file.md"
+	if newName != expected {
+		t.Errorf("ReplaceExt did not return the expected file name, got: %s, want: %s", newName, expected)
 	}
 }
 
 func TestCopyFile(t *testing.T) {
-	type args struct {
-		from string
-		to   string
+	tempDir, err := ioutil.TempDir("", "fsx")
+	if err != nil {
+		t.Errorf("TempDir failed with error: %v", err)
 	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
+	defer os.RemoveAll(tempDir)
+
+	fromName := filepath.Join(tempDir, "test_copy_file_from")
+	toName := filepath.Join(tempDir, "test_copy_file_to")
+	text := "Test"
+
+	err = WriteFile(fromName, text)
+	if err != nil {
+		t.Errorf("WriteFile failed with error: %v", err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := CopyFile(tt.args.from, tt.args.to); (err != nil) != tt.wantErr {
-				t.Errorf("CopyFile() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+
+	err = CopyFile(fromName, toName)
+	if err != nil {
+		t.Errorf("CopyFile failed with error: %v", err)
+	}
+
+	readText, err := ReadFile(toName)
+	if err != nil {
+		t.Errorf("ReadFile failed with error: %v", err)
+	}
+
+	if readText != text {
+		t.Errorf("CopyFile did not copy the same text as written, got: %s, want: %s", readText, text)
 	}
 }
 
 func TestMkMissingDir(t *testing.T) {
-	type args struct {
-		dir string
+	tempDir, err := ioutil.TempDir("", "fsx")
+	if err != nil {
+		t.Errorf("TempDir failed with error: %v", err)
 	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
+	defer os.RemoveAll(tempDir)
+
+	dir := filepath.Join(tempDir, "test_mk_missing_dir/test_subdir")
+	err = MkMissingDir(dir)
+	if err != nil {
+		t.Errorf("MkMissingDir failed with error: %v", err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := MkMissingDir(tt.args.dir); (err != nil) != tt.wantErr {
-				t.Errorf("MkMissingDir() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+
+	if !DirExists(dir) {
+		t.Errorf("MkMissingDir did not create the missing directory")
 	}
 }
 
 func TestPathIsInDir(t *testing.T) {
-	type args struct {
-		p   string
-		dir string
+	p := "/path/to/file/file.txt"
+	dir := "/path/to"
+	inDir := PathIsInDir(p, dir)
+	if !inDir {
+		t.Errorf("PathIsInDir returned false on path that is in directory")
 	}
-	tests := []struct {
-		name   string
-		args   args
-		wanted bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := PathIsInDir(tt.args.p, tt.args.dir); got != tt.wanted {
-				t.Errorf("PathIsInDir() = %v, wanted %v", got, tt.wanted)
-			}
-		})
+
+	outDir := PathIsInDir(p, "/path/out")
+	if outDir {
+		t.Errorf("PathIsInDir returned true on path that is not in directory")
 	}
 }
 
 func TestPathTranslate(t *testing.T) {
-	type args struct {
-		srcPath string
-		srcRoot string
-		dstRoot string
-	}
-	tests := []struct {
-		name   string
-		args   args
-		wanted string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := PathTranslate(tt.args.srcPath, tt.args.srcRoot, tt.args.dstRoot); got != tt.wanted {
-				t.Errorf("PathTranslate() = %v, wanted %v", got, tt.wanted)
-			}
-		})
+	srcPath := "/path/to/src/file.txt"
+	srcRoot := "/path/to"
+	dstRoot := "/path/to/dst"
+	expected := "/path/to/dst/src/file.txt"
+	dstPath := PathTranslate(srcPath, srcRoot, dstRoot)
+	if dstPath != expected {
+		t.Errorf("PathTranslate did not return the expected destination path, got: %s, want: %s", dstPath, expected)
 	}
 }
 
 func TestFileModTime(t *testing.T) {
-	type args struct {
-		f string
+	tempDir, err := ioutil.TempDir("", "fsx")
+	if err != nil {
+		t.Errorf("TempDir failed with error: %v", err)
 	}
-	tests := []struct {
-		name   string
-		args   args
-		wanted time.Time
-	}{
-		// TODO: Add test cases.
+	defer os.RemoveAll(tempDir)
+
+	fileName := filepath.Join(tempDir, "test_file_mod_time")
+	err = ioutil.WriteFile(fileName, []byte("Test"), 0644)
+	if err != nil {
+		t.Errorf("WriteFile failed with error: %v", err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := FileModTime(tt.args.f); !reflect.DeepEqual(got, tt.wanted) {
-				t.Errorf("FileModTime() = %v, wanted %v", got, tt.wanted)
-			}
-		})
+
+	modTime := FileModTime(fileName)
+	if modTime.IsZero() {
+		t.Errorf("FileModTime returned zero time for existing file")
+	}
+
+	notExistTime := FileModTime(filepath.Join(tempDir, "test_file_not_exist"))
+	if !notExistTime.IsZero() {
+		t.Errorf("FileModTime did not return zero time for non-existing file")
 	}
 }
 
 func TestDirCount(t *testing.T) {
-	type args struct {
-		dir string
+	tempDir, err := ioutil.TempDir("", "fsx")
+	if err != nil {
+		t.Errorf("TempDir failed with error: %v", err)
 	}
-	tests := []struct {
-		name   string
-		args   args
-		wanted int
-	}{
-		// TODO: Add test cases.
+
+	dir := filepath.Join(tempDir, "test_dir_count")
+	err = os.MkdirAll(dir, 0775)
+	if err != nil {
+		t.Errorf("MkdirAll failed with error: %v", err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := DirCount(tt.args.dir); got != tt.wanted {
-				t.Errorf("DirCount() = %v, wanted %v", got, tt.wanted)
-			}
-		})
+
+	fileName := filepath.Join(dir, "test_file")
+	err = ioutil.WriteFile(fileName, []byte("Test"), 0644)
+	if err != nil {
+		t.Errorf("WriteFile failed with error: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	count := DirCount(dir)
+	expected := 1
+	if count != expected {
+		t.Errorf("DirCount did not return the expected number of files and folders, got: %d, want: %d", count, expected)
+	}
+
+	notExistCount := DirCount(filepath.Join(tempDir, "test_dir_not_exist"))
+	if notExistCount != 0 {
+		t.Errorf("DirCount did not return zero for non-existing directory, got: %d", notExistCount)
 	}
 }
