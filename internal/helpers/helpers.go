@@ -12,8 +12,6 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-// TODO helpers_test.go
-
 func If[T any](b bool, trueVal, falseVal T) T {
 	if b {
 		return trueVal
@@ -22,7 +20,7 @@ func If[T any](b bool, trueVal, falseVal T) T {
 	}
 }
 
-// NormalizeNewlines converts \r\n (Window) and \n (Mac OS) line terminations to
+// NormalizeNewlines converts \r\n (Windows) and \n (Mac OS) line terminations to
 // \n (UNIX) termination.
 func NormalizeNewlines(s string) (result string) {
 	result = strings.ReplaceAll(s, "\r\n", "\n")
@@ -31,7 +29,6 @@ func NormalizeNewlines(s string) (result string) {
 }
 
 // SortedMapKeys returns a sorted array of map keys.
-// TODO tests
 func SortedMapKeys[K constraints.Ordered, V any](m map[K]V) (res []K) {
 	for k := range m {
 		res = append(res, k)
@@ -41,18 +38,16 @@ func SortedMapKeys[K constraints.Ordered, V any](m map[K]V) (res []K) {
 }
 
 // CopyMap returns a copy of a map.
-// TODO generalise keys
-func CopyMap[T any](m map[string]T) (result map[string]T) {
-	result = map[string]T{}
+func CopyMap[K comparable, V any](m map[K]V) (result map[K]V) {
+	result = make(map[K]V)
 	for k, v := range m {
 		result[k] = v
 	}
-	return
+	return result
 }
 
 // MergeMap merges maps into dst map.
-// TODO generalise keys
-func MergeMap[T any](dst map[string]T, maps ...map[string]T) {
+func MergeMap[K comparable, V any](dst map[K]V, maps ...map[K]V) {
 	for _, m := range maps {
 		for k, v := range m {
 			dst[k] = v

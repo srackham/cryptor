@@ -56,58 +56,131 @@ func TestSortedMapKeys(t *testing.T) {
 }
 
 func TestCopyMap(t *testing.T) {
-	m := map[string]string{
-		"a": "A",
-		"b": "B",
-		"c": "C",
-	}
-	res := CopyMap(m)
-	if len(res) != len(m) {
-		t.Errorf("Expected %v, got %v", m, res)
-	}
-	for k, v := range res {
-		if m[k] != v {
-			t.Errorf("Expected %v, got %v", m, res)
+	// Test with a map[string]string
+	t.Run("CopiesStringStringMap", func(t *testing.T) {
+		m := map[string]string{
+			"a": "A",
+			"b": "B",
+			"c": "C",
 		}
-	}
+
+		result := CopyMap(m)
+
+		if len(result) != len(m) {
+			t.Errorf("Expected length of %d, but got %d", len(m), len(result))
+		}
+
+		for k, v := range result {
+			if m[k] != v {
+				t.Errorf("Expected value %s for key %s, but was %s", m[k], k, v)
+			}
+		}
+	})
+
+	// Test with a map[int]string
+	t.Run("CopiesIntStringMap", func(t *testing.T) {
+		m := map[int]string{
+			1: "One",
+			2: "Two",
+			3: "Three",
+		}
+
+		result := CopyMap(m)
+
+		if len(result) != len(m) {
+			t.Errorf("Expected length of %d, but got %d", len(m), len(result))
+		}
+
+		for k, v := range result {
+			if m[k] != v {
+				t.Errorf("Expected value %s for key %v, but was %s", m[k], k, v)
+			}
+		}
+	})
 }
 
 func TestMergeMap(t *testing.T) {
-	dst := map[string]string{
-		"a": "A",
-		"b": "B",
-		"c": "C",
-	}
-	m1 := map[string]string{
-		"d": "D",
-		"e": "E",
-		"f": "F",
-	}
-	m2 := map[string]string{
-		"g": "G",
-		"h": "H",
-		"i": "I",
-	}
-	MergeMap(dst, m1, m2)
-	expected := map[string]string{
-		"a": "A",
-		"b": "B",
-		"c": "C",
-		"d": "D",
-		"e": "E",
-		"f": "F",
-		"g": "G",
-		"h": "H",
-		"i": "I",
-	}
-	if len(dst) != len(expected) {
-		t.Errorf("Expected %v, got %v", expected, dst)
-	}
-	for k, v := range dst {
-		if expected[k] != v {
-			t.Errorf("Expected %v, got %v", expected, dst)
+	// Test with a map[string]string
+	t.Run("MergesStringStringMaps", func(t *testing.T) {
+		dst := map[string]string{
+			"a": "A",
+			"b": "B",
+			"c": "C",
 		}
-	}
+
+		m1 := map[string]string{
+			"d": "D",
+			"e": "E",
+			"f": "F",
+		}
+
+		m2 := map[string]string{
+			"g": "G",
+			"h": "H",
+			"i": "I",
+		}
+
+		MergeMap(dst, m1, m2)
+
+		expected := map[string]string{
+			"a": "A",
+			"b": "B",
+			"c": "C",
+			"d": "D",
+			"e": "E",
+			"f": "F",
+			"g": "G",
+			"h": "H",
+			"i": "I",
+		}
+
+		for k, v := range expected {
+			if dst[k] != v {
+				t.Errorf("Expected value %s for key %s, but was %s", v, k, dst[k])
+			}
+		}
+	})
+
+	// Test with a map[int]string
+	t.Run("MergesIntStringMaps", func(t *testing.T) {
+		dst := map[int]string{
+			1: "One",
+			2: "Two",
+			3: "Three",
+		}
+
+		m1 := map[int]string{
+			4: "Four",
+			5: "Five",
+			6: "Six",
+		}
+
+		m2 := map[int]string{
+			7: "Seven",
+			8: "Eight",
+			9: "Nine",
+		}
+
+		MergeMap(dst, m1, m2)
+
+		expected := map[int]string{
+			1: "One",
+			2: "Two",
+			3: "Three",
+			4: "Four",
+			5: "Five",
+			6: "Six",
+			7: "Seven",
+			8: "Eight",
+			9: "Nine",
+		}
+
+		for k, v := range expected {
+			if dst[k] != v {
+				t.Errorf("Expected value %s for key %d, but was %s", v, k, dst[k])
+			}
+		}
+	})
 }
 
 /* This test works only if you test with in an environment with a browser installed.
