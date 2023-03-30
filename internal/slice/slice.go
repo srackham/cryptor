@@ -70,7 +70,6 @@ func (slice Slice[T]) Filter(f func(T) bool) Slice[T] {
 }
 
 // Find returns the first index of satisfying the predicate f, or -1 if no match is found.
-// TODO add tests
 func (slice Slice[T]) Find(f func(T) bool) int {
 	for i, v := range slice {
 		if f(v) {
