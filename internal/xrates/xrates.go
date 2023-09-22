@@ -31,10 +31,12 @@ func NewExchangeRates(log *logger.Log) ExchangeRates {
 func getRates() (Rates, error) {
 	rates := make(Rates)
 	client := http.Client{}
-	url := "https://api.exchangerate.host/latest?base=usd"
+	// 22-Sep-2023: The exchangerate.host site is down: Error 1000 (DNS points to prohibited IP)
+	// url := "https://api.exchangerate.host/latest?base=usd"
+	url := "https://openexchangerates.org/api/latest.json?app_id=404d2ec9a36a4f73948dccb71887b788"
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return rates, err
+		return rates, fmt.Errorf("exchange rate request: %s: %s", url, err.Error())
 	}
 	resp, err := client.Do(request)
 	if err != nil {
@@ -44,10 +46,7 @@ func getRates() (Rates, error) {
 	var m map[string]any
 	err = json.NewDecoder(resp.Body).Decode(&m)
 	if err != nil {
-		return rates, err
-	}
-	if m["success"] == false {
-		return rates, fmt.Errorf("rate server query failed: %s", url)
+		return rates, fmt.Errorf("exchange rate decode: %s", err.Error())
 	}
 	m = m["rates"].(map[string]any)
 	for k, v := range m {
