@@ -26,7 +26,7 @@ func NewExchangeRates(log *logger.Log) ExchangeRates {
 	}
 }
 
-// getRates fetches a list of currency exchange rates against the USD from https://exchangerate.host/
+// getRates fetches a list of currency exchange rates against the USD
 // TODO getRates should be an IXRatesAPI interface cf. prices.IPriceAPI.
 func getRates() (Rates, error) {
 	rates := make(Rates)
