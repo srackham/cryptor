@@ -8,24 +8,13 @@ import (
 
 	"github.com/srackham/cryptor/internal/cache"
 	"github.com/srackham/cryptor/internal/fsx"
+	"github.com/srackham/cryptor/internal/global"
 	"github.com/srackham/cryptor/internal/helpers"
 	"github.com/srackham/cryptor/internal/logger"
 	"github.com/srackham/cryptor/internal/portfolio"
 	"github.com/srackham/cryptor/internal/price"
 	"github.com/srackham/cryptor/internal/slice"
 	"github.com/srackham/cryptor/internal/xrates"
-)
-
-// Build ldflags.
-var (
-	// VERS is the latest cryptor version tag. Set by linker -ldflags "-X main.VERS=..."
-	VERS = "v0.2.0"
-	// OS is the target operating system and architecture. Set by linker -ldflags "-X main.OS=..."
-	OS = "-"
-	// BUILD is the date the executable was built.
-	BUILT = "-"
-	// COMMIT is the Git commit hash.
-	COMMIT = "-"
 )
 
 type cli struct {
@@ -54,7 +43,7 @@ func New(api price.IPriceAPI) *cli {
 	c.valuations = portfolio.Portfolios{}
 	c.valuationsCache = *cache.NewCache(&c.valuations)
 	c.priceReader = price.NewPriceReader(api, &c.log)
-	c.xrates = xrates.NewExchangeRates(&c.log)
+	c.xrates = xrates.NewExchangeRates(global.XRATES_QUERY, &c.log)
 	return &c
 }
 
@@ -225,9 +214,9 @@ Options:
     -portfolio PORTFOLIO    Process named portfolio (default: all portfolios)
     -force                  Unconditionally fetch crypto prices and exchange rates
 
-Version:    ` + VERS + " (" + OS + ")" + `
-Git commit: ` + COMMIT + `
-Built:      ` + BUILT + `
+Version:    ` + global.VERS + " (" + global.OS + ")" + `
+Git commit: ` + global.COMMIT + `
+Built:      ` + global.BUILT + `
 Github:     ` + github
 
 	cli.log.Console("\n" + summary + "\n")

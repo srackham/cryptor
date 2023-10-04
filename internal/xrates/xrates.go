@@ -15,25 +15,24 @@ type ExchangeRates struct {
 	log *logger.Log
 	Cache[RatesCache]
 	fetched bool
+	url     string
 }
 
-func NewExchangeRates(log *logger.Log) ExchangeRates {
+func NewExchangeRates(url string, log *logger.Log) ExchangeRates {
 	data := make(RatesCache)
 	return ExchangeRates{
 		log:     log,
 		Cache:   *NewCache(&data),
 		fetched: false,
+		url:     url,
 	}
 }
 
 // getRates fetches a list of currency exchange rates against the USD
 // TODO getRates should be an IXRatesAPI interface cf. prices.IPriceAPI.
-func getRates() (Rates, error) {
+func getRates(url string) (Rates, error) {
 	rates := make(Rates)
 	client := http.Client{}
-	// 22-Sep-2023: The exchangerate.host site is down: Error 1000 (DNS points to prohibited IP)
-	url := "https://api.exchangerate.host/latest?base=usd"
-	// url := "https://openexchangerates.org/api/latest.json?app_id=404d2ec9a36a4f73948dccb71887b788"
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return rates, fmt.Errorf("exchange rate request: %s: %s", url, err.Error())
@@ -77,7 +76,7 @@ func (x *ExchangeRates) GetRate(currency string, force bool) (float64, error) {
 	force = force && !x.fetched // Don't force if rates have previously been fetched during this session.
 	if rate, ok = (*x.CacheData)[today][strings.ToLower(currency)]; !ok || force {
 		x.log.Note("exchange rates request: " + helpers.TodaysDate())
-		rates, err := getRates()
+		rates, err := getRates(x.url)
 		if err != nil {
 			return 0.0, err
 		}
