@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	. "github.com/srackham/cryptor/internal/cache"
@@ -72,6 +73,9 @@ func getRates(url string) (Rates, error) {
 func (x *ExchangeRates) GetRate(currency string, force bool) (float64, error) {
 	if currency == "USD" {
 		return 1.00, nil
+	}
+	if os.Getenv("GITHUB_ACTION") != "" {
+		panic("xrates.GetRate() requires HTTP access and should never execute from Github Actions")
 	}
 	var rate float64
 	var ok bool
