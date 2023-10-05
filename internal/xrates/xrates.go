@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	. "github.com/srackham/cryptor/internal/cache"
@@ -32,7 +31,7 @@ func NewExchangeRates(url string, log *logger.Log) ExchangeRates {
 // getRates fetches a list of currency exchange rates against the USD
 // TODO getRates should be an IXRatesAPI interface cf. prices.IPriceAPI.
 func getRates(url string) (Rates, error) {
-	if os.Getenv("GITHUB_ACTION") != "" {
+	if helpers.GithubActions() {
 		// getRates() requires HTTP access and should never execute from Github Actions.
 		mockRates := Rates{"usd": 1.0, "nzd": 1.5, "aud": 1.6}
 		return mockRates, nil

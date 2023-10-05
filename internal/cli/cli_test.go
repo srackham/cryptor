@@ -38,9 +38,11 @@ func exec(cli *cli, cmd string) (out string, err error) {
 	if err != nil {
 		return
 	}
-	err = fsx.CopyFile("../../testdata/config.yaml", path.Join(tmpdir, "config.yaml"))
-	if err != nil {
-		return
+	if !helpers.GithubActions() {
+		err = fsx.CopyFile("../../testdata/config.yaml", path.Join(tmpdir, "config.yaml"))
+		if err != nil {
+			return
+		}
 	}
 	err = fsx.CopyFile("../../testdata/portfolios.yaml", path.Join(tmpdir, "portfolios.yaml"))
 	if err != nil {

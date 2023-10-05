@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
 	"sort"
@@ -130,4 +131,9 @@ func ParseDateOrOffset(date string, fromDate string) (string, error) {
 	}
 	d = d.AddDate(0, 0, offset)
 	return d.Format("2006-01-02"), nil
+}
+
+// GithubActions return true if the code is executing on Github.
+func GithubActions() bool {
+	return os.Getenv("GITHUB_ACTION") != ""
 }

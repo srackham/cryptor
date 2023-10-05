@@ -1,16 +1,16 @@
 package xrates
 
 import (
-	"os"
 	"testing"
 
 	"github.com/srackham/cryptor/internal/assert"
 	"github.com/srackham/cryptor/internal/config"
+	"github.com/srackham/cryptor/internal/helpers"
 	"github.com/srackham/cryptor/internal/logger"
 )
 
 func TestExchangeRates(t *testing.T) {
-	if os.Getenv("GITHUB_ACTION") != "" {
+	if helpers.GithubActions() {
 		t.Skip("skip on Github Actions because this test requires HTTP access")
 	}
 
