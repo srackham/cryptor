@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -190,6 +191,7 @@ func TestPathTranslate(t *testing.T) {
 	dstRoot := "/path/to/dst"
 	expected := "/path/to/dst/src/file.txt"
 	dstPath := PathTranslate(srcPath, srcRoot, dstRoot)
+	dstPath = strings.ReplaceAll(dstPath, string(filepath.Separator), "/")
 	if dstPath != expected {
 		t.Errorf("PathTranslate did not return the expected destination path, got: %s, want: %s", dstPath, expected)
 	}
