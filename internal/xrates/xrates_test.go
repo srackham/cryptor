@@ -10,7 +10,7 @@ import (
 )
 
 func TestExchangeRates(t *testing.T) {
-	if os.Getenv("CI") != "" {
+	if os.Getenv("GITHUB_ACTION") != "" {
 		t.Skip("skip on Github Actions because this test requires HTTP access")
 	}
 
