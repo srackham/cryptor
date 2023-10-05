@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/srackham/cryptor/internal/assert"
-	"github.com/srackham/cryptor/internal/global"
+	"github.com/srackham/cryptor/internal/config"
 	"github.com/srackham/cryptor/internal/logger"
 )
 
@@ -14,7 +14,13 @@ func TestExchangeRates(t *testing.T) {
 		t.Skip("skip on Github Actions because this test requires HTTP access")
 	}
 
-	x := NewExchangeRates(global.XRATES_QUERY, &logger.Log{})
+	test_config := "../../testdata/config.yaml"
+	conf, err := config.LoadConfig(test_config)
+	if err != nil {
+		t.Fatalf("failed to parse config file: %v", err)
+	}
+	assert.PassIf(t, err == nil, "%v", err)
+	x := NewExchangeRates(conf.XratesURL, &logger.Log{})
 
 	rate, err := x.GetRate("USD", false)
 	assert.PassIf(t, err == nil, "%v", err)

@@ -32,6 +32,9 @@ func NewExchangeRates(url string, log *logger.Log) ExchangeRates {
 // TODO getRates should be an IXRatesAPI interface cf. prices.IPriceAPI.
 func getRates(url string) (Rates, error) {
 	rates := make(Rates)
+	if url == "" {
+		return rates, fmt.Errorf("exchange rate request: URL has not been specified")
+	}
 	client := http.Client{}
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -39,7 +42,7 @@ func getRates(url string) (Rates, error) {
 	}
 	resp, err := client.Do(request)
 	if err != nil {
-		return rates, err
+		return rates, fmt.Errorf("exchange rate request: %s: %s", url, err.Error())
 	}
 	// See https://www.sohamkamani.com/golang/json/#decoding-json-to-maps---unstructured-data
 	var m map[string]any
@@ -51,9 +54,9 @@ func getRates(url string) (Rates, error) {
 	if !exists {
 		jsonData, err := json.Marshal(m)
 		if err != nil {
-			return rates, fmt.Errorf("invalid exchange rate response: %v", m)
+			return rates, fmt.Errorf("invalid exchange rate response: %s: %v", url, m)
 		}
-		return rates, fmt.Errorf("invalid exchange rate response: %s", string(jsonData))
+		return rates, fmt.Errorf("invalid exchange rate response: %s: %s", url, string(jsonData))
 	}
 	m = m["rates"].(map[string]any)
 	for k, v := range m {

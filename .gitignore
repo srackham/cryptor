@@ -5,4 +5,5 @@ debug
 tmp/
 dist/
 build/
+testdata/config.yaml
 TODO.md

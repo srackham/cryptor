@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/srackham/cryptor/internal/cache"
+	"github.com/srackham/cryptor/internal/config"
 	"github.com/srackham/cryptor/internal/fsx"
 	"github.com/srackham/cryptor/internal/global"
 	"github.com/srackham/cryptor/internal/helpers"
@@ -34,6 +35,7 @@ type cli struct {
 		force      bool
 		format     string
 		portfolios []string
+		xratesURL  string
 	}
 }
 
@@ -43,7 +45,6 @@ func New(api price.IPriceAPI) *cli {
 	c.valuations = portfolio.Portfolios{}
 	c.valuationsCache = *cache.NewCache(&c.valuations)
 	c.priceReader = price.NewPriceReader(api, &c.log)
-	c.xrates = xrates.NewExchangeRates(global.XRATES_QUERY, &c.log)
 	return &c
 }
 
@@ -60,6 +61,17 @@ func (cli *cli) Execute(args []string) error {
 	cli.opts.currency = "USD"
 	cli.opts.format = "text"
 	err = cli.parseArgs(args)
+	if fsx.FileExists(cli.configFile()) {
+		var conf *config.Config
+		conf, err = config.LoadConfig(cli.configFile())
+		if err != nil {
+			return err
+		}
+		if conf.XratesURL != "" {
+			cli.opts.xratesURL = conf.XratesURL
+		}
+	}
+	cli.xrates = xrates.NewExchangeRates(cli.opts.xratesURL, &cli.log)
 	if err == nil {
 		cli.priceReader.CacheFile = filepath.Join(cli.configDir, "crypto-prices.json")
 		cli.xrates.CacheFile = filepath.Join(cli.configDir, "exchange-rates.json")
@@ -107,7 +119,7 @@ func (cli *cli) parseArgs(args []string) error {
 			cli.opts.aggregate = true
 		case opt == "-force":
 			cli.opts.force = true
-		case slice.New("-confdir", "-currency", "-date", "-format", "-portfolio").Has(opt):
+		case slice.New("-confdir", "-currency", "-date", "-format", "-portfolio", "-xrates-url").Has(opt):
 			// Process option argument.
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
@@ -137,6 +149,8 @@ func (cli *cli) parseArgs(args []string) error {
 					return fmt.Errorf("invalid -portfolio argument: \"%s\"", arg)
 				}
 				cli.opts.portfolios = append(cli.opts.portfolios, arg)
+			case "-xrates-url":
+				cli.opts.xratesURL = arg
 			default:
 				return fmt.Errorf("unexpected option: \"%s\"", opt)
 			}
@@ -157,10 +171,18 @@ func (cli *cli) initCmd() error {
 		}
 	}
 	if fsx.FileExists(cli.configFile()) {
-		return fmt.Errorf("portfolios file already exists: \"%s\"", cli.configFile())
+		return fmt.Errorf("config file already exists: \"%s\"", cli.configFile())
 	}
-	cli.log.Note("installing example portfolios file: \"%s\"", cli.configFile())
-	conf := `# Example cryptor portfolio configuration file
+	cli.log.Note("installing default config file: \"%s\"", cli.portfoliosFile())
+	contents := `xrates-url: https://openexchangerates.org/api/latest.json?app_id=YOUR_ACCESS_KEY`
+	if err := fsx.WriteFile(cli.configFile(), contents); err != nil {
+		return fmt.Errorf("failed to write config file: \"%s\"", err.Error())
+	}
+	if fsx.FileExists(cli.portfoliosFile()) {
+		return fmt.Errorf("portfolios file already exists: \"%s\"", cli.portfoliosFile())
+	}
+	cli.log.Note("installing example portfolios file: \"%s\"", cli.portfoliosFile())
+	contents = `# Example cryptor portfolio configuration file
 
 - name:  personal
   notes: |
@@ -182,7 +204,7 @@ func (cli *cli) initCmd() error {
 - assets:
       BTC: 0.25
 `
-	if err := fsx.WriteFile(cli.configFile(), conf); err != nil {
+	if err := fsx.WriteFile(cli.portfoliosFile(), contents); err != nil {
 		return err
 	}
 	return nil
@@ -199,7 +221,8 @@ Usage:
 
 Commands:
 
-    init     create configuration directory and install example portfolios file
+    init     create configuration directory and install default config and
+             example portfolios file
     valuate  calculate and display portfolio valuations
     history  display saved portfolio valuations from the valuations history
     help     display documentation
@@ -207,12 +230,13 @@ Commands:
 Options:
 
     -aggregate              Display portfolio valuations aggregated by date
-    -confdir CONF_DIR       Directory containing data and cache files (default: $HOME/.cryptor)
+    -confdir CONF_DIR       Directory containing config, data and cache files (default: $HOME/.cryptor)
     -currency CURRENCY      Display values in this fiat CURRENCY
     -date DATE              Valuation date, YYYY-MM-DD format or integer day offset: 0,-1,-2...
     -format FORMAT          Print format: text, json
     -portfolio PORTFOLIO    Process named portfolio (default: all portfolios)
     -force                  Unconditionally fetch crypto prices and exchange rates
+    -xrates-url URL         Fetch exchange rates from URL
 
 Version:    ` + global.VERS + " (" + global.OS + ")" + `
 Git commit: ` + global.COMMIT + `
@@ -227,16 +251,20 @@ func isCommand(name string) bool {
 }
 
 func (cli *cli) configFile() string {
+	return filepath.Join(cli.configDir, "config.yaml")
+}
+
+func (cli *cli) portfoliosFile() string {
 	return filepath.Join(cli.configDir, "portfolios.yaml")
 }
 
 func (cli *cli) load() error {
-	ps, err := portfolio.LoadPortfoliosFile(cli.configFile())
+	ps, err := portfolio.LoadPortfoliosFile(cli.portfoliosFile())
 	if err != nil {
 		return err
 	}
 	if err := ps.Validate(true); err != nil {
-		return fmt.Errorf("config file: \"%s\": %s", cli.configFile(), err.Error())
+		return fmt.Errorf("config file: \"%s\": %s", cli.portfoliosFile(), err.Error())
 	}
 	cli.portfolios = ps
 	if err := cli.valuationsCache.Load(); err != nil {

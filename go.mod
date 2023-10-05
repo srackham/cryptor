@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/fatih/color v1.13.0
+	github.com/google/go-cmp v0.5.8
 	github.com/superoo7/go-gecko v1.0.0
 	gopkg.in/yaml.v3 v3.0.1
 )

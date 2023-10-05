@@ -14,11 +14,12 @@ import (
 func PassIf(t *testing.T, ok bool, format string, args ...any) {
 	t.Helper()
 	if strings.Contains(format, "%s") {
-		t.Logf("use '%%v' instead of '%%s' to report possibly nil values: '%s'", format)
-		t.FailNow()
+		t.Fatalf("use '%%v' instead of '%%s' to report possibly nil values: '%s'", format)
 	}
 	if !ok {
-		t.Errorf(format, args...)
+		// I don't want errors to cascade, prefer to deal with them one by one.
+		t.Fatalf(format, args...)
+		// t.Errorf(format, args...)
 	}
 }
 
