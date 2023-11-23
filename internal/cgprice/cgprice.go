@@ -37,8 +37,19 @@ func (r *Reader) SetCacheDir(cacheDir string) {
 }
 
 // getId returns the CoinGecko API ID of the crypto symbol.
-func (r *Reader) getCoinId(symbol string) (string, error) {
+func (r *Reader) GetCoinId(symbol string) (string, error) {
 	symbol = strings.ToLower(symbol)
+	// FIXME: Kludge to get correct ID for well known coins.
+	switch symbol {
+	case "btc":
+		return "bitcoin", nil
+	case "eth":
+		return "ethereum", nil
+	case "sol":
+		return "solana", nil
+	case "avax":
+		return "avalanche-2", nil
+	}
 	if len(*(r.coinList.CacheData)) == 0 {
 		cl, err := getCoinsList()
 		if err != nil {
@@ -55,7 +66,7 @@ func (r *Reader) getCoinId(symbol string) (string, error) {
 }
 
 func (r *Reader) GetPrice(symbol string, date string) (float64, error) {
-	id, err := r.getCoinId(symbol)
+	id, err := r.GetCoinId(symbol)
 	if err != nil {
 		return 0.00, err
 	}
