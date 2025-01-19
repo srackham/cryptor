@@ -87,7 +87,7 @@ func (cli *cli) Execute(args []string) error {
 		case "history":
 			err = cli.historyCmd()
 		default:
-			err = fmt.Errorf("invalid command: " + cli.command)
+			err = fmt.Errorf("invalid command: %s", cli.command)
 		}
 	}
 	return err
@@ -243,7 +243,7 @@ Git commit: ` + global.COMMIT + `
 Built:      ` + global.BUILT + `
 Github:     ` + github
 
-	cli.log.Console("\n" + summary + "\n")
+	cli.log.Console("\n%s\n", summary)
 }
 
 func isCommand(name string) bool {
