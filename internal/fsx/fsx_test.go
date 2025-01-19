@@ -1,7 +1,6 @@
 package fsx
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,7 +8,7 @@ import (
 )
 
 func TestDirExists(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -33,14 +32,14 @@ func TestDirExists(t *testing.T) {
 }
 
 func TestFileExists(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
 	defer os.RemoveAll(tempDir)
 
 	fileName := filepath.Join(tempDir, "test_file_exists")
-	err = ioutil.WriteFile(fileName, []byte("Test"), 0644)
+	err = os.WriteFile(fileName, []byte("Test"), 0644)
 	if err != nil {
 		t.Errorf("WriteFile failed with error: %v", err)
 	}
@@ -57,7 +56,7 @@ func TestFileExists(t *testing.T) {
 }
 
 func TestReadAndWriteFile(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -82,7 +81,7 @@ func TestReadAndWriteFile(t *testing.T) {
 }
 
 func TestWritePath(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -123,7 +122,7 @@ func TestReplaceExt(t *testing.T) {
 }
 
 func TestCopyFile(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -154,7 +153,7 @@ func TestCopyFile(t *testing.T) {
 }
 
 func TestMkMissingDir(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -198,14 +197,14 @@ func TestPathTranslate(t *testing.T) {
 }
 
 func TestFileModTime(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
 	defer os.RemoveAll(tempDir)
 
 	fileName := filepath.Join(tempDir, "test_file_mod_time")
-	err = ioutil.WriteFile(fileName, []byte("Test"), 0644)
+	err = os.WriteFile(fileName, []byte("Test"), 0644)
 	if err != nil {
 		t.Errorf("WriteFile failed with error: %v", err)
 	}
@@ -222,7 +221,7 @@ func TestFileModTime(t *testing.T) {
 }
 
 func TestDirCount(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -234,7 +233,7 @@ func TestDirCount(t *testing.T) {
 	}
 
 	fileName := filepath.Join(dir, "test_file")
-	err = ioutil.WriteFile(fileName, []byte("Test"), 0644)
+	err = os.WriteFile(fileName, []byte("Test"), 0644)
 	if err != nil {
 		t.Errorf("WriteFile failed with error: %v", err)
 	}
