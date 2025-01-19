@@ -4,6 +4,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/srackham/cryptor/internal/assert"
 	"github.com/srackham/cryptor/internal/helpers"
@@ -23,9 +24,10 @@ func TestPrice(t *testing.T) {
 	assert.PassIf(t, err == nil, "%#v", err)
 	assert.PassIf(t, amt > 0.00, "expected BTC price to be greater than zero")
 
-	amt, err = cg.GetPrice("ETH", "2022-06-01")
+	nineMonthsAgo := time.Now().AddDate(0, -9, 0).Format("2006-01-02")
+	amt, err = cg.GetPrice("ETH", nineMonthsAgo)
 	assert.PassIf(t, err == nil, "%#v", err)
-	assert.PassIf(t, amt > 0.00, "expected 2022-06-01 ETH price to be greater than zero")
+	assert.PassIf(t, amt > 0.00, "expected %v ETH price to be greater than zero", nineMonthsAgo)
 
 	_, err = cg.GetPrice("undefined_symbol", today)
 	assert.Equal(t, "unsupported coin: undefined_symbol", err.Error())
