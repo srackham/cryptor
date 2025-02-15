@@ -3,6 +3,7 @@ package helpers
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"testing"
 	"time"
 )
@@ -331,7 +332,10 @@ func TestParseDateOrOffset(t *testing.T) {
 	}
 }
 
-func TestGetXDGConfigDir(t *testing.T) {
+func TestGetConfigDir(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		return
+	}
 	// Save the original environment variables
 	originalXDGConfigHome := os.Getenv("XDG_CONFIG_HOME")
 	originalHome := os.Getenv("HOME")
@@ -363,7 +367,7 @@ func TestGetXDGConfigDir(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			os.Setenv("XDG_CONFIG_HOME", tc.xdgConfigHome)
 			os.Setenv("HOME", tc.home)
-			result := GetXDGConfigDir()
+			result := GetConfigDir()
 			if result != tc.expectedResult {
 				t.Errorf("Expected %s, but got %s", tc.expectedResult, result)
 			}
@@ -371,7 +375,10 @@ func TestGetXDGConfigDir(t *testing.T) {
 	}
 }
 
-func TestGetXDGCacheDir(t *testing.T) {
+func TestGetCacheDir(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		return
+	}
 	// Save the original environment variables
 	originalXDGCacheHome := os.Getenv("XDG_CACHE_HOME")
 	originalHome := os.Getenv("HOME")
@@ -403,7 +410,7 @@ func TestGetXDGCacheDir(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			os.Setenv("XDG_CACHE_HOME", tc.xdgCacheHome)
 			os.Setenv("HOME", tc.home)
-			result := GetXDGCacheDir()
+			result := GetCacheDir()
 			if result != tc.expectedResult {
 				t.Errorf("Expected %s, but got %s", tc.expectedResult, result)
 			}

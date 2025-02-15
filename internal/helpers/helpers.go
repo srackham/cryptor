@@ -154,8 +154,11 @@ func IsRunningOnGithub() bool {
 	return os.Getenv("GITHUB_ACTION") != ""
 }
 
-// GetXDGConfigDir returns the XDG user config directory path.
-func GetXDGConfigDir() string {
+// GetConfigDir returns the XDG user config directory path.
+func GetConfigDir() string {
+	if runtime.GOOS == "windows" {
+		return os.Getenv("LOCALAPPDATA")
+	}
 	// Get the XDG_CONFIG_HOME environment variable
 	configHome := os.Getenv("XDG_CONFIG_HOME")
 	if configHome == "" {
@@ -165,8 +168,11 @@ func GetXDGConfigDir() string {
 	return configHome
 }
 
-// GetXDGCacheDir returns the XDG user cache directory path.
-func GetXDGCacheDir() string {
+// GetCacheDir returns the XDG user cache directory path.
+func GetCacheDir() string {
+	if runtime.GOOS == "windows" {
+		return os.Getenv("LOCALAPPDATA")
+	}
 	cacheHome := os.Getenv("XDG_CACHE_HOME")
 	if cacheHome != "" {
 		return cacheHome
@@ -174,8 +180,11 @@ func GetXDGCacheDir() string {
 	return filepath.Join(os.Getenv("HOME"), ".cache")
 }
 
-// GetXDGDataDir returns the XDG user data directory path.
-func GetXDGDataDir() string {
+// GetDataDir returns the XDG user data directory path.
+func GetDataDir() string {
+	if runtime.GOOS == "windows" {
+		return os.Getenv("LOCALAPPDATA")
+	}
 	dataHome := os.Getenv("XDG_DATA_HOME")
 	if dataHome != "" {
 		return dataHome

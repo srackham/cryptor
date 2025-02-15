@@ -15,9 +15,9 @@ func main() {
 	ctx := Context{
 		Stdout:    os.Stdout,
 		Stderr:    os.Stderr,
-		DataDir:   path.Join(helpers.GetXDGDataDir(), "cryptor"),
-		CacheDir:  path.Join(helpers.GetXDGCacheDir(), "cryptor"),
-		ConfigDir: path.Join(helpers.GetXDGConfigDir(), "cryptor"),
+		DataDir:   path.Join(helpers.GetDataDir(), "cryptor"),
+		CacheDir:  path.Join(helpers.GetCacheDir(), "cryptor"),
+		ConfigDir: path.Join(helpers.GetConfigDir(), "cryptor"),
 		Now:       func() time.Time { return time.Now() },
 		HttpGet:   http.Get,
 	}
