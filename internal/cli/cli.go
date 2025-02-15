@@ -2,93 +2,75 @@ package cli
 
 import (
 	"fmt"
-	"os/user"
 	"path/filepath"
 	"strings"
 
-	"github.com/srackham/cryptor/internal/cache"
-	"github.com/srackham/cryptor/internal/config"
+	"github.com/srackham/cryptor/internal/binance"
 	"github.com/srackham/cryptor/internal/fsx"
-	"github.com/srackham/cryptor/internal/global"
-	"github.com/srackham/cryptor/internal/helpers"
-	"github.com/srackham/cryptor/internal/logger"
+	. "github.com/srackham/cryptor/internal/global"
 	"github.com/srackham/cryptor/internal/portfolio"
-	"github.com/srackham/cryptor/internal/price"
 	"github.com/srackham/cryptor/internal/slice"
 	"github.com/srackham/cryptor/internal/xrates"
+	"gopkg.in/yaml.v3"
 )
 
 type cli struct {
-	command         string
-	executable      string
-	configDir       string
-	log             logger.Log
-	portfolios      portfolio.Portfolios
-	valuations      portfolio.Portfolios
-	valuationsCache cache.Cache[portfolio.Portfolios]
-	priceReader     price.PriceReader
-	xrates          xrates.ExchangeRates
-	opts            struct {
-		aggregate  bool
-		currency   string
-		date       string
-		force      bool
-		format     string
-		portfolios []string
-		xratesURL  string
+	*Context
+	command     string               // CLI command
+	portfolios  portfolio.Portfolios // Crypto currency portfolios loaded from configuration file
+	valuation   portfolio.Portfolios // Valuated portfolios
+	aggregate   portfolio.Portfolio  // Combinded portfolios valuation
+	priceReader binance.PriceReader  // Crypto currency price oracle
+	xrates      xrates.ExchangeRates // Fiat currency to USD exchange rate oracle
+	opts        struct {
+		aggregate     bool                // Inlcude aggregate (combined) portfolios valuation
+		aggregateOnly bool                // Only include aggregate portfolio valuation
+		currency      string              // Fiat currency symbol that the valuation is denominated in
+		notes         bool                // Include portfolio notes in the valuations
+		format        string              // Valuate command output format ("json" or "yaml")
+		noSave        bool                // Do not update the valuations file
+		portfolios    slice.Slice[string] // Names of portfolios to be printed
 	}
 }
 
-// New creates a new cli context.
-func New(api price.IPriceAPI) *cli {
-	c := cli{}
-	c.valuations = portfolio.Portfolios{}
-	c.valuationsCache = *cache.NewCache(&c.valuations)
-	c.priceReader = price.NewPriceReader(api, &c.log)
-	return &c
+// New creates a new cli.
+func New(ctx *Context) *cli {
+	cli := cli{}
+	cli.Context = ctx
+	cli.priceReader = binance.NewPriceReader(ctx)
+	cli.xrates = xrates.New(ctx)
+	return &cli
 }
 
 // Execute runs a command specified by CLI args.
-func (cli *cli) Execute(args []string) error {
+func (cli *cli) Execute(args ...string) error {
 	var err error
 	defer func() {
 		if err != nil {
-			cli.log.Error("%s", err.Error())
+			fmt.Fprintf(cli.Stderr, "\nERROR: %s\n", err.Error())
 		}
 	}()
-	user, _ := user.Current()
-	cli.configDir = filepath.Join(user.HomeDir, ".cryptor")
 	cli.opts.currency = "USD"
-	cli.opts.format = "text"
+	cli.opts.portfolios = slice.New[string]()
 	err = cli.parseArgs(args)
-	if fsx.FileExists(cli.configFile()) {
-		var conf *config.Config
-		conf, err = config.LoadConfig(cli.configFile())
-		if err != nil {
-			return err
-		}
-		if conf.XratesURL != "" {
-			cli.opts.xratesURL = conf.XratesURL
-		}
+	if err != nil {
+		return err
 	}
-	cli.xrates = xrates.NewExchangeRates(cli.opts.xratesURL, &cli.log)
-	if err == nil {
-		cli.priceReader.CacheFile = filepath.Join(cli.configDir, "crypto-prices.json")
-		cli.xrates.CacheFile = filepath.Join(cli.configDir, "exchange-rates.json")
-		cli.valuationsCache.CacheFile = filepath.Join(cli.configDir, "valuations.json")
-		cli.priceReader.API.SetCacheDir(cli.configDir)
-		switch cli.command {
-		case "help":
-			cli.helpCmd()
-		case "init":
-			err = cli.initCmd()
-		case "valuate":
-			err = cli.valuateCmd()
-		case "history":
-			err = cli.historyCmd()
-		default:
-			err = fmt.Errorf("invalid command: %s", cli.command)
-		}
+	cli.valuation = portfolio.Portfolios{}
+	if err != nil {
+		return err
+	}
+	switch cli.command {
+	case "help":
+		cli.helpCmd()
+	case "history":
+		err = cli.historyCmd()
+	case "init":
+		err = cli.initCmd()
+	case "valuate":
+		err = cli.valuateCmd()
+	default:
+		err = fmt.Errorf("invalid command: %s", cli.command)
 	}
 	return err
 }
@@ -103,7 +85,6 @@ func (cli *cli) parseArgs(args []string) error {
 		}
 		switch {
 		case i == 0:
-			cli.executable = opt
 			if len(args) == 1 {
 				cli.command = "help"
 			}
@@ -117,9 +98,13 @@ func (cli *cli) parseArgs(args []string) error {
 			cli.command = opt
 		case opt == "-aggregate":
 			cli.opts.aggregate = true
-		case opt == "-force":
-			cli.opts.force = true
-		case slice.New("-confdir", "-currency", "-date", "-format", "-portfolio", "-xrates-url").Has(opt):
+		case opt == "-aggregate-only":
+			cli.opts.aggregateOnly = true
+		case opt == "-notes":
+			cli.opts.notes = true
+		case opt == "-no-save":
+			cli.opts.noSave = true
+		case slice.New("-confdir", "-currency", "-format", "-portfolio").Has(opt):
 			// Process option argument.
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
@@ -127,20 +112,13 @@ func (cli *cli) parseArgs(args []string) error {
 			arg := args[i+1]
 			switch opt {
 			case "-confdir":
-				cli.configDir = arg
+				cli.ConfigDir = arg
+				cli.CacheDir = arg
+				cli.DataDir = arg
 			case "-currency":
 				cli.opts.currency = strings.ToUpper(arg)
-			case "-date":
-				var err error
-				if arg, err = helpers.ParseDateOrOffset(arg, helpers.TodaysDate()); err != nil {
-					return fmt.Errorf("invalid date: \"%s\"", arg)
-				}
-				if strings.Compare(arg, helpers.TodaysDate()) == 1 {
-					return fmt.Errorf("future date is not allowed: \"%s\"", arg)
-				}
-				cli.opts.date = arg
 			case "-format":
-				if !slice.New("text", "json").Has(arg) {
+				if !slice.New("json", "yaml").Has(arg) {
 					return fmt.Errorf("invalid -format argument: \"%s\"", arg)
 				}
 				cli.opts.format = arg
@@ -148,9 +126,10 @@ func (cli *cli) parseArgs(args []string) error {
 				if !portfolio.IsValidName(arg) {
 					return fmt.Errorf("invalid -portfolio argument: \"%s\"", arg)
 				}
+				if cli.opts.portfolios.Has(arg) {
+					return fmt.Errorf("-portfolio name can only be specified once: \"%s\"", arg)
+				}
 				cli.opts.portfolios = append(cli.opts.portfolios, arg)
-			case "-xrates-url":
-				cli.opts.xratesURL = arg
 			default:
 				return fmt.Errorf("unexpected option: \"%s\"", opt)
 			}
@@ -164,86 +143,130 @@ func (cli *cli) parseArgs(args []string) error {
 
 // initCmd implements the initCmd command.
 func (cli *cli) initCmd() error {
-	if !fsx.DirExists(cli.configDir) {
-		cli.log.Note("creating configuration directory: \"%s\"", cli.configDir)
-		if err := fsx.MkMissingDir(cli.configDir); err != nil {
+	if !fsx.DirExists(cli.ConfigDir) {
+		fmt.Fprintf(cli.Stdout, "creating configuration directory: \"%s\"\n", cli.ConfigDir)
+		if err := fsx.MkMissingDir(cli.ConfigDir); err != nil {
 			return err
 		}
 	}
 	if fsx.FileExists(cli.configFile()) {
-		return fmt.Errorf("config file already exists: \"%s\"", cli.configFile())
-	}
-	cli.log.Note("installing default config file: \"%s\"", cli.portfoliosFile())
-	contents := `xrates-url: https://openexchangerates.org/api/latest.json?app_id=YOUR_ACCESS_KEY`
-	if err := fsx.WriteFile(cli.configFile(), contents); err != nil {
-		return fmt.Errorf("failed to write config file: \"%s\"", err.Error())
+		fmt.Fprintf(cli.Stdout, "config file already exists: \"%s\"\n", cli.configFile())
+	} else {
+		fmt.Fprintf(cli.Stdout, "installing example config file: \"%s\"\n", cli.configFile())
+		contents := `# Open Exchange Rates App ID (https://openexchangerates.org/)
+xrates-appid: YOUR_APP_ID`
+		if err := fsx.WriteFile(cli.configFile(), contents); err != nil {
+			return fmt.Errorf("failed to write config file: \"%s\"", err.Error())
+		}
 	}
 	if fsx.FileExists(cli.portfoliosFile()) {
-		return fmt.Errorf("portfolios file already exists: \"%s\"", cli.portfoliosFile())
-	}
-	cli.log.Note("installing example portfolios file: \"%s\"", cli.portfoliosFile())
-	contents = `# Example cryptor portfolio configuration file
+		fmt.Fprintf(cli.Stdout, "portfolios file already exists: \"%s\"\n", cli.portfoliosFile())
+	} else {
+		fmt.Fprintf(cli.Stdout, "installing example portfolios file: \"%s\"\n", cli.portfoliosFile())
+		contents := `# Example cryptor portfolios configuration file containing two portfolios installed by 'cryptor init' command.
 
 - name:  personal
-  notes: |
-    ## Personal Portfolio
-    - 7-Jan-2023: Migrated to new h/w wallet.
-  cost: $10,000.00 NZD
+  notes: Personal portfolio notes.
+  cost: $10,000.00 USD
   assets:
     BTC: 0.5
     ETH: 2.5
     USDC: 100
 
-- name:  joint
-  notes: Joint Portfolio
+- name:  business
+  notes: |
+    Business portfolio notes
+    over multiple lines.
+  cost: $20,000.00 USD
   assets:
-      BTC: 0.5
-      ETH: 2.5
-
-# Minimal portfolio
-- assets:
-      BTC: 0.25
-`
-	if err := fsx.WriteFile(cli.portfoliosFile(), contents); err != nil {
-		return err
+    BTC: 1.0`
+		if err := fsx.WriteFile(cli.portfoliosFile(), contents); err != nil {
+			return err
+		}
+	}
+	if !fsx.DirExists(cli.CacheDir) {
+		fmt.Fprintf(cli.Stdout, "creating cache directory: \"%s\"\n", cli.CacheDir)
+		if err := fsx.MkMissingDir(cli.CacheDir); err != nil {
+			return err
+		}
+	}
+	if !fsx.DirExists(cli.DataDir) {
+		fmt.Fprintf(cli.Stdout, "creating data directory: \"%s\"\n", cli.DataDir)
+		if err := fsx.MkMissingDir(cli.DataDir); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-// helpCmd implements the helpCmd command.
+// historyCmd prints the saved valuations history.
+func (cli *cli) historyCmd() (err error) {
+	if err := cli.load(); err != nil {
+		return err
+	}
+	fname := cli.valuationsFile("json")
+	valuations := portfolio.Portfolios{}
+	if fsx.FileExists(fname) {
+		valuations, err = portfolio.LoadValuations(fname)
+		if err != nil {
+			return fmt.Errorf("valuations file: \"%s\": %s", fname, err.Error())
+		}
+	}
+	if len(cli.opts.portfolios) > 0 {
+		valuations = valuations.FilterByName(cli.opts.portfolios...)
+	}
+	if len(valuations) == 0 {
+		return fmt.Errorf("valuations file: \"%s\": no valuations found", fname)
+	}
+	var s string
+	if cli.opts.format == "yaml" {
+		s, err = valuations.ToYAML()
+	} else {
+		s, err = valuations.ToJSON()
+	}
+	if err == nil {
+		_, err = fmt.Fprint(cli.Stdout, s)
+	}
+	return
+}
+
+// helpCmd implements the `help` command.
 func (cli *cli) helpCmd() {
 	github := "https://github.com/srackham/cryptor"
-	summary := `Cryptor valuates crypto currency asset portfolios.
-
+	summary := `
 Usage:
-
     cryptor COMMAND [OPTION]...
 
-Commands:
+Description:
+    Cryptor valuates crypto currency asset portfolios.
 
+Commands:
     init     create configuration directory and install default config and
-             example portfolios file
-    valuate  calculate and display portfolio valuations
-    history  display saved portfolio valuations from the valuations history
+             example portfolios files
+    valuate  valuate, print and save portfolio valuations
+    history  Print saved portfolio valuations
     help     display documentation
 
 Options:
+    -aggregate                  Include aggregated portfolios in printed valuation
+    -aggregate-only             Only include aggregated portfolios in printed valuation
+    -confdir CONF_DIR           Directory containing config, data and cache files
+    -currency CURRENCY          Print fiat currency values denominated in CURRENCY
+    -notes                      Include portfolio notes in the valuations
+    -no-save                    Do not update the valuations file
+    -portfolio PORTFOLIO        Process named portfolio (default: all portfolios)
+    -format FORMAT              Set the valuate command output format ("json" or "yaml")
 
-    -aggregate              Display portfolio valuations aggregated by date
-    -confdir CONF_DIR       Directory containing config, data and cache files (default: $HOME/.cryptor)
-    -currency CURRENCY      Display values in this fiat CURRENCY
-    -date DATE              Valuation date, YYYY-MM-DD format or integer day offset: 0,-1,-2...
-    -format FORMAT          Print format: text, json
-    -portfolio PORTFOLIO    Process named portfolio (default: all portfolios)
-    -force                  Unconditionally fetch crypto prices and exchange rates
-    -xrates-url URL         Fetch exchange rates from URL
+Config directory: ` + cli.ConfigDir + `
+Cache directory:  ` + cli.CacheDir + `
+Data directory:   ` + cli.DataDir + `
 
-Version:    ` + global.VERS + " (" + global.OS + ")" + `
-Git commit: ` + global.COMMIT + `
-Built:      ` + global.BUILT + `
+Version:    ` + VERS + " (" + OS + ")" + `
+Git commit: ` + COMMIT + `
+Built:      ` + BUILT + `
 Github:     ` + github
 
-	cli.log.Console("\n%s\n", summary)
+	fmt.Fprintf(cli.Stdout, "%s\n", summary)
 }
 
 func isCommand(name string) bool {
@@ -251,160 +274,192 @@ func isCommand(name string) bool {
 }
 
 func (cli *cli) configFile() string {
-	return filepath.Join(cli.configDir, "config.yaml")
+	return filepath.Join(cli.ConfigDir, "config.yaml")
 }
 
 func (cli *cli) portfoliosFile() string {
-	return filepath.Join(cli.configDir, "portfolios.yaml")
+	return filepath.Join(cli.ConfigDir, "portfolios.yaml")
+}
+
+func (cli *cli) valuationsFile(format string) string {
+	return filepath.Join(cli.DataDir, "valuations."+format)
 }
 
 func (cli *cli) load() error {
-	ps, err := portfolio.LoadPortfoliosFile(cli.portfoliosFile())
+	ps, err := cli.loadConfigFile(cli.portfoliosFile())
 	if err != nil {
-		return err
+		return fmt.Errorf("portfolios file: \"%s\": %s", cli.portfoliosFile(), err.Error())
 	}
-	if err := ps.Validate(true); err != nil {
-		return fmt.Errorf("config file: \"%s\": %s", cli.portfoliosFile(), err.Error())
+	if err = ps.Validate(true); err != nil {
+		return fmt.Errorf("portfolios file: \"%s\": %s", cli.portfoliosFile(), err.Error())
 	}
 	cli.portfolios = ps
-	if err := cli.valuationsCache.Load(); err != nil {
-		return err
-	}
-	if err := cli.valuations.Validate(false); err != nil {
-		return fmt.Errorf("valuations file: \"%s\": %s", cli.valuationsCache.CacheFile, err.Error())
-	}
-	if err := cli.xrates.Load(); err != nil {
-		return err
-	}
-	if err := cli.priceReader.Load(); err != nil {
-		return err
-	}
-	if err := cli.priceReader.API.LoadCacheFiles(); err != nil {
+	if err = cli.xrates.Load(cli.xrates.CacheFile()); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (cli *cli) save() error {
-	cli.valuations.SortByDateAndName()
-	if err := cli.valuationsCache.Save(); err != nil {
-		return err
+// save appends the current valuation to the valuations file and saves the exchange rates cache file.
+func (cli *cli) save() (err error) {
+	if !cli.opts.noSave {
+		fname := cli.valuationsFile("json")
+		valuations := portfolio.Portfolios{}
+		if fsx.FileExists(fname) {
+			valuations, err = portfolio.LoadValuations(fname)
+			if err != nil {
+				return fmt.Errorf("valuations file: \"%s\": %s", fname, err.Error())
+			}
+		}
+		valuations = append(valuations, cli.valuation...)
+		valuations = append(valuations, cli.aggregate)
+		err = valuations.SaveValuations(fname)
+		if err != nil {
+			return fmt.Errorf("valuations file: \"%s\": %s", fname, err.Error())
+		}
 	}
-	if err := cli.xrates.Save(); err != nil {
-		return err
+	if len(*cli.xrates.CacheData) > 0 {
+		err = cli.xrates.Save(cli.xrates.CacheFile())
+		if err != nil {
+			return fmt.Errorf("exchange rates file: \"%s\": %s", cli.xrates.CacheFile(), err.Error())
+		}
 	}
-	if err := cli.priceReader.Save(); err != nil {
-		return err
-	}
-	if err := cli.priceReader.API.SaveCacheFiles(); err != nil {
-		return err
-	}
-	return nil
+	return
 }
 
-// historyCmd implements the valuate command.
-func (cli *cli) historyCmd() error {
-	if err := cli.load(); err != nil {
-		return err
-	}
-	var ps portfolio.Portfolios
-	if len(cli.opts.portfolios) > 0 {
-		ps = cli.valuations.FilterByName(cli.opts.portfolios...)
-	} else {
-		ps = cli.valuations
-	}
-	if cli.opts.date != "" {
-		ps = ps.FilterByDate(cli.opts.date)
-	}
-	if cli.opts.aggregate {
-		ps = ps.AggregateByDate("aggregate")
-	}
-	xrate, err := cli.xrates.GetRate(cli.opts.currency, cli.opts.force)
-	if err != nil {
-		return err
-	}
-	if s, err := ps.ToString(cli.opts.format, cli.opts.currency, xrate); err != nil {
-		return err
-	} else {
-		cli.log.Console("\n%s", s)
-	}
-	return nil
-}
-
-// valuateCmd implements the valuateCmd command.
+// valuateCmd implements the valuate command.
 func (cli *cli) valuateCmd() error {
-	date := cli.opts.date
-	if date == "" {
-		date = helpers.TodaysDate()
-	}
+	now := cli.Now()
+	date := now.Format("2006-01-02")
+	time := now.Format("15:04:05")
 	if err := cli.load(); err != nil {
 		return err
 	}
 	// Select portfolios to be valuated.
-	var ps portfolio.Portfolios
+	cli.valuation = portfolio.Portfolios{}
+	cli.valuation = cli.portfolios
+	// Evaluate portfolios.
+	for i := range cli.valuation {
+		cli.valuation[i].Date = date
+		cli.valuation[i].Time = time
+		if err := cli.valuation[i].SetUSDValues(cli.priceReader); err != nil {
+			return err
+		}
+		cli.valuation[i].SetAllocations()
+		cli.valuation[i].Assets.Sort()
+	}
+	cli.aggregate = cli.valuation.Aggregate("aggregate")
+	cli.aggregate.Date = date
+	cli.aggregate.Time = time
+	printed_valuation := cli.valuation
 	if len(cli.opts.portfolios) > 0 {
+		// Check all -portfolio option names exist.
 		for _, name := range cli.opts.portfolios {
 			i := cli.portfolios.FindByName(name)
 			if i == -1 {
 				return fmt.Errorf("missing portfolio: \"%s\"", name)
 			}
-			if ps.FindByName(name) != -1 {
-				return fmt.Errorf("portfolio name can only be specified once: \"%s\"", name)
+		}
+		// Select -portfolio option valuations.
+		printed_valuation = portfolio.Portfolios{}
+		for _, p := range cli.valuation {
+			if cli.opts.portfolios.IndexOf(p.Name) >= 0 {
+				printed_valuation = append(printed_valuation, p)
 			}
-			ps = append(ps, cli.portfolios[i])
-		}
-	} else {
-		ps = cli.portfolios
-	}
-	// Evaluate portfolios.
-	for i := range ps {
-		ps[i].Date = date
-		if err := ps[i].SetUSDValues(cli.priceReader, date, cli.opts.force); err != nil {
-			return err
-		}
-		ps[i].SetAllocations()
-		ps[i].Assets.SortByValue()
-		if ps[i].Cost != "" {
-			cost, err := cli.currencyToUSD(ps[i].Cost)
-			if err != nil {
-				return err
-			}
-			ps[i].USDCost = cost
-		}
-		// Update valuations history.
-		if j := cli.valuations.FindByNameAndDate(ps[i].Name, ps[i].Date); j == -1 {
-			cli.valuations = append(cli.valuations, ps[i])
-		} else if cli.opts.force {
-			cli.valuations[j] = ps[i]
 		}
 	}
-	if cli.opts.aggregate {
-		ps = ps.AggregateByDate("aggregate")
+	if cli.opts.aggregateOnly {
+		printed_valuation = portfolio.Portfolios{cli.aggregate}
+	} else if cli.opts.aggregate {
+		printed_valuation = append(printed_valuation, cli.aggregate)
 	}
 	// Print portfolios.
-	xrate, err := cli.xrates.GetRate(cli.opts.currency, cli.opts.force)
+	xrate, err := cli.xrates.GetCachedRate(cli.opts.currency, false)
 	if err != nil {
 		return err
 	}
-	if s, err := ps.ToString(cli.opts.format, cli.opts.currency, xrate); err != nil {
+	if s, err := printed_valuation.ToString(cli.opts.format, cli.opts.currency, xrate); err != nil {
 		return err
 	} else {
-		cli.log.Console("\n%s", s)
+		fmt.Fprintf(cli.Stdout, "\n%s\n", s)
 	}
-	// Save valuations and cache files.
+	// Save valuation and cache files.
 	if err := cli.save(); err != nil {
 		return err
 	}
 	return nil
 }
 
+// loadConfigFile reads portfolios configuration file.
+func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
+	res := portfolio.Portfolios{}
+	s, err := fsx.ReadFile(filename)
+	if err != nil {
+		return res, err
+	}
+	config := []struct {
+		Name   string             `yaml:"name"`
+		Notes  string             `yaml:"notes"`
+		Cost   string             `yaml:"cost"`
+		Assets map[string]float64 `yaml:"assets"`
+	}{}
+	err = yaml.Unmarshal([]byte(s), &config)
+	if err != nil {
+		return res, err
+	}
+	// Copy parsed portfolios configuration to Portfolios slice.
+	for _, c := range config {
+		p := portfolio.Portfolio{}
+		p.Name = c.Name
+		if cli.opts.notes {
+			p.Notes = c.Notes
+		}
+		if c.Cost != "" {
+			cost, err := cli.currencyToUSD(c.Cost)
+			if err != nil {
+				return res, err
+			}
+			p.Cost = cost
+		}
+		p.Assets = []portfolio.Asset{}
+		for k, v := range c.Assets {
+			asset := portfolio.Asset{}
+			asset.Symbol = strings.ToUpper(k)
+			asset.Amount = v
+			p.Assets = append(p.Assets, asset)
+		}
+		res = append(res, p)
+	}
+	// Check for duplicate portfolio names.
+	for i := range res {
+		for j := range res {
+			if i != j && res[i].Name == res[j].Name {
+				return res, fmt.Errorf("duplicate portfolio name: \"%s\"", res[j].Name)
+			}
+		}
+	}
+	// Synthesise missing portfolio names.
+	for i := range res {
+		if res[i].Name == "" {
+			for j := 1; ; j++ {
+				name := fmt.Sprintf("portfolio%d", j)
+				if res.FindByName(name) == -1 {
+					res[i].Name = name
+					break
+				}
+			}
+		}
+	}
+	return res, err
+}
+
 // currencyToUSD parses "<value>[<currency]" string and converts to USD.
-func (cli *cli) currencyToUSD(cs string) (value float64, err error) {
-	value, currency, err := portfolio.ParseCurrency(cs)
+func (cli *cli) currencyToUSD(currencyValue string) (value float64, err error) {
+	value, currency, err := portfolio.ParseCurrency(currencyValue)
 	if err != nil {
 		return
 	}
-	rate, err := cli.xrates.GetRate(currency, cli.opts.force)
+	rate, err := cli.xrates.GetCachedRate(currency, false)
 	if err != nil {
 		return
 	}
@@ -412,8 +467,8 @@ func (cli *cli) currencyToUSD(cs string) (value float64, err error) {
 		err = fmt.Errorf("USD exchange rate should be 1.00: %f", rate)
 		return
 	}
-	if rate == 0.00 {
-		err = fmt.Errorf("exchange rate is zero: %s", currency)
+	if rate <= 0.00 {
+		err = fmt.Errorf("exchange rate is zero or less: %.2f %s", rate, currency)
 		return
 	}
 	value = value / rate

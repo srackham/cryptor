@@ -9,7 +9,7 @@ import (
 )
 
 type Config struct {
-	XratesURL string `yaml:"xrates-url"`
+	XratesAppId string `yaml:"xrates-appid"` // https://openexchangerates.org/ app ID
 }
 
 func LoadConfig(fileName string) (*Config, error) {
@@ -28,6 +28,8 @@ func LoadConfig(fileName string) (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode config file: %s", fileName)
 	}
-
+	if config.XratesAppId == "" {
+		return nil, fmt.Errorf("missing openexchangerates.org App ID (xrates-appid)")
+	}
 	return &config, nil
 }

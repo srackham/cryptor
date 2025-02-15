@@ -1,9 +1,12 @@
 package helpers
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"regexp"
 	"runtime"
 	"sort"
 	"strconv"
@@ -133,7 +136,54 @@ func ParseDateOrOffset(date string, fromDate string) (string, error) {
 	return d.Format("2006-01-02"), nil
 }
 
-// GithubActions return true if the code is executing on Github.
-func GithubActions() bool {
+func StripTrailingSpaces(s string) string {
+	lines := strings.Split(s, "\n")
+	for i, line := range lines {
+		lines[i] = strings.TrimRight(line, " \t")
+	}
+	return strings.Join(lines, "\n")
+}
+
+func StripAllWhitespace(s string) string {
+	re := regexp.MustCompile(`\s+`)
+	return re.ReplaceAllString(s, "")
+}
+
+// IsRunningOnGithub return true if the code is executing on Github.
+func IsRunningOnGithub() bool {
 	return os.Getenv("GITHUB_ACTION") != ""
+}
+
+// GetXDGConfigDir returns the XDG user config directory path.
+func GetXDGConfigDir() string {
+	// Get the XDG_CONFIG_HOME environment variable
+	configHome := os.Getenv("XDG_CONFIG_HOME")
+	if configHome == "" {
+		// Default to ~/.config if not set
+		return filepath.Join(os.Getenv("HOME"), ".config")
+	}
+	return configHome
+}
+
+// GetXDGCacheDir returns the XDG user cache directory path.
+func GetXDGCacheDir() string {
+	cacheHome := os.Getenv("XDG_CACHE_HOME")
+	if cacheHome != "" {
+		return cacheHome
+	}
+	return filepath.Join(os.Getenv("HOME"), ".cache")
+}
+
+// GetXDGDataDir returns the XDG user data directory path.
+func GetXDGDataDir() string {
+	dataHome := os.Getenv("XDG_DATA_HOME")
+	if dataHome != "" {
+		return dataHome
+	}
+	return filepath.Join(os.Getenv("HOME"), ".local", "share")
+}
+
+// IsRunningInTest returns true if the code is being run by a test.
+func IsRunningInTest() bool {
+	return flag.Lookup("test.v") != nil
 }

@@ -1,9 +1,9 @@
 debug
 *.test
 *.out
-.vscode/
 tmp/
 dist/
 build/
-testdata/config.yaml
+testdata/cache/
 TODO.md
+cryptor

@@ -17,13 +17,15 @@ func TestAssertFunctions(t *testing.T) {
 	Equal(t, p, nil)
 	True(t, p == nil)
 	PassIf(t, p == nil, "p should be nil")
+	FailIf(t, p != nil, "p should not be nil")
 	n := 42
 	p = &n
 	True(t, p != nil)
 	Contains(t, "foobar", "bar")
 
 	/* Uncomment to see failures: */
-	// PassIf(t, false, "the criteria is not met")
+	// PassIf(t, false, "the PassIf criteria is not met")
+	// FailIf(t, true, "the Failif criteria is not met")
 	// Equal(t, "hello", "Grace")
 	// True(t, false)
 	// EqualValues(t, []string{"one", "two"}, []string{"one"})
@@ -31,6 +33,7 @@ func TestAssertFunctions(t *testing.T) {
 	// EqualValues(t, []string{"one", "two"}, []string{})
 	// Panics(t, func() {})
 	// Contains(t, "foobar", "\"baz")
+	// EqualStrings(t, "foobar", "\"baz")
 
 	/* Uncomment to see the compilation error: */
 	// Equal(t, 1, "1")

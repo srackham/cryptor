@@ -3,35 +3,42 @@ package portfolio
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 
+	"github.com/srackham/cryptor/internal/binance"
 	"github.com/srackham/cryptor/internal/fsx"
 	"github.com/srackham/cryptor/internal/helpers"
-	"github.com/srackham/cryptor/internal/price"
 	"github.com/srackham/cryptor/internal/set"
 	"gopkg.in/yaml.v3"
 )
 
+// An amount of crypto currency belonging to a portfolio.
 type Asset struct {
-	Symbol     string  `json:"symbol"`
-	Amount     float64 `json:"amount"`
-	Value      float64 `json:"value"`      // Value in USD at the time of valuation
-	Allocation float64 `json:"allocation"` // Percentage of total portfolio USD value
+	Symbol     string  `yaml:"symbol"     json:"symbol"`     // Crypto currecy symbol
+	Amount     float64 `yaml:"amount"     json:"amount"`     // Numerical amount crypto currency
+	Value      float64 `yaml:"value"      json:"value"`      // Asset value in USD at the time of valuation
+	Allocation float64 `yaml:"allocation" json:"allocation"` // Percentage of total portfolio value
 }
 
 type Assets []Asset
 
+// Portfolio stores a named portfolio of zero or more crypto currency assets.
+// - A Portfolio is loaded from a `portfolios.yaml` configuration file.
+// - The `Valuate` method calculates and sets the current value of a `Portfolio`.
+// - The valuated `Portfolio` is appended to a `valuations.yaml` file.
+// - Note that the portfolios configuration and valuations files have different formats.
 type Portfolio struct {
-	Name    string  `json:"name"`
-	Notes   string  `json:"notes"`
-	Date    string  `json:"date"`    // The valuation date formatted "YYYY-MM-DD"
-	Value   float64 `json:"value"`   // Combined assets value in USD
-	Cost    string  `json:"cost"`    // Combined assets cost, format = "<amount> <currency>"
-	USDCost float64 `json:"usdcost"` // Calculated cost in USD.
-	Assets  Assets  `json:"assets"`
+	Name   string  `yaml:"name"    json:"name"`  // Porfolio name
+	Notes  string  `yaml:"notes"   json:"notes"` // User notes
+	Date   string  `yaml:"date"    json:"date"`  // The valuation date formatted "YYYY-MM-DD"
+	Time   string  `yaml:"time"    json:"time"`  // The valuation time formatted "hh:mm:ss""
+	Value  float64 `yaml:"value"   json:"value"` // Current portfolio value in USD
+	Cost   float64 `yaml:"cost"    json:"cost"`  // The total cost of the portfolio in USD at current exchange rate.
+	Assets Assets  `yaml:"assets"  json:"assets"`
 }
 
 type Portfolios []Portfolio
@@ -43,8 +50,9 @@ func IsValidName(name string) bool {
 }
 
 // ParseCurrency extracts the amount and currency symbol from a string formatted like "<amount>[ <currency>]".
-func ParseCurrency(cstr string) (value float64, currency string, err error) {
-	s := strings.ReplaceAll(cstr, "$", "")
+// <currency> defaults to USD.
+func ParseCurrency(currencyValue string) (value float64, currency string, err error) {
+	s := strings.ReplaceAll(currencyValue, "$", "")
 	s = strings.ReplaceAll(s, ",", "")
 	split := regexp.MustCompile(`\s+`).Split(s, -1)
 	switch len(split) {
@@ -53,20 +61,20 @@ func ParseCurrency(cstr string) (value float64, currency string, err error) {
 	case 2:
 		currency = strings.ToUpper(split[1])
 	default:
-		err = fmt.Errorf("invalid currency value: \"%s\"", cstr)
+		err = fmt.Errorf("invalid currency value: \"%s\"", currencyValue)
 		return
 	}
 	value, err = strconv.ParseFloat(split[0], 64)
 	if err != nil {
-		err = fmt.Errorf("invalid currency value: \"%s\"", cstr)
+		err = fmt.Errorf("invalid currency value: \"%s\"", currencyValue)
 		return
 	}
 	return
 }
 
-func (assets Assets) SortByValue() {
+// Sort assets by descending value.
+func (assets Assets) Sort() {
 	// TODO tests
-	// Sort assets by descending value.
 	sort.Slice(assets, func(i, j int) bool {
 		return assets[i].Value > assets[j].Value
 	})
@@ -86,10 +94,10 @@ func (assets Assets) Find(symbol string) int {
 
 // SetUSDValues calculates the current USD value of portfolio assets and their total value.
 // TODO tests
-func (p *Portfolio) SetUSDValues(reader price.PriceReader, date string, force bool) error {
+func (p *Portfolio) SetUSDValues(reader binance.PriceReader) error {
 	total := 0.0
 	for i, a := range p.Assets {
-		rate, err := reader.GetPrice(a.Symbol, date, force)
+		rate, err := reader.GetCachedPrice(a.Symbol)
 		if err != nil {
 			return err
 		}
@@ -120,102 +128,62 @@ func (p Portfolio) DeepCopy() Portfolio {
 	return res
 }
 
-// LoadPortfoliosFile reads portfolios configuration file.
-// Returns a Portfolios slice.
-func LoadPortfoliosFile(filename string) (Portfolios, error) {
-	res := Portfolios{}
-	s, err := fsx.ReadFile(filename)
-	if err != nil {
-		return res, err
-	}
-	config := []struct {
-		Name   string             `yaml:"name"`
-		Notes  string             `yaml:"notes"`
-		Cost   string             `yaml:"cost"`
-		Assets map[string]float64 `yaml:"assets"`
-	}{}
-	err = yaml.Unmarshal([]byte(s), &config)
-	if err != nil {
-		return res, err
-	}
-	// Copy parsed portfolios configuration to Portfolios slice.
-	for _, c := range config {
-		p := Portfolio{}
-		p.Name = c.Name
-		p.Notes = c.Notes
-		p.Cost = c.Cost
-		p.Assets = []Asset{}
-		for k, v := range c.Assets {
-			asset := Asset{}
-			asset.Symbol = strings.ToUpper(k)
-			asset.Amount = v
-			p.Assets = append(p.Assets, asset)
-		}
-		res = append(res, p)
-	}
-	// Check for duplicate portfolio names.
-	for i := range res {
-		for j := range res {
-			if i != j && res[i].Name == res[j].Name {
-				return res, fmt.Errorf("duplicate portfolio name: \"%s\"", res[j].Name)
-			}
-		}
-	}
-	// Synthesise missing portfolio names.
-	for i := range res {
-		if res[i].Name == "" {
-			for j := 1; ; j++ {
-				name := fmt.Sprintf("portfolio%d", j)
-				if res.FindByName(name) == -1 {
-					res[i].Name = name
-					break
-				}
-			}
-		}
-	}
-	return res, err
-}
-
 func (ps Portfolios) ToJSON() (string, error) {
 	data, err := json.MarshalIndent(ps, "", "  ")
+	return string(data) + "\n", err
+}
+
+func (ps Portfolios) ToYAML() (string, error) {
+	data, err := yaml.Marshal(ps)
 	return string(data), err
 }
 
-func LoadValuationsFile(valuationsFile string) (Portfolios, error) {
+// LoadValuations reads a file of portfolio valuations.
+func LoadValuations(fname string) (Portfolios, error) {
 	res := Portfolios{}
-	s, err := fsx.ReadFile(valuationsFile)
+	format := strings.ToLower(filepath.Ext(fname)[1:])
+	s, err := fsx.ReadFile(fname)
 	if err == nil {
-		err = json.Unmarshal([]byte(s), &res)
+		switch format {
+		case "json":
+			err = json.Unmarshal([]byte(s), &res)
+		case "yaml":
+			err = yaml.Unmarshal([]byte(s), &res)
+		default:
+			err = fmt.Errorf("invalid format: \"%s\"", format)
+		}
 	}
 	return res, err
 }
 
-func (ps Portfolios) SaveValuationsFile(valuationsFile string) error {
-	ps.SortByDateAndName()
-	s, err := ps.ToJSON()
-	if err == nil {
-		err = fsx.WriteFile(valuationsFile, s)
+// SaveValuations appends the valuated portfolios to file `fname` in JSON or YAML `format.
+func (ps Portfolios) SaveValuations(fname string) (err error) {
+	valuations := Portfolios{}
+	if fsx.FileExists(fname) {
+		valuations, err = LoadValuations(fname)
+		if err != nil {
+			return
+		}
 	}
-	return err
+	valuations = append(valuations, ps...)
+	format := strings.ToLower(filepath.Ext(fname)[1:])
+	var s string
+	switch format {
+	case "json":
+		s, err = ps.ToJSON()
+	case "yaml":
+		s, err = ps.ToYAML()
+	default:
+		err = fmt.Errorf("invalid format: \"%s\"", format)
+	}
+	if err != nil {
+		return
+	}
+	err = fsx.WriteFile(fname, s)
+	return
 }
 
-// AggregateByDate aggregates portfolios by date and returns a slice the aggregated portfolios.
-// TODO tests
-func (ps Portfolios) AggregateByDate(name string) Portfolios {
-	res := Portfolios{}
-	dates := set.New[string]()
-	for _, p := range ps {
-		dates.Add(p.Date)
-	}
-	for _, d := range dates.Values() {
-		p := ps.FilterByDate(d).Aggregate(name)
-		p.Date = d
-		res = append(res, p)
-	}
-	return res
-}
-
-// Aggregate returns a new portfolio that combines the receiver portfolios.
+// Aggregate returns a new portfolio that combines the valuated receiver portfolios.
 // Portfolio Notes field is assigned the list of combined portfolios.
 // Aggregated costs are valid only if all portfolios are costed.
 // TODO tests
@@ -225,14 +193,14 @@ func (ps Portfolios) Aggregate(name string) Portfolio {
 		Assets: Assets{},
 	}
 	notes := []string{}
-	missingCosts := false
+	isMissingCost := false
 	for _, p := range ps {
 		notes = append(notes, p.Name)
 		res.Value += p.Value
-		if p.USDCost == 0 {
-			missingCosts = true
+		if p.Cost == 0 {
+			isMissingCost = true
 		}
-		res.USDCost += p.USDCost
+		res.Cost += p.Cost
 		for _, a := range p.Assets {
 			i := res.Assets.Find(a.Symbol)
 			if i == -1 {
@@ -246,9 +214,9 @@ func (ps Portfolios) Aggregate(name string) Portfolio {
 	sort.Strings(notes)
 	res.Notes = strings.Join(notes, ", ")
 	res.SetAllocations()
-	res.Assets.SortByValue()
-	if missingCosts {
-		res.USDCost = 0.00
+	res.Assets.Sort()
+	if isMissingCost {
+		res.Cost = 0.00 // Cost if "omitted" if one or more portfolios are not costed
 	}
 	return res
 }
@@ -297,11 +265,6 @@ func (ps Portfolios) Validate(nodups bool) error {
 		if !IsValidName(p.Name) {
 			return fmt.Errorf("invalid portfolio name: \"%s\"", p.Name)
 		}
-		if p.Cost != "" {
-			if _, _, err := ParseCurrency(p.Cost); err != nil {
-				return err
-			}
-		}
 		assets := set.New[string]()
 		for _, a := range p.Assets {
 			if !IsValidName(a.Symbol) {
@@ -335,23 +298,26 @@ func (ps Portfolios) FilterByName(names ...string) Portfolios {
 	return res
 }
 
-func (ps Portfolios) SortByDateAndName() {
-	// Sort documents by ascending date and name.
+// Sort Portfolios by ascending date, time and name.
+func (ps Portfolios) Sort() {
 	sort.Slice(ps, func(i, j int) bool {
 		if ps[i].Date != ps[j].Date {
 			return ps[i].Date < ps[j].Date
+		}
+		if ps[i].Time != ps[j].Time {
+			return ps[i].Time < ps[j].Time
 		}
 		return ps[i].Name < ps[j].Name
 	})
 }
 
 func (p Portfolio) gains() float64 {
-	return p.Value - p.USDCost
+	return p.Value - p.Cost
 }
 
 func (p Portfolio) pcgains() float64 {
-	if p.USDCost > 0.00 {
-		return p.gains() / p.USDCost * 100
+	if p.Cost > 0.00 {
+		return p.gains() / p.Cost * 100
 	} else {
 		return 0.0
 	}
@@ -360,10 +326,10 @@ func (p Portfolio) pcgains() float64 {
 func (ps *Portfolios) ToText(currency string, xrate float64) string {
 	res := ""
 	for _, p := range *ps {
-		res += fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nVALUE: %.2f %s",
-			p.Name, p.Notes, p.Date, p.Value*xrate, currency)
-		if p.USDCost > 0.00 {
-			res += fmt.Sprintf("\nCOST:  %.2f %s\nGAINS: %.2f (%.2f%%)", p.USDCost*xrate, currency, p.gains()*xrate, p.pcgains())
+		res += fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nTIME:  %s\nVALUE: %.2f %s",
+			p.Name, p.Notes, p.Date, p.Time, p.Value*xrate, currency)
+		if p.Cost > 0.00 {
+			res += fmt.Sprintf("\nCOST:  %.2f %s\nGAINS: %.2f %s (%.2f%%)", p.Cost*xrate, currency, p.gains()*xrate, currency, p.pcgains())
 		} else {
 			res += "\nCOST:\nGAINS:"
 		}
@@ -390,12 +356,16 @@ func (ps *Portfolios) ToText(currency string, xrate float64) string {
 }
 
 func (ps Portfolios) ToString(format string, currency string, xrate float64) (res string, err error) {
-	ps.SortByDateAndName()
 	switch format {
-	case "text":
+	case "":
 		res = ps.ToText(currency, xrate)
 	case "json":
 		res, err = ps.ToJSON()
+		if err != nil {
+			return
+		}
+	case "yaml":
+		res, err = ps.ToYAML()
 		if err != nil {
 			return
 		}

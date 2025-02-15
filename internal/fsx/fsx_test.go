@@ -8,7 +8,7 @@ import (
 )
 
 func TestDirExists(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx-temp")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -32,7 +32,7 @@ func TestDirExists(t *testing.T) {
 }
 
 func TestFileExists(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx-temp")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -56,7 +56,7 @@ func TestFileExists(t *testing.T) {
 }
 
 func TestReadAndWriteFile(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx-temp")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -81,7 +81,7 @@ func TestReadAndWriteFile(t *testing.T) {
 }
 
 func TestWritePath(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx-temp")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -122,7 +122,7 @@ func TestReplaceExt(t *testing.T) {
 }
 
 func TestCopyFile(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx-temp")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -153,7 +153,7 @@ func TestCopyFile(t *testing.T) {
 }
 
 func TestMkMissingDir(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx-temp")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -197,7 +197,7 @@ func TestPathTranslate(t *testing.T) {
 }
 
 func TestFileModTime(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx-temp")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}
@@ -221,7 +221,7 @@ func TestFileModTime(t *testing.T) {
 }
 
 func TestDirCount(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "fsx")
+	tempDir, err := os.MkdirTemp("", "fsx-temp")
 	if err != nil {
 		t.Errorf("TempDir failed with error: %v", err)
 	}

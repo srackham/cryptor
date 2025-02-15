@@ -33,6 +33,16 @@ func WriteFile(name string, text string) error {
 	return os.WriteFile(name, []byte(text), 0644)
 }
 
+func AppendFile(name string, text string) error {
+	file, err := os.OpenFile(name, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	_, err = file.WriteString(text)
+	return err
+}
+
 // WritePath writes file and creates any missing path directories.
 func WritePath(path string, text string) error {
 	if err := MkMissingDir(filepath.Dir(path)); err != nil {

@@ -1,0 +1,210 @@
+- name: personal
+  notes: Personal holdings
+  date: '2022-12-02'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+    - symbol: USDC
+      amount: 100
+      value: 100
+- name: joint
+  notes: Joint holdings
+  date: '2022-12-02'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+- name: personal
+  notes: Personal holdings
+  date: '2022-12-01'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+    - symbol: USDC
+      amount: 100
+      value: 100
+- name: joint
+  notes: Joint holdings
+  date: '2022-12-01'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+- name: personal
+  notes: Personal holdings
+  date: '2022-12-02'
+  time: '10:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+    - symbol: USDC
+      amount: 100
+      value: 100
+- name: joint
+  notes: Joint holdings
+  date: '2022-12-03'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+- name: personal
+  notes: Personal holdings
+  date: '2022-12-04'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+    - symbol: USDC
+      amount: 100
+      value: 100
+- name: joint
+  notes: Joint holdings
+  date: '2022-12-04'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+- name: personal
+  notes: Personal holdings
+  date: '2022-12-05'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+    - symbol: USDC
+      amount: 100
+      value: 100
+- name: joint
+  notes: Joint holdings
+  date: '2022-12-05'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+- name: personal
+  notes: Personal holdings
+  date: '2022-12-07'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+    - symbol: USDC
+      amount: 100
+      value: 100
+- name: joint
+  notes: Joint holdings
+  date: '2022-12-07'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+- name: personal
+  notes: Personal holdings
+  date: '2022-12-06'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+    - symbol: USDC
+      amount: 100
+      value: 100
+- name: joint
+  notes: Joint holdings
+  date: '2022-12-06'
+  time: '12:30:00'
+  cost: 6372.05
+  assets:
+    - symbol: BTC
+      amount: 0.5
+      value: 5000
+    - symbol: ETH
+      amount: 2.5
+      value: 2500
+
+- name: aggregate
+  notes: 'joint, personal, portfolio1'
+  date: '2000-12-01'
+  time: '12:30:00'
+  value: 130100
+  cost: 0
+  assets:
+    - symbol: BTC
+      amount: 1.25
+      value: 125000
+      allocation: 96.07993850883936
+    - symbol: ETH
+      amount: 5
+      value: 5000
+      allocation: 3.843197540353574
+    - symbol: USDC
+      amount: 100
+      value: 100
+      allocation: 0.07686395080707148
+

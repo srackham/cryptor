@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 )
@@ -325,6 +326,86 @@ func TestParseDateOrOffset(t *testing.T) {
 				if actual != tc.expected {
 					t.Errorf("Expected %q but got %q", tc.expected, actual)
 				}
+			}
+		})
+	}
+}
+
+func TestGetXDGConfigDir(t *testing.T) {
+	// Save the original environment variables
+	originalXDGConfigHome := os.Getenv("XDG_CONFIG_HOME")
+	originalHome := os.Getenv("HOME")
+	defer func() {
+		os.Setenv("XDG_CONFIG_HOME", originalXDGConfigHome)
+		os.Setenv("HOME", originalHome)
+	}()
+
+	testCases := []struct {
+		name           string
+		xdgConfigHome  string
+		home           string
+		expectedResult string
+	}{
+		{
+			name:           "XDG_CONFIG_HOME set",
+			xdgConfigHome:  "/custom/config/path",
+			home:           "/home/user",
+			expectedResult: "/custom/config/path",
+		},
+		{
+			name:           "XDG_CONFIG_HOME not set",
+			xdgConfigHome:  "",
+			home:           "/home/user",
+			expectedResult: "/home/user/.config",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			os.Setenv("XDG_CONFIG_HOME", tc.xdgConfigHome)
+			os.Setenv("HOME", tc.home)
+			result := GetXDGConfigDir()
+			if result != tc.expectedResult {
+				t.Errorf("Expected %s, but got %s", tc.expectedResult, result)
+			}
+		})
+	}
+}
+
+func TestGetXDGCacheDir(t *testing.T) {
+	// Save the original environment variables
+	originalXDGCacheHome := os.Getenv("XDG_CACHE_HOME")
+	originalHome := os.Getenv("HOME")
+	defer func() {
+		os.Setenv("XDG_CACHE_HOME", originalXDGCacheHome)
+		os.Setenv("HOME", originalHome)
+	}()
+
+	testCases := []struct {
+		name           string
+		xdgCacheHome   string
+		home           string
+		expectedResult string
+	}{
+		{
+			name:           "XDG_CACHE_HOME set",
+			xdgCacheHome:   "/custom/cache/path",
+			home:           "/home/user",
+			expectedResult: "/custom/cache/path",
+		},
+		{
+			name:           "XDG_CACHE_HOME not set",
+			xdgCacheHome:   "",
+			home:           "/home/user",
+			expectedResult: "/home/user/.cache",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			os.Setenv("XDG_CACHE_HOME", tc.xdgCacheHome)
+			os.Setenv("HOME", tc.home)
+			result := GetXDGCacheDir()
+			if result != tc.expectedResult {
+				t.Errorf("Expected %s, but got %s", tc.expectedResult, result)
 			}
 		})
 	}

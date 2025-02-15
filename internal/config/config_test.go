@@ -14,7 +14,7 @@ func TestLoadConfig_ValidYAML(t *testing.T) {
 		t.Fatalf("failed to create temporary file: %v", err)
 	}
 	defer os.Remove(tmpFile.Name())
-	_, err = tmpFile.WriteString(`xrates-url: http://example.com/api`)
+	_, err = tmpFile.WriteString(`xrates-appid: 1234`)
 	if err != nil {
 		t.Fatalf("failed to write to temporary file: %v", err)
 	}
@@ -27,7 +27,7 @@ func TestLoadConfig_ValidYAML(t *testing.T) {
 
 	// Assert that the config is valid.
 	expectedConfig := Config{
-		XratesURL: "http://example.com/api",
+		XratesAppId: "1234",
 	}
 
 	if diff := cmp.Diff(expectedConfig, *config); diff != "" {
