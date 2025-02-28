@@ -466,3 +466,123 @@ func TestHistoryCmd(t *testing.T) {
 	assert.FailIf(t, err == nil, "non-existent portfolio should generate an error")
 	assert.Contains(t, stderr, "no valuations found")
 }
+
+func TestParsePriceOption(t *testing.T) {
+	testCases := []struct {
+		name           string
+		priceOption    string
+		expectedSymbol string
+		expectedPrice  float64
+		expectedErr    bool
+	}{
+		{
+			name:           "Valid price option",
+			priceOption:    "BTC=12345.67",
+			expectedSymbol: "BTC",
+			expectedPrice:  12345.67,
+			expectedErr:    false,
+		},
+		{
+			name:           "Valid price option with spaces",
+			priceOption:    "  ETH  =  123.45  ",
+			expectedSymbol: "ETH",
+			expectedPrice:  123.45,
+			expectedErr:    false,
+		},
+		{
+			name:           "Invalid price option - missing equals",
+			priceOption:    "BTC12345.67",
+			expectedSymbol: "",
+			expectedPrice:  0,
+			expectedErr:    true,
+		},
+		{
+			name:           "Invalid price option - multiple equals",
+			priceOption:    "BTC=12345.67=890",
+			expectedSymbol: "",
+			expectedPrice:  0,
+			expectedErr:    true,
+		},
+		{
+			name:           "Invalid price option - invalid symbol",
+			priceOption:    "BTC@=12345.67",
+			expectedSymbol: "",
+			expectedPrice:  0,
+			expectedErr:    true,
+		},
+		{
+			name:           "Invalid price option - invalid price",
+			priceOption:    "BTC=abc",
+			expectedSymbol: "",
+			expectedPrice:  0,
+			expectedErr:    true,
+		},
+		{
+			name:           "Valid price option - negative price",
+			priceOption:    "BTC=-123.45",
+			expectedSymbol: "BTC",
+			expectedPrice:  -123.45,
+			expectedErr:    false,
+		},
+		{
+			name:           "Valid price option - zero price",
+			priceOption:    "BTC=0",
+			expectedSymbol: "BTC",
+			expectedPrice:  0,
+			expectedErr:    false,
+		},
+		{
+			name:           "Valid price option - symbol with hyphen and underscore",
+			priceOption:    "BTC-USD_PERP=123.45",
+			expectedSymbol: "BTC-USD_PERP",
+			expectedPrice:  123.45,
+			expectedErr:    false,
+		},
+		{
+			name:           "Valid price option - symbol with numbers",
+			priceOption:    "BTC123=123.45",
+			expectedSymbol: "BTC123",
+			expectedPrice:  123.45,
+			expectedErr:    false,
+		},
+		{
+			name:           "Empty price option",
+			priceOption:    "",
+			expectedSymbol: "",
+			expectedPrice:  0,
+			expectedErr:    true,
+		},
+		{
+			name:           "Price option with only symbol",
+			priceOption:    "BTC=",
+			expectedSymbol: "",
+			expectedPrice:  0,
+			expectedErr:    true,
+		},
+		{
+			name:           "Price option with only price",
+			priceOption:    "=123.45",
+			expectedSymbol: "",
+			expectedPrice:  0,
+			expectedErr:    true,
+		},
+	}
+	for _, tc := range testCases {
+		symbol, price, err := ParsePriceOption(tc.priceOption)
+		if tc.expectedErr {
+			if err == nil {
+				t.Errorf("%s: expected error, but got nil", tc.name)
+			}
+		} else {
+			if err != nil {
+				t.Errorf("%s: unexpected error: %v", tc.name, err)
+			}
+			if symbol != tc.expectedSymbol {
+				t.Errorf("%s: expected symbol %q, but got %q", tc.name, tc.expectedSymbol, symbol)
+			}
+			if price != tc.expectedPrice {
+				t.Errorf("%s: expected price %f, but got %f", tc.name, tc.expectedPrice, price)
+			}
+		}
+	}
+}

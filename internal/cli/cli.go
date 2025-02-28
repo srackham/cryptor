@@ -3,6 +3,8 @@ package cli
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/srackham/cryptor/internal/binance"
@@ -139,6 +141,26 @@ func (cli *cli) parseArgs(args []string) error {
 		}
 	}
 	return nil
+}
+
+// ParsePriceOption parses a price option string in the format "SYMBOL=PRICE".
+// It returns the symbol and price as separate values.
+// It returns an error if the price option string is invalid or if the symbol or price are invalid.
+func ParsePriceOption(priceOption string) (symbol string, price float64, err error) {
+	parts := strings.Split(priceOption, "=")
+	if len(parts) != 2 {
+		return "", 0, fmt.Errorf("invalid price option: \"%s\"", priceOption)
+	}
+	symbol = strings.TrimSpace(parts[0])
+	priceStr := strings.TrimSpace(parts[1])
+	if !regexp.MustCompile("^[a-zA-Z0-9-_]+$").MatchString(symbol) {
+		return "", 0, fmt.Errorf("invalid price symbol: \"%s\"", priceOption)
+	}
+	price, err = strconv.ParseFloat(priceStr, 64)
+	if err != nil {
+		return "", 0, fmt.Errorf("invalid price value: \"%s\"", priceOption)
+	}
+	return symbol, price, nil
 }
 
 // initCmd implements the initCmd command.
