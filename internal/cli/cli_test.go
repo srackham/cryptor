@@ -345,7 +345,8 @@ func TestInitCmd(t *testing.T) {
 	assert.Contains(t, stdout, `installing example config file:`)
 	s, err := fsx.ReadFile(cli.configFile())
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.EqualStrings(t, `# Open Exchange Rates App ID (https://openexchangerates.org/)
+	assert.EqualStrings(t, `# NOTE: The xrates-appid option is only necessary if the -currency command option is used.
+# Open Exchange Rates App ID (https://openexchangerates.org/)
 xrates-appid: YOUR_APP_ID`, s)
 	assert.Contains(t, stdout, `installing example portfolios file:`)
 	s, err = fsx.ReadFile(cli.portfoliosFile())

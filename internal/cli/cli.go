@@ -153,7 +153,8 @@ func (cli *cli) initCmd() error {
 		fmt.Fprintf(cli.Stdout, "config file already exists: \"%s\"\n", cli.configFile())
 	} else {
 		fmt.Fprintf(cli.Stdout, "installing example config file: \"%s\"\n", cli.configFile())
-		contents := `# Open Exchange Rates App ID (https://openexchangerates.org/)
+		contents := `# NOTE: The xrates-appid option is only necessary if the -currency command option is used.
+# Open Exchange Rates App ID (https://openexchangerates.org/)
 xrates-appid: YOUR_APP_ID`
 		if err := fsx.WriteFile(cli.configFile(), contents); err != nil {
 			return fmt.Errorf("failed to write config file: \"%s\"", err.Error())

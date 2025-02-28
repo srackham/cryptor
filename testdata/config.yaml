@@ -1,2 +1,3 @@
+# NOTE: The xrates-appid option is only necessary if the -currency command option is used.
 # Open Exchange Rates App ID (https://openexchangerates.org/)
 xrates-appid: 1234
