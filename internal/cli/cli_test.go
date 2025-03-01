@@ -467,6 +467,19 @@ func TestHistoryCmd(t *testing.T) {
 	assert.Contains(t, stderr, "no valuations found")
 }
 
+func TestNoConfigFile(t *testing.T) {
+	tmpdir := mock.MkdirTemp(t)
+	cli := mockCli(t)
+	err := fsx.WriteFile(path.Join(tmpdir, "portfolios.yaml"), `# Minimal portfolio
+- assets:
+      BTC: 0.25`)
+	assert.PassIf(t, err == nil, "%v", err)
+	cli.ConfigDir = tmpdir // No config.yaml file
+	cli.DataDir = tmpdir
+	_, _, err = exec(cli, "cryptor valuate")
+	assert.PassIf(t, err == nil, "missing config.yaml file should not generate an error: %v", err)
+}
+
 func TestParsePriceOption(t *testing.T) {
 	testCases := []struct {
 		name           string
