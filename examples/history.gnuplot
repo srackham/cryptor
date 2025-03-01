@@ -26,8 +26,8 @@ set multiplot layout 2,1
 title = portfolio.' portfolio value '.sprintf("$%'d USD", value).' '.strftime("%d-%b-%Y", date)
 set title '{/:Bold '.title.'}'
 set ylabel 'Value (USD)'
-set yrange [0:]
-set ytics 0, 25 format "$%'.0fK" nomirror font ", 8"
+set yrange [0:*]
+set ytics auto format "$%'.0fK" nomirror font ", 8"
 plot \
     data \
         using 2:($4/1000) \
