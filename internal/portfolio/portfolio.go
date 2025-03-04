@@ -49,25 +49,29 @@ func IsValidName(name string) bool {
 	return re.MatchString(name)
 }
 
-// ParseCurrency extracts the amount and currency symbol from a string formatted like "<amount>[ <symbol>]".
+// ParseCurrency extracts the amount and currency symbol from a string formatted like "<amount><symbol>".
 // <symbol> defaults to "USD".
-func ParseCurrency(currencyValue string) (value float64, symbol string, err error) {
+func ParseCurrency(currencyValue string) (amount float64, symbol string, err error) {
 	s := strings.ReplaceAll(currencyValue, "$", "")
 	s = strings.ReplaceAll(s, ",", "")
-	split := regexp.MustCompile(`\s+`).Split(s, -1)
-	switch len(split) {
-	case 1:
-		symbol = "USD"
-	case 2:
-		symbol = strings.ToUpper(split[1])
-	default:
+	s = strings.ReplaceAll(s, " ", "")
+	re := regexp.MustCompile(`^([0-9.]+)([a-zA-Z]*)$`)
+	matches := re.FindStringSubmatch(s)
+	if len(matches) != 3 {
 		err = fmt.Errorf("invalid currency value: \"%s\"", currencyValue)
 		return
 	}
-	value, err = strconv.ParseFloat(split[0], 64)
+	amountStr := matches[1]
+	symbolStr := matches[2]
+	amount, err = strconv.ParseFloat(amountStr, 64)
 	if err != nil {
 		err = fmt.Errorf("invalid currency value: \"%s\"", currencyValue)
 		return
+	}
+	if symbolStr == "" {
+		symbol = "USD"
+	} else {
+		symbol = strings.ToUpper(symbolStr)
 	}
 	return
 }

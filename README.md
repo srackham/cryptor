@@ -92,11 +92,12 @@ Github:     https://github.com/srackham/cryptor
 -   All values are saved in USD (the `-currency` option can be used to display printed values in non-USD currencies).
 -   Fiat currency exchange rates are cached locally and refreshed daily.
 -   Portfolio names are unique and can only contain alphanumeric characters, underscores and dashes.
--   If you specify a portfolio's `cost` (the total amount paid for the portfolio assets) then portfolio gains (or losses) are calculated.
--   The portfolio `cost` value is formatted like `<amount> <currency>`. The amount is mandatory; the currency is optional and defaults to `USD`; dollar and comma characters are ignored. Examples:
+-   If you specify a portfolio's `COST` (the total amount paid for the portfolio assets) then portfolio gains (or losses) are calculated.
+-   The portfolio `COST` value is formatted like `<amount><symbol>`. The amount is mandatory; the currency symbol is optional and defaults to `USD`; dollar, comma and space characters are ignored; case insensitive. Examples:
 
           $5,000.00 NZD     # Five thousand New Zealand dollars.
-          1000              # One thousand US dollars
+          1000aud           # One thousand Australian dollars.
+          .5                # Fifty cents USD.
 
 -   Currency symbols are displayed in uppercase.
 -   Saved portfolio valuations include the valuation's local `date` and `time`.

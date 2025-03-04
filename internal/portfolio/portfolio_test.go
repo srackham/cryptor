@@ -76,27 +76,43 @@ func TestSaveValuationsFile(t *testing.T) {
 }
 
 func TestParseCurrency(t *testing.T) {
-	value, currency, err := ParseCurrency("$1,234.56")
-	assert.PassIf(t, err == nil, "%v", err)
-	assert.Equal(t, 1234.56, value)
-	assert.Equal(t, "USD", currency)
-
-	value, currency, err = ParseCurrency("$1,234.56 NZD")
-	assert.PassIf(t, err == nil, "%v", err)
-	assert.Equal(t, 1234.56, value)
-	assert.Equal(t, "NZD", currency)
-
-	_, _, err = ParseCurrency("")
-	assert.PassIf(t, err != nil, "%v", err)
-	assert.Equal(t, "invalid currency value: \"\"", err.Error())
-
-	_, _, err = ParseCurrency("foo")
-	assert.PassIf(t, err != nil, "%v", err)
-	assert.Equal(t, "invalid currency value: \"foo\"", err.Error())
-
-	_, _, err = ParseCurrency("$1,234.56 NZD qux")
-	assert.PassIf(t, err != nil, "%v", err)
-	assert.Equal(t, "invalid currency value: \"$1,234.56 NZD qux\"", err.Error())
+	tests := []struct {
+		input   string
+		wantAmt float64
+		wantSym string
+		wantErr bool
+		errMsg  string
+	}{
+		{input: "$5,000.00 NZD", wantAmt: 5000.00, wantSym: "NZD", wantErr: false},
+		{input: "1000aud", wantAmt: 1000.0, wantSym: "AUD", wantErr: false},
+		{input: ".5", wantAmt: 0.5, wantSym: "USD", wantErr: false},
+		{input: "123.45EUR", wantAmt: 123.45, wantSym: "EUR", wantErr: false},
+		{input: "123.45 eur", wantAmt: 123.45, wantSym: "EUR", wantErr: false},
+		{input: "12345", wantAmt: 12345.0, wantSym: "USD", wantErr: false},
+		{input: "$1,234.56", wantAmt: 1234.56, wantSym: "USD", wantErr: false},
+		{input: "abc", wantErr: true, errMsg: "invalid currency value: \"abc\""},
+		{input: "", wantErr: true, errMsg: "invalid currency value: \"\""},
+		{input: "   ", wantErr: true, errMsg: "invalid currency value: \"   \""},
+		{input: "123.45abc123", wantErr: true, errMsg: "invalid currency value: \"123.45abc123\""},
+		{input: "123.45.67USD", wantErr: true, errMsg: "invalid currency value: \"123.45.67USD\""},
+	}
+	for _, tt := range tests {
+		gotVal, gotSym, gotErr := ParseCurrency(tt.input)
+		if (gotErr != nil) != tt.wantErr {
+			t.Errorf("ParseCurrency(%q) error = %v, wantErr %v", tt.input, gotErr, tt.wantErr)
+			continue
+		}
+		if tt.wantErr && gotErr != nil && gotErr.Error() != tt.errMsg {
+			t.Errorf("ParseCurrency(%q) error message = %v, want message %v", tt.input, gotErr.Error(), tt.errMsg)
+			continue
+		}
+		if gotVal != tt.wantAmt {
+			t.Errorf("ParseCurrency(%q) gotVal = %v, want %v", tt.input, gotVal, tt.wantAmt)
+		}
+		if gotSym != tt.wantSym {
+			t.Errorf("ParseCurrency(%q) gotSym = %v, want %v", tt.input, gotSym, tt.wantSym)
+		}
+	}
 }
 
 func TestSortAndFilter(t *testing.T) {
