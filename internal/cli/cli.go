@@ -190,7 +190,7 @@ xrates-appid: YOUR_APP_ID`
 
 - name:  personal
   notes: Personal portfolio notes.
-  cost: $10,000.00 USD
+  paid: $10,000.00 USD
   assets:
     BTC: 0.5
     ETH: 2.5
@@ -200,7 +200,7 @@ xrates-appid: YOUR_APP_ID`
   notes: |
     Business portfolio notes
     over multiple lines.
-  cost: $20,000.00 USD
+  paid: $20,000.00 USD
   assets:
     BTC: 1.0`
 		if err := fsx.WriteFile(cli.portfoliosFile(), contents); err != nil {
@@ -423,7 +423,8 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 	config := []struct {
 		Name   string             `yaml:"name"`
 		Notes  string             `yaml:"notes"`
-		Cost   string             `yaml:"cost"`
+		Paid   string             `yaml:"paid"`
+		Cost   string             `yaml:"cost"` // TODO: drop this, it's for for backward compatibility
 		Assets map[string]float64 `yaml:"assets"`
 	}{}
 	err = yaml.Unmarshal([]byte(s), &config)
@@ -437,7 +438,11 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 		if cli.opts.notes {
 			p.Notes = c.Notes
 		}
-		p.Paid = c.Cost
+		p.Paid = c.Paid
+		// TODO: drop this, it's for for backward compatibility
+		if c.Cost != "" {
+			return res, fmt.Errorf("deprecated \"cost\" field rename to \"paid\"")
+		}
 		p.Assets = []portfolio.Asset{}
 		for k, v := range c.Assets {
 			asset := portfolio.Asset{}

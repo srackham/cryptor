@@ -334,9 +334,9 @@ func (ps *Portfolios) ToText(currency string, xrate float64) string {
 		res += fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nTIME:  %s\nVALUE: %.2f %s",
 			p.Name, p.Notes, p.Date, p.Time, p.Value*xrate, currency)
 		if p.Cost > 0.00 {
-			res += fmt.Sprintf("\nCOST:  %.2f %s\nGAINS: %.2f %s (%.2f%%)", p.Cost*xrate, currency, p.gains()*xrate, currency, p.pcgains())
+			res += fmt.Sprintf("\nPAID:  %.2f %s\nGAINS: %.2f %s (%.2f%%)", p.Cost*xrate, currency, p.gains()*xrate, currency, p.pcgains())
 		} else {
-			res += "\nCOST:\nGAINS:"
+			res += "\nPAID:\nGAINS:"
 		}
 		if currency != "USD" {
 			res += fmt.Sprintf("\nXRATE: 1 USD = %.2f %s", xrate, currency)
