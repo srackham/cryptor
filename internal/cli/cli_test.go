@@ -228,6 +228,7 @@ USDC      100.0000       100.00 USD      0.08%         1.00 USD
     "date": "2000-12-01",
     "time": "12:30:00",
     "value": 130100,
+    "paid": "",
     "cost": 0,
     "assets": [
       {
@@ -263,6 +264,7 @@ USDC      100.0000       100.00 USD      0.08%         1.00 USD
   date: "2000-12-01"
   time: "12:30:00"
   value: 130100
+  paid: ""
   cost: 0
   assets:
     - symbol: BTC

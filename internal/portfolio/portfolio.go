@@ -32,13 +32,14 @@ type Assets []Asset
 // - The valuated `Portfolio` is appended to a `valuations.yaml` file.
 // - Note that the portfolios configuration and valuations files have different formats.
 type Portfolio struct {
-	Name   string  `yaml:"name"    json:"name"`  // Porfolio name
-	Notes  string  `yaml:"notes"   json:"notes"` // User notes
-	Date   string  `yaml:"date"    json:"date"`  // The valuation date formatted "YYYY-MM-DD"
-	Time   string  `yaml:"time"    json:"time"`  // The valuation time formatted "hh:mm:ss""
-	Value  float64 `yaml:"value"   json:"value"` // Current portfolio value in USD
-	Cost   float64 `yaml:"cost"    json:"cost"`  // The total cost of the portfolio in USD at current exchange rate.
-	Assets Assets  `yaml:"assets"  json:"assets"`
+	Name   string  `yaml:"name"     json:"name"`  // Porfolio name
+	Notes  string  `yaml:"notes"    json:"notes"` // User notes
+	Date   string  `yaml:"date"     json:"date"`  // The valuation date formatted "YYYY-MM-DD"
+	Time   string  `yaml:"time"     json:"time"`  // The valuation time formatted "hh:mm:ss""
+	Value  float64 `yaml:"value"    json:"value"` // Current portfolio value in USD
+	Paid   string  `yaml:"paid"     json:"paid"`  // The cost from the portfolios.yaml configuration file
+	Cost   float64 `yaml:"cost"     json:"cost"`  // The total cost of the portfolio calculated in USD at current exchange rate
+	Assets Assets  `yaml:"assets"   json:"assets"`
 }
 
 type Portfolios []Portfolio

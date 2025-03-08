@@ -358,6 +358,13 @@ func (cli *cli) valuateCmd() error {
 	if err := cli.load(); err != nil {
 		return err
 	}
+	// Check all -portfolio option names exist.
+	for _, name := range cli.opts.portfolios {
+		i := cli.portfolios.FindByName(name)
+		if i == -1 {
+			return fmt.Errorf("missing portfolio: \"%s\"", name)
+		}
+	}
 	// Select portfolios to be valuated.
 	cli.valuation = portfolio.Portfolios{}
 	cli.valuation = cli.portfolios
@@ -376,13 +383,6 @@ func (cli *cli) valuateCmd() error {
 	cli.aggregate.Time = time
 	printed_valuation := cli.valuation
 	if len(cli.opts.portfolios) > 0 {
-		// Check all -portfolio option names exist.
-		for _, name := range cli.opts.portfolios {
-			i := cli.portfolios.FindByName(name)
-			if i == -1 {
-				return fmt.Errorf("missing portfolio: \"%s\"", name)
-			}
-		}
 		// Select -portfolio option valuations.
 		printed_valuation = portfolio.Portfolios{}
 		for _, p := range cli.valuation {
@@ -437,13 +437,7 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 		if cli.opts.notes {
 			p.Notes = c.Notes
 		}
-		if c.Cost != "" {
-			cost, err := cli.currencyToUSD(c.Cost)
-			if err != nil {
-				return res, err
-			}
-			p.Cost = cost
-		}
+		p.Paid = c.Cost
 		p.Assets = []portfolio.Asset{}
 		for k, v := range c.Assets {
 			asset := portfolio.Asset{}
@@ -471,6 +465,16 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 					break
 				}
 			}
+		}
+	}
+	// Calculate portfolio costs in USD
+	for i := range res {
+		if res[i].Paid != "" {
+			cost, err := cli.currencyToUSD(res[i].Paid)
+			if err != nil {
+				return res, err
+			}
+			res[i].Cost = cost
 		}
 	}
 	return res, err
