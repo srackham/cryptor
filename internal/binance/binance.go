@@ -39,6 +39,9 @@ func NewPriceReader(ctx *Context) PriceReader {
 }
 
 func (r *PriceReader) getPrice(symbol string) (float64, error) {
+	if symbol == "USDT" {
+		return 1.0, nil // Because "USDTUSDT" is an illegal trading pair.
+	}
 	url := PRICE_QUERY + symbol + "USDT"
 	var resp *http.Response
 	var err error
