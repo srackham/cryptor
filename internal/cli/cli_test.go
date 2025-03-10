@@ -109,7 +109,7 @@ VALUE: 52600.00 USD
 PAID:  6666.67 USD
 GAINS: 45933.33 USD (689.00%)
 XRATE:
-            AMOUNT            VALUE    PERCENT            PRICE
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.5000     50000.00 USD     95.06%    100000.00 USD
 ETH         2.5000      2500.00 USD      4.75%      1000.00 USD
 USDC      100.0000       100.00 USD      0.19%         1.00 USD
@@ -122,7 +122,7 @@ VALUE: 52500.00 USD
 PAID:
 GAINS:
 XRATE:
-            AMOUNT            VALUE    PERCENT            PRICE
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.5000     50000.00 USD     95.24%    100000.00 USD
 ETH         2.5000      2500.00 USD      4.76%      1000.00 USD
 
@@ -134,7 +134,7 @@ VALUE: 25000.00 USD
 PAID:
 GAINS:
 XRATE:
-            AMOUNT            VALUE    PERCENT            PRICE
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.2500     25000.00 USD    100.00%    100000.00 USD
 `
 	wanted = helpers.StripTrailingSpaces(wanted)
@@ -157,7 +157,7 @@ VALUE: 52600.00 USD
 PAID:  6666.67 USD
 GAINS: 45933.33 USD (689.00%)
 XRATE:
-            AMOUNT            VALUE    PERCENT            PRICE
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.5000     50000.00 USD     95.06%    100000.00 USD
 ETH         2.5000      2500.00 USD      4.75%      1000.00 USD
 USDC      100.0000       100.00 USD      0.19%         1.00 USD
@@ -170,7 +170,7 @@ VALUE: 52500.00 USD
 PAID:
 GAINS:
 XRATE:
-            AMOUNT            VALUE    PERCENT            PRICE
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.5000     50000.00 USD     95.24%    100000.00 USD
 ETH         2.5000      2500.00 USD      4.76%      1000.00 USD
 
@@ -182,7 +182,7 @@ VALUE: 25000.00 USD
 PAID:
 GAINS:
 XRATE:
-            AMOUNT            VALUE    PERCENT            PRICE
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.2500     25000.00 USD    100.00%    100000.00 USD
 `
 	wanted = helpers.StripTrailingSpaces(wanted)
@@ -201,7 +201,7 @@ VALUE: 130100.00 USD
 PAID:
 GAINS:
 XRATE:
-            AMOUNT            VALUE    PERCENT            PRICE
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         1.2500    125000.00 USD     96.08%    100000.00 USD
 ETH         5.0000      5000.00 USD      3.84%      1000.00 USD
 USDC      100.0000       100.00 USD      0.08%         1.00 USD
@@ -309,7 +309,7 @@ VALUE: 195150.00 NZD
 PAID:
 GAINS:
 XRATE: 1 USD = 1.50 NZD
-            AMOUNT            VALUE    PERCENT            PRICE
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         1.2500    187500.00 NZD     96.08%    150000.00 NZD
 ETH         5.0000      7500.00 NZD      3.84%      1500.00 NZD
 USDC      100.0000       150.00 NZD      0.08%         1.50 NZD

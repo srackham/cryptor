@@ -42,7 +42,7 @@ VALUE: 55202.96 USD
 PAID:  10000.00 USD
 GAINS: 45202.96 USD (452.03%)
 XRATE:
-            AMOUNT            VALUE    PERCENT            PRICE
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.5000     48522.29 USD     87.90%     97044.58 USD
 ETH         2.5000      6580.68 USD     11.92%      2632.27 USD
 USDC      100.0000        99.99 USD      0.18%         1.00 USD

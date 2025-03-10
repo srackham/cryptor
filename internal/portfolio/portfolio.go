@@ -343,7 +343,7 @@ func (ps *Portfolios) ToText(currency string, xrate float64) string {
 		} else {
 			res += "\nXRATE:"
 		}
-		res += "\n            AMOUNT            VALUE    PERCENT            PRICE\n"
+		res += "\n            AMOUNT            VALUE    PERCENT       UNIT PRICE\n"
 		for _, a := range p.Assets {
 			value := a.Value * xrate
 			res += fmt.Sprintf("%-5s %12.4f %12.2f %s    %6.2f%% %12.2f %s\n",

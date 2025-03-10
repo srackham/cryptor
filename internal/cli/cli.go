@@ -444,7 +444,7 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 		p.Paid = c.Paid
 		// TODO: drop this, it's for for backward compatibility
 		if c.Cost != "" {
-			fmt.Fprint(os.Stderr, "WARNING: deprecated \"cost\" field rename to \"paid\"")
+			fmt.Fprint(os.Stderr, "WARNING: deprecated \"cost\" field rename to \"paid\"\n")
 			p.Paid = c.Cost
 		}
 		p.Assets = []portfolio.Asset{}
