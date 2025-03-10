@@ -17,14 +17,14 @@ type RatesCacheData map[string]Rates // Key = date string "YYYY-MM-DD".
 
 type ExchangeRates struct {
 	*Context
-	cache.Cache[RatesCacheData]
+	*cache.Cache[RatesCacheData]
 }
 
 func New(ctx *Context) ExchangeRates {
 	result := ExchangeRates{}
 	result.Context = ctx
 	data := make(RatesCacheData)
-	result.Cache = *cache.New(&data)
+	result.Cache = cache.New(&data)
 	return result
 }
 
@@ -77,15 +77,14 @@ func (x *ExchangeRates) GetCachedRate(currency string, force bool) (float64, err
 	if currency == "USD" {
 		return 1.00, nil
 	}
-	var rate float64
-	var ok bool
 	today := x.Now().Format("2006-01-02")
-	if rate, ok = (*x.CacheData)[today][strings.ToUpper(currency)]; !ok || force {
+	rate, ok := (*x.CacheData)[today][strings.ToUpper(currency)]
+	if !ok || force {
 		rates, err := x.getRates()
 		if err != nil {
 			return 0.0, err
 		}
-		x.CacheData = &RatesCacheData{today: rates}
+		x.CacheData = &(RatesCacheData{today: rates})
 		if rate, ok = (*x.CacheData)[today][strings.ToUpper(currency)]; !ok {
 			return 0.0, fmt.Errorf("unknown currency: %s", currency)
 		}

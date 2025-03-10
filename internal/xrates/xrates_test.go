@@ -48,8 +48,10 @@ func TestExchangeRates(t *testing.T) {
 
 	rates := *x.CacheData
 	rates["1999-12-31"] = rates["2000-12-01"]
+	assert.Equal(t, len(*(x.CacheData)), 2)
 	_, err = x.GetCachedRate("AUD", true) // Replaces rates with only today's rates
 	assert.PassIf(t, err == nil, "%v", err)
+	assert.Equal(t, len(*(x.CacheData)), 1)
 	err = x.Save(x.CacheFile())
 	assert.PassIf(t, err == nil, "error writing exchange rates cache: \"%v\": %v", x.CacheFile(), err)
 	got, err = fsx.ReadFile(x.CacheFile())
