@@ -309,7 +309,10 @@ func (cli *cli) valuationsFile(format string) string {
 	return filepath.Join(cli.DataDir, "valuations."+format)
 }
 
-func (cli *cli) load() error {
+func (cli *cli) load() (err error) {
+	if err = cli.xrates.Load(cli.xrates.CacheFile()); err != nil {
+		return err
+	}
 	ps, err := cli.loadConfigFile(cli.portfoliosFile())
 	if err != nil {
 		return fmt.Errorf("portfolios file: \"%s\": %s", cli.portfoliosFile(), err.Error())
@@ -318,9 +321,6 @@ func (cli *cli) load() error {
 		return fmt.Errorf("portfolios file: \"%s\": %s", cli.portfoliosFile(), err.Error())
 	}
 	cli.portfolios = ps
-	if err = cli.xrates.Load(cli.xrates.CacheFile()); err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -342,7 +342,7 @@ func (cli *cli) save() (err error) {
 			return fmt.Errorf("valuations file: \"%s\": %s", fname, err.Error())
 		}
 	}
-	if len(*cli.xrates.CacheData) > 0 {
+	if len(*(cli.xrates.CacheData)) > 0 {
 		err = cli.xrates.Save(cli.xrates.CacheFile())
 		if err != nil {
 			return fmt.Errorf("exchange rates file: \"%s\": %s", cli.xrates.CacheFile(), err.Error())
