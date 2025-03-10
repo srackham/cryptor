@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -441,7 +442,8 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 		p.Paid = c.Paid
 		// TODO: drop this, it's for for backward compatibility
 		if c.Cost != "" {
-			return res, fmt.Errorf("deprecated \"cost\" field rename to \"paid\"")
+			fmt.Fprint(os.Stderr, "WARNING: deprecated \"cost\" field rename to \"paid\"")
+			p.Paid = c.Cost
 		}
 		p.Assets = []portfolio.Asset{}
 		for k, v := range c.Assets {
@@ -479,7 +481,7 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 			if err != nil {
 				return res, err
 			}
-			res[i].Cost = cost
+			res[i].PaidUSD = cost
 		}
 	}
 	return res, err
