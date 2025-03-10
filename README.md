@@ -99,7 +99,7 @@ Github:     https://github.com/srackham/cryptor
           1000aud           # One thousand Australian dollars.
           .5                # Fifty cents USD.
 
--   Currency symbols are displayed in uppercase.
+-   Asset and currency symbols are case insensitive and are converted to uppercase.
 -   Saved portfolio valuations include the valuation's local `date` and `time`.
 -   Dates are saved as `YYYY-DD-MM` formatted strings.
 -   Times are saved as `hh:mm:ss` formatted strings.
