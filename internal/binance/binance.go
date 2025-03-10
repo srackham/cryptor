@@ -23,7 +23,7 @@ type TickerPrice struct {
 
 type PriceReader struct {
 	*Context
-	cache.Cache[Rates]
+	*cache.Cache[Rates]
 }
 
 func (r *PriceReader) LoadCache() error { return nil }
@@ -33,7 +33,7 @@ func NewPriceReader(ctx *Context) PriceReader {
 	data := make(Rates)
 	result := PriceReader{
 		ctx,
-		*cache.New(&data),
+		cache.New(&data),
 	}
 	return result
 }

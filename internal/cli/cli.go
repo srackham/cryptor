@@ -19,12 +19,12 @@ import (
 
 type cli struct {
 	*Context
-	command     string               // CLI command
-	portfolios  portfolio.Portfolios // Crypto currency portfolios loaded from configuration file
-	valuation   portfolio.Portfolios // Valuated portfolios
-	aggregate   portfolio.Portfolio  // Combinded portfolios valuation
-	priceReader binance.PriceReader  // Crypto currency price oracle
-	xrates      xrates.ExchangeRates // Fiat currency to USD exchange rate oracle
+	command     string                // CLI command
+	portfolios  portfolio.Portfolios  // Crypto currency portfolios loaded from configuration file
+	valuation   portfolio.Portfolios  // Valuated portfolios
+	aggregate   portfolio.Portfolio   // Combinded portfolios valuation
+	priceReader *binance.PriceReader  // Crypto currency price oracle
+	xrates      *xrates.ExchangeRates // Fiat currency to USD exchange rate oracle
 	opts        struct {
 		aggregate     bool                // Inlcude aggregate (combined) portfolios valuation
 		aggregateOnly bool                // Only include aggregate portfolio valuation
@@ -40,8 +40,10 @@ type cli struct {
 func New(ctx *Context) *cli {
 	cli := cli{}
 	cli.Context = ctx
-	cli.priceReader = binance.NewPriceReader(ctx)
-	cli.xrates = xrates.New(ctx)
+	priceReader := binance.NewPriceReader(ctx)
+	cli.priceReader = &priceReader
+	xrates := xrates.New(ctx)
+	cli.xrates = &xrates
 	return &cli
 }
 

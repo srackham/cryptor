@@ -99,7 +99,7 @@ func (assets Assets) Find(symbol string) int {
 
 // SetUSDValues calculates the current USD value of portfolio assets and their total value.
 // TODO tests
-func (p *Portfolio) SetUSDValues(reader binance.PriceReader) error {
+func (p *Portfolio) SetUSDValues(reader *binance.PriceReader) error {
 	total := 0.0
 	for i, a := range p.Assets {
 		rate, err := reader.GetCachedPrice(a.Symbol)
