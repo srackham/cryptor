@@ -39,7 +39,7 @@ NOTES:
 DATE:  2025-02-10
 TIME:  19:08:45
 VALUE: 55202.96 USD
-PAID:  10000.00 USD
+COST:  10000.00 USD
 GAINS: 45202.96 USD (452.03%)
 XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
@@ -92,8 +92,8 @@ Github:     https://github.com/srackham/cryptor
 -   All values are saved in USD (the `-currency` option can be used to display printed values in non-USD currencies).
 -   Fiat currency exchange rates are cached locally and refreshed daily.
 -   Portfolio names are unique and can only contain alphanumeric characters, underscores and dashes.
--   If you specify a portfolio's `PAID` amount (the total amount paid for the portfolio assets) then portfolio gains (or losses) are calculated.
--   The portfolio `PAID` value is formatted like `<amount><symbol>`. The amount is mandatory; the currency symbol is optional and defaults to `USD`; dollar, comma and space characters are ignored; case insensitive. Examples:
+-   If you specify a portfolio's `COST` amount (the total amount paid for the portfolio assets) then portfolio gains (or losses) are calculated.
+-   The portfolio `COST` value is formatted like `<amount><symbol>`. The amount is mandatory; the currency symbol is optional and defaults to `USD`; dollar, comma and space characters are ignored; case insensitive. Examples:
 
           $5,000.00 NZD     # Five thousand New Zealand dollars.
           1000aud           # One thousand Australian dollars.

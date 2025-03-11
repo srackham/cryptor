@@ -106,7 +106,7 @@ NOTES:
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 52600.00 USD
-PAID:  6666.67 USD
+COST:  6666.67 USD
 GAINS: 45933.33 USD (689.00%)
 XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
@@ -119,7 +119,7 @@ NOTES:
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 52500.00 USD
-PAID:
+COST:
 GAINS:
 XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
@@ -131,7 +131,7 @@ NOTES:
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 25000.00 USD
-PAID:
+COST:
 GAINS:
 XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
@@ -154,7 +154,7 @@ NOTES: ## Personal Portfolio
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 52600.00 USD
-PAID:  6666.67 USD
+COST:  6666.67 USD
 GAINS: 45933.33 USD (689.00%)
 XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
@@ -167,7 +167,7 @@ NOTES: Joint Portfolio
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 52500.00 USD
-PAID:
+COST:
 GAINS:
 XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
@@ -179,7 +179,7 @@ NOTES:
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 25000.00 USD
-PAID:
+COST:
 GAINS:
 XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
@@ -198,7 +198,7 @@ NOTES: joint, personal, portfolio1
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 130100.00 USD
-PAID:
+COST:
 GAINS:
 XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
@@ -228,7 +228,7 @@ USDC      100.0000       100.00 USD      0.08%         1.00 USD
     "date": "2000-12-01",
     "time": "12:30:00",
     "value": 130100,
-    "paid": "",
+    "denominated_cost": "",
     "cost": 0,
     "assets": [
       {
@@ -264,7 +264,7 @@ USDC      100.0000       100.00 USD      0.08%         1.00 USD
   date: "2000-12-01"
   time: "12:30:00"
   value: 130100
-  paid: ""
+  denominated_cost: ""
   cost: 0
   assets:
     - symbol: BTC
@@ -306,7 +306,7 @@ NOTES: joint, personal, portfolio1
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 195150.00 NZD
-PAID:
+COST:
 GAINS:
 XRATE: 1 USD = 1.50 NZD
             AMOUNT            VALUE    PERCENT       UNIT PRICE
@@ -357,7 +357,7 @@ xrates-appid: YOUR_APP_ID`, s)
 
 - name:  personal
   notes: Personal portfolio notes.
-  paid: $10,000.00 USD
+  cost: $10,000.00 USD
   assets:
     BTC: 0.5
     ETH: 2.5
@@ -367,7 +367,7 @@ xrates-appid: YOUR_APP_ID`, s)
   notes: |
     Business portfolio notes
     over multiple lines.
-  paid: $20,000.00 USD
+  cost: $20,000.00 USD
   assets:
     BTC: 1.0`, s)
 	err = cli.Execute("cryptor", "init", "-confdir", tmpdir)

@@ -32,14 +32,14 @@ type Assets []Asset
 // - The valuated `Portfolio` is appended to a `valuations.yaml` file.
 // - Note that the portfolios configuration and valuations files have different formats.
 type Portfolio struct {
-	Name    string  `yaml:"name"     json:"name"`  // Porfolio name
-	Notes   string  `yaml:"notes"    json:"notes"` // User notes
-	Date    string  `yaml:"date"     json:"date"`  // The valuation date formatted "YYYY-MM-DD"
-	Time    string  `yaml:"time"     json:"time"`  // The valuation time formatted "hh:mm:ss""
-	Value   float64 `yaml:"value"    json:"value"` // Current portfolio value in USD
-	Paid    string  `yaml:"paid"     json:"paid"`  // The amount paid for the portfolio from portfolios.yaml configuration file
-	PaidUSD float64 `yaml:"cost"     json:"cost"`  // The amount paid for the portfolio calculated in USD at the current exchange rate
-	Assets  Assets  `yaml:"assets"   json:"assets"`
+	Name            string  `yaml:"name"     json:"name"`                     // Porfolio name
+	Notes           string  `yaml:"notes"    json:"notes"`                    // User notes
+	Date            string  `yaml:"date"     json:"date"`                     // The valuation date formatted "YYYY-MM-DD"
+	Time            string  `yaml:"time"     json:"time"`                     // The valuation time formatted "hh:mm:ss""
+	Value           float64 `yaml:"value"    json:"value"`                    // Current portfolio value in USD
+	DenominatedCost string  `yaml:"denominated_cost" json:"denominated_cost"` // The amount paid for the portfolio from portfolios.yaml configuration file
+	Cost            float64 `yaml:"cost"     json:"cost"`                     // The amount paid for the portfolio calculated in USD at the current exchange rate
+	Assets          Assets  `yaml:"assets"   json:"assets"`
 }
 
 type Portfolios []Portfolio
@@ -202,10 +202,10 @@ func (ps Portfolios) Aggregate(name string) Portfolio {
 	for _, p := range ps {
 		notes = append(notes, p.Name)
 		res.Value += p.Value
-		if p.PaidUSD == 0 {
+		if p.Cost == 0 {
 			isMissingCost = true
 		}
-		res.PaidUSD += p.PaidUSD
+		res.Cost += p.Cost
 		for _, a := range p.Assets {
 			i := res.Assets.Find(a.Symbol)
 			if i == -1 {
@@ -221,7 +221,7 @@ func (ps Portfolios) Aggregate(name string) Portfolio {
 	res.SetAllocations()
 	res.Assets.Sort()
 	if isMissingCost {
-		res.PaidUSD = 0.00 // Cost is "omitted" if one or more portfolios are not costed
+		res.Cost = 0.00 // Cost is "omitted" if one or more portfolios are not costed
 	}
 	return res
 }
@@ -317,12 +317,12 @@ func (ps Portfolios) Sort() {
 }
 
 func (p Portfolio) gains() float64 {
-	return p.Value - p.PaidUSD
+	return p.Value - p.Cost
 }
 
 func (p Portfolio) pcgains() float64 {
-	if p.PaidUSD > 0.00 {
-		return p.gains() / p.PaidUSD * 100
+	if p.Cost > 0.00 {
+		return p.gains() / p.Cost * 100
 	} else {
 		return 0.0
 	}
@@ -333,10 +333,10 @@ func (ps *Portfolios) ToText(currency string, xrate float64) string {
 	for _, p := range *ps {
 		res += fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nTIME:  %s\nVALUE: %.2f %s",
 			p.Name, p.Notes, p.Date, p.Time, p.Value*xrate, currency)
-		if p.PaidUSD > 0.00 {
-			res += fmt.Sprintf("\nPAID:  %.2f %s\nGAINS: %.2f %s (%.2f%%)", p.PaidUSD*xrate, currency, p.gains()*xrate, currency, p.pcgains())
+		if p.Cost > 0.00 {
+			res += fmt.Sprintf("\nCOST:  %.2f %s\nGAINS: %.2f %s (%.2f%%)", p.Cost*xrate, currency, p.gains()*xrate, currency, p.pcgains())
 		} else {
-			res += "\nPAID:\nGAINS:"
+			res += "\nCOST:\nGAINS:"
 		}
 		if currency != "USD" {
 			res += fmt.Sprintf("\nXRATE: 1 USD = %.2f %s", xrate, currency)

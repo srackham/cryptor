@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -193,7 +192,7 @@ xrates-appid: YOUR_APP_ID`
 
 - name:  personal
   notes: Personal portfolio notes.
-  paid: $10,000.00 USD
+  cost: $10,000.00 USD
   assets:
     BTC: 0.5
     ETH: 2.5
@@ -203,7 +202,7 @@ xrates-appid: YOUR_APP_ID`
   notes: |
     Business portfolio notes
     over multiple lines.
-  paid: $20,000.00 USD
+  cost: $20,000.00 USD
   assets:
     BTC: 1.0`
 		if err := fsx.WriteFile(cli.portfoliosFile(), contents); err != nil {
@@ -426,8 +425,7 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 	config := []struct {
 		Name   string             `yaml:"name"`
 		Notes  string             `yaml:"notes"`
-		Paid   string             `yaml:"paid"`
-		Cost   string             `yaml:"cost"` // TODO: drop this, it's for for backward compatibility
+		Cost   string             `yaml:"cost"`
 		Assets map[string]float64 `yaml:"assets"`
 	}{}
 	err = yaml.Unmarshal([]byte(s), &config)
@@ -441,12 +439,7 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 		if cli.opts.notes {
 			p.Notes = c.Notes
 		}
-		p.Paid = c.Paid
-		// TODO: drop this, it's for for backward compatibility
-		if c.Cost != "" {
-			fmt.Fprint(os.Stderr, "WARNING: deprecated \"cost\" field rename to \"paid\"\n")
-			p.Paid = c.Cost
-		}
+		p.DenominatedCost = c.Cost
 		p.Assets = []portfolio.Asset{}
 		for k, v := range c.Assets {
 			asset := portfolio.Asset{}
@@ -478,12 +471,12 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 	}
 	// Calculate portfolio costs in USD
 	for i := range res {
-		if res[i].Paid != "" {
-			cost, err := cli.currencyToUSD(res[i].Paid)
+		if res[i].DenominatedCost != "" {
+			cost, err := cli.currencyToUSD(res[i].DenominatedCost)
 			if err != nil {
 				return res, err
 			}
-			res[i].PaidUSD = cost
+			res[i].Cost = cost
 		}
 	}
 	return res, err
