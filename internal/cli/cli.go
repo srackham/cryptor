@@ -226,9 +226,6 @@ xrates-appid: YOUR_APP_ID`
 
 // historyCmd prints the saved valuations history.
 func (cli *cli) historyCmd() (err error) {
-	if err := cli.load(); err != nil {
-		return err
-	}
 	fname := cli.valuationsFile("json")
 	valuations := portfolio.Portfolios{}
 	if fsx.FileExists(fname) {
