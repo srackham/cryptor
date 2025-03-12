@@ -311,9 +311,6 @@ func (cli *cli) valuationsFile(format string) string {
 }
 
 func (cli *cli) load() (err error) {
-	if err = cli.xrates.Load(cli.xrates.CacheFile()); err != nil {
-		return err
-	}
 	ps, err := cli.loadConfigFile(cli.portfoliosFile())
 	if err != nil {
 		return fmt.Errorf("portfolios file: \"%s\": %s", cli.portfoliosFile(), err.Error())
