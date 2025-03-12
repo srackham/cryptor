@@ -443,14 +443,6 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 		}
 		res = append(res, p)
 	}
-	// Check for duplicate portfolio names.
-	for i := range res {
-		for j := range res {
-			if i != j && res[i].Name == res[j].Name {
-				return res, fmt.Errorf("duplicate portfolio name: \"%s\"", res[j].Name)
-			}
-		}
-	}
 	// Synthesise missing portfolio names.
 	for i := range res {
 		if res[i].Name == "" {
@@ -460,6 +452,14 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 					res[i].Name = name
 					break
 				}
+			}
+		}
+	}
+	// Check for duplicate portfolio names.
+	for i := range res {
+		for j := range res {
+			if i != j && res[i].Name == res[j].Name {
+				return res, fmt.Errorf("duplicate portfolio name: \"%s\"", res[j].Name)
 			}
 		}
 	}
