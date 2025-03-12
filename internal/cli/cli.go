@@ -433,7 +433,6 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 		if cli.opts.notes {
 			p.Notes = c.Notes
 		}
-		p.DenominatedCost = c.Cost
 		p.Assets = []portfolio.Asset{}
 		for k, v := range c.Assets {
 			asset := portfolio.Asset{}
@@ -463,14 +462,17 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 			}
 		}
 	}
-	// Calculate portfolio costs in USD
-	for i := range res {
-		if res[i].DenominatedCost != "" {
-			cost, err := cli.currencyToUSD(res[i].DenominatedCost)
+	// Calculate portfolio costs in USD (this is done last to avoid loading the exchange rates cache unnecessarily)
+	for i := range config {
+		if config[i].Cost != "" {
+			if config[i].Name != res[i].Name {
+				panic("out of order portfolios")
+			}
+			usd, err := cli.currencyToUSD(config[i].Cost)
 			if err != nil {
 				return res, err
 			}
-			res[i].Cost = cost
+			res[i].Cost = usd
 		}
 	}
 	return res, err
