@@ -32,6 +32,7 @@ type cli struct {
 		format        string              // Valuate command output format ("json" or "yaml")
 		noSave        bool                // Do not update the valuations file
 		portfolios    slice.Slice[string] // Names of portfolios to be printed
+		prices        portfolio.Prices    // Maps asset symbols to prices
 	}
 }
 
@@ -82,6 +83,7 @@ func (cli *cli) Execute(args ...string) error {
 // parseArgs parses and validate command-line arguments.
 func (cli *cli) parseArgs(args []string) error {
 	skip := false
+	cli.opts.prices = make(portfolio.Prices)
 	for i, opt := range args {
 		if skip {
 			skip = false
@@ -108,7 +110,7 @@ func (cli *cli) parseArgs(args []string) error {
 			cli.opts.notes = true
 		case opt == "-no-save":
 			cli.opts.noSave = true
-		case slice.New("-confdir", "-currency", "-format", "-portfolio").Has(opt):
+		case slice.New("-confdir", "-currency", "-format", "-portfolio", "-price").Has(opt):
 			// Process option argument.
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
@@ -134,6 +136,12 @@ func (cli *cli) parseArgs(args []string) error {
 					return fmt.Errorf("-portfolio name can only be specified once: \"%s\"", arg)
 				}
 				cli.opts.portfolios = append(cli.opts.portfolios, arg)
+			case "-price":
+				symbol, price, err := ParsePriceOption(arg)
+				if err != nil {
+					return err
+				}
+				cli.opts.prices[symbol] = price
 			default:
 				return fmt.Errorf("unexpected option: \"%s\"", opt)
 			}
@@ -146,7 +154,7 @@ func (cli *cli) parseArgs(args []string) error {
 }
 
 // ParsePriceOption parses a price option string in the format "SYMBOL=PRICE".
-// It returns the symbol and price as separate values.
+// It returns the uppercase symbol and price as separate values.
 // It returns an error if the price option string is invalid or if the symbol or price are invalid.
 func ParsePriceOption(priceOption string) (symbol string, price float64, err error) {
 	parts := strings.Split(priceOption, "=")
@@ -162,7 +170,7 @@ func ParsePriceOption(priceOption string) (symbol string, price float64, err err
 	if err != nil {
 		return "", 0, fmt.Errorf("invalid price value: \"%s\"", priceOption)
 	}
-	return symbol, price, nil
+	return strings.ToUpper(symbol), price, nil
 }
 
 // initCmd implements the initCmd command.
@@ -277,6 +285,7 @@ Options:
     -notes                      Include portfolio notes in the valuations
     -no-save                    Do not update the valuations file
     -portfolio PORTFOLIO        Process named portfolio (default: all portfolios)
+    -price SYMBOL=PRICE         Override the asset price of SYMBOL with PRICE (in USD)
     -format FORMAT              Set the valuate command output format ("json" or "yaml")
 
 Config directory: ` + cli.ConfigDir + `
@@ -307,7 +316,7 @@ func (cli *cli) valuationsFile(format string) string {
 	return filepath.Join(cli.DataDir, "valuations."+format)
 }
 
-func (cli *cli) load() (err error) {
+func (cli *cli) loadPortfolios() (err error) {
 	ps, err := cli.loadConfigFile(cli.portfoliosFile())
 	if err != nil {
 		return fmt.Errorf("portfolios file: \"%s\": %s", cli.portfoliosFile(), err.Error())
@@ -351,15 +360,8 @@ func (cli *cli) valuateCmd() error {
 	now := cli.Now()
 	date := now.Format("2006-01-02")
 	time := now.Format("15:04:05")
-	if err := cli.load(); err != nil {
+	if err := cli.loadPortfolios(); err != nil {
 		return err
-	}
-	// Check all -portfolio option names exist.
-	for _, name := range cli.opts.portfolios {
-		i := cli.portfolios.FindByName(name)
-		if i == -1 {
-			return fmt.Errorf("missing portfolio: \"%s\"", name)
-		}
 	}
 	// Select portfolios to be valuated.
 	cli.valuation = portfolio.Portfolios{}
@@ -460,6 +462,19 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 			if i != j && res[i].Name == res[j].Name {
 				return res, fmt.Errorf("duplicate portfolio name: \"%s\"", res[j].Name)
 			}
+		}
+	}
+	// Assign asset price options
+	for symbol, price := range cli.opts.prices {
+		if err := res.SetAssetPrice(symbol, price); err != nil {
+			return res, err
+		}
+	}
+	// Check all -portfolio option names exist.
+	for _, name := range cli.opts.portfolios {
+		i := res.FindByName(name)
+		if i == -1 {
+			return res, fmt.Errorf("missing portfolio: \"%s\"", name)
 		}
 	}
 	// Calculate portfolio costs in USD (this is done last to avoid loading the exchange rates cache unnecessarily)

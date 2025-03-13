@@ -16,10 +16,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type Prices map[string]float64 // Maps asset symbols to prices
+
 // An amount of crypto currency belonging to a portfolio.
 type Asset struct {
 	Symbol     string  `yaml:"symbol"     json:"symbol"`     // Crypto currecy symbol
-	Amount     float64 `yaml:"amount"     json:"amount"`     // Numerical amount crypto currency
+	Price      float64 `yaml:"price"      json:"price"`      // The price in USD at the time of valuation of one asset unit
+	Amount     float64 `yaml:"amount"     json:"amount"`     // Number of asset units
 	Value      float64 `yaml:"value"      json:"value"`      // Asset value in USD at the time of valuation
 	Allocation float64 `yaml:"allocation" json:"allocation"` // Percentage of total portfolio value
 }
@@ -101,12 +104,16 @@ func (assets Assets) Find(symbol string) int {
 func (p *Portfolio) SetUSDValues(reader *binance.PriceReader) error {
 	total := 0.0
 	for i, a := range p.Assets {
-		rate, err := reader.GetCachedPrice(a.Symbol)
-		if err != nil {
-			return err
+		if a.Price == 0 {
+			price, err := reader.GetCachedPrice(a.Symbol)
+			if err != nil {
+				return err
+			}
+			a.Price = price
 		}
-		val := a.Amount * rate
+		val := a.Amount * a.Price
 		p.Assets[i].Value = val
+		p.Assets[i].Price = a.Price
 		total += val
 	}
 	p.Value = total
@@ -208,7 +215,7 @@ func (ps Portfolios) Aggregate(name string) Portfolio {
 		for _, a := range p.Assets {
 			i := res.Assets.Find(a.Symbol)
 			if i == -1 {
-				res.Assets = append(res.Assets, Asset{Symbol: a.Symbol, Amount: a.Amount, Value: a.Value})
+				res.Assets = append(res.Assets, Asset{Symbol: a.Symbol, Price: a.Price, Amount: a.Amount, Value: a.Value})
 			} else {
 				res.Assets[i].Amount += a.Amount
 				res.Assets[i].Value += a.Value
@@ -258,6 +265,24 @@ func (ps Portfolios) FindByName(name string) int {
 		}
 	}
 	return -1
+}
+
+// SetAssetPrice sets the unit price of assets named `name` to `price`.
+// TODO tests
+func (ps Portfolios) SetAssetPrice(name string, price float64) (err error) {
+	found := false
+	for i := range ps {
+		j := ps[i].Assets.Find(name)
+		if j == -1 {
+			continue
+		}
+		ps[i].Assets[j].Price = price
+		found = true
+	}
+	if !found {
+		err = fmt.Errorf("missing asset: \"%s\"", name)
+	}
+	return
 }
 
 // Validate returns `true` if the portfolio fields pass basic sanity checks.

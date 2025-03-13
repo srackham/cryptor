@@ -74,6 +74,7 @@ Options:
     -notes                      Include portfolio notes in the valuations
     -no-save                    Do not update the valuations file
     -portfolio PORTFOLIO        Process named portfolio (default: all portfolios)
+    -price SYMBOL=PRICE         Override the asset price of SYMBOL with PRICE (in USD)
     -format FORMAT              Set the valuate command output format ("json" or "yaml")
 
 Config directory: /home/srackham/.config/cryptor
@@ -104,6 +105,12 @@ Github:     https://github.com/srackham/cryptor
 -   Dates are saved as `YYYY-DD-MM` formatted strings.
 -   Times are saved as `hh:mm:ss` formatted strings.
 -   The `-portfolio` option can be specified multiple times.
+-   The `-price` option allows the user to override current asset prices in order to evaluate "what if" scenarios. Example:
+
+        cryptor valuate -price btc=50000    # Price Bitcoin at $50,000 USD
+
+-   The `-price` option can be specified multiple times.
+-   The `-price` option could be used to include non-crypto assets, e.g. gold, in the portfolios.
 -   Cryptocurrency prices are fetched using the [Binance HTTP ticker price](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#symbol-price-ticker) API.
 -   Fiat currency exchange rates are fetched using the [Open Exchange Rates](https://openexchangerates.org/) API.
 -   By default valuations are printed in a human-friendly text format; use the `-format` option to print in JSON or YAML formats.

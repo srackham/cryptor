@@ -38,6 +38,7 @@ func TestLoadConfig(t *testing.T) {
 	assert.PassIf(t, i != -1, "missing asset: BTC")
 	assert.Equal(t, portfolio.Asset{
 		Symbol: "BTC",
+		Price:  0,
 		Amount: 0.5,
 		Value:  0.0,
 	}, ps[0].Assets[i])
@@ -47,6 +48,7 @@ func TestLoadConfig(t *testing.T) {
 	assert.Equal(t, "joint", ps[1].Name)
 	assert.Equal(t, portfolio.Asset{
 		Symbol: "ETH",
+		Price:  0,
 		Amount: 2.5,
 		Value:  0.0,
 	}, ps[1].Assets[i])
@@ -86,6 +88,7 @@ func TestParseArgs(t *testing.T) {
 	assert.Equal(t, "help", cli.command)
 	parse("cryptor invalid-command")
 	assert.Equal(t, `invalid command: "invalid-command"`, err.Error())
+	// TODO: test all possible errors
 }
 
 func exec(cli *cli, cmd string) (string, string, error) {
@@ -232,18 +235,21 @@ USDC      100.0000       100.00 USD      0.08%         1.00 USD
     "assets": [
       {
         "symbol": "BTC",
+        "price": 100000,
         "amount": 1.25,
         "value": 125000,
         "allocation": 96.07993850883936
       },
       {
         "symbol": "ETH",
+        "price": 1000,
         "amount": 5,
         "value": 5000,
         "allocation": 3.843197540353574
       },
       {
         "symbol": "USDC",
+        "price": 1,
         "amount": 100,
         "value": 100,
         "allocation": 0.07686395080707148
@@ -266,14 +272,17 @@ USDC      100.0000       100.00 USD      0.08%         1.00 USD
   cost: 0
   assets:
     - symbol: BTC
+      price: 100000
       amount: 1.25
       value: 125000
       allocation: 96.07993850883936
     - symbol: ETH
+      price: 1000
       amount: 5
       value: 5000
       allocation: 3.843197540353574
     - symbol: USDC
+      price: 1
       amount: 100
       value: 100
       allocation: 0.07686395080707148
@@ -598,4 +607,59 @@ func TestParsePriceOption(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestValuatePriceOption(t *testing.T) {
+	cli := mockCli(t)
+	stdout, _, err := exec(cli, "cryptor valuate -price btc=50000 -price ETH=500.00 -no-save")
+	assert.PassIf(t, err == nil, "%v", err)
+	assert.Equal(t, 3, len(cli.valuation))
+	assert.PassIf(t, cli.valuation.FindByNameAndDate("personal", "2000-12-01") != -1, "missing valuation")
+	wanted := `
+NAME:  personal
+NOTES:
+DATE:  2000-12-01
+TIME:  12:30:00
+VALUE: 26350.00 USD
+COST:  6666.67 USD
+GAINS: 19683.33 USD (295.25%)
+XRATE:
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
+BTC         0.5000     25000.00 USD     94.88%     50000.00 USD
+ETH         2.5000      1250.00 USD      4.74%       500.00 USD
+USDC      100.0000       100.00 USD      0.38%         1.00 USD
+
+NAME:  joint
+NOTES:
+DATE:  2000-12-01
+TIME:  12:30:00
+VALUE: 26250.00 USD
+COST:
+GAINS:
+XRATE:
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
+BTC         0.5000     25000.00 USD     95.24%     50000.00 USD
+ETH         2.5000      1250.00 USD      4.76%       500.00 USD
+
+NAME:  portfolio1
+NOTES:
+DATE:  2000-12-01
+TIME:  12:30:00
+VALUE: 12500.00 USD
+COST:
+GAINS:
+XRATE:
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
+BTC         0.2500     12500.00 USD    100.00%     50000.00 USD
+`
+	wanted = helpers.StripTrailingSpaces(wanted)
+	stdout = helpers.StripTrailingSpaces(stdout)
+	assert.EqualStrings(t, wanted, stdout)
+}
+
+func TestMissingAsset(t *testing.T) {
+	cli := mockCli(t)
+	_, stderr, err := exec(cli, "cryptor valuate -no-save -price non-existent=1.0")
+	assert.FailIf(t, err == nil, "non-existent asset should generate an error")
+	assert.Contains(t, stderr, "missing asset: \"NON-EXISTENT\"")
 }
