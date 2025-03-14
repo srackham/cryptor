@@ -72,7 +72,7 @@ Options:
     -confdir CONF_DIR           Directory containing config, data and cache files
     -currency CURRENCY          Print fiat currency values denominated in CURRENCY
     -notes                      Include portfolio notes in the valuations
-    -no-save                    Do not update the valuations file
+    -save                       Update the valuations file
     -portfolio PORTFOLIO        Process named portfolio (default: all portfolios)
     -price SYMBOL=PRICE         Override the asset price of SYMBOL with PRICE (in USD)
     -format FORMAT              Set the valuate command output format ("json" or "yaml")
@@ -132,10 +132,11 @@ an alternate single directory for all files can be specified using the `-confdir
 
 -   The `valuate` command prints and saves valuations in the same order that they occur in the portfolios configuration file.
 -   The printed output can be customised using the `-portfolio`, `-aggregate` and `-aggregate-only` options.
--   Unless the `-no-save` option is specified the valuation of all portfolios is appended to the `valuations.json` valuations file; the aggregate valuation is appended after the portfolio valuations.
--   The `-portfolio`, `-aggregate` and `-aggregate-only` options only apply to printed outputs, not to the saved valuations.
+-   If the `-save` option is specified the valuation of all portfolios is appended to the `valuations.json` valuations file; the aggregate valuation is appended after the portfolio valuations.
+-   Saved valuations always include all portfolio valuations plus the aggregate valuation.
 -   The `aggregate` portfolio is the aggregate of all portfolios, not just those specified by `-portfolio` options.
 -   The `valuations.json` file is located in the data configuration directory.
+-   The `-portfolio`, `-aggregate` and `-aggregate-only` options apply to printed outputs.
 
 ## Post-processing Valuation Data
 

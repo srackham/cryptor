@@ -99,7 +99,7 @@ func exec(cli *cli, cmd string) (string, string, error) {
 
 func TestValuateCmd(t *testing.T) {
 	cli := mockCli(t)
-	stdout, _, err := exec(cli, "cryptor valuate -no-save")
+	stdout, _, err := exec(cli, "cryptor valuate")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Equal(t, 3, len(cli.valuation))
 	assert.PassIf(t, cli.valuation.FindByNameAndDate("personal", "2000-12-01") != -1, "missing valuation")
@@ -145,7 +145,7 @@ BTC         0.2500     25000.00 USD    100.00%    100000.00 USD
 	assert.EqualStrings(t, wanted, stdout)
 
 	cli = mockCli(t)
-	stdout, _, err = exec(cli, "cryptor valuate -no-save -notes")
+	stdout, _, err = exec(cli, "cryptor valuate -notes")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Equal(t, 3, len(cli.valuation))
 	assert.PassIf(t, cli.valuation.FindByNameAndDate("personal", "2000-12-01") != -1, "missing valuation")
@@ -193,7 +193,7 @@ BTC         0.2500     25000.00 USD    100.00%    100000.00 USD
 	assert.EqualStrings(t, wanted, stdout)
 
 	cli = mockCli(t)
-	stdout, _, err = exec(cli, "cryptor valuate -no-save -aggregate-only -notes")
+	stdout, _, err = exec(cli, "cryptor valuate -aggregate-only -notes")
 	assert.PassIf(t, err == nil, "%v", err)
 	wanted = `
 NAME:  aggregate
@@ -214,14 +214,14 @@ USDC      100.0000       100.00 USD      0.08%         1.00 USD
 	assert.EqualStrings(t, wanted, stdout)
 
 	cli = mockCli(t)
-	stdout, _, err = exec(cli, "cryptor valuate -no-save -portfolio portfolio1 -portfolio personal")
+	stdout, _, err = exec(cli, "cryptor valuate -portfolio portfolio1 -portfolio personal")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Equal(t, 3, len(cli.valuation))
 	assert.PassIf(t, cli.valuation.FindByNameAndDate("personal", "2000-12-01") != -1, "missing valuation")
 	assert.PassIf(t, cli.valuation.FindByNameAndDate("portfolio1", "2000-12-01") != -1, "missing valuation")
 
 	cli = mockCli(t)
-	stdout, _, err = exec(cli, "cryptor valuate -no-save -aggregate-only -format json")
+	stdout, _, err = exec(cli, "cryptor valuate -aggregate-only -format json")
 	assert.PassIf(t, err == nil, "%v", err)
 	wanted = `
 [
@@ -261,7 +261,7 @@ USDC      100.0000       100.00 USD      0.08%         1.00 USD
 	assert.EqualStrings(t, wanted, stdout)
 
 	cli = mockCli(t)
-	stdout, _, err = exec(cli, "cryptor valuate -no-save -aggregate-only -format yaml")
+	stdout, _, err = exec(cli, "cryptor valuate -aggregate-only -format yaml")
 	assert.PassIf(t, err == nil, "%v", err)
 	wanted = `
 - name: aggregate
@@ -294,7 +294,7 @@ USDC      100.0000       100.00 USD      0.08%         1.00 USD
 		err = os.Remove(cli.xrates.CacheFile())
 		assert.PassIf(t, err == nil, "%v", err)
 	}
-	stdout, _, err = exec(cli, "cryptor valuate -no-save -aggregate-only -currency NZD")
+	stdout, _, err = exec(cli, "cryptor valuate -aggregate-only -currency NZD")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.PassIf(t, fsx.FileExists(cli.xrates.CacheFile()), "missing exchange rates cache file: \"%v\"", cli.xrates.CacheFile())
 	got, err := fsx.ReadFile(cli.xrates.CacheFile())
@@ -389,7 +389,7 @@ func TestSaveValuation(t *testing.T) {
 
 	cli := mockCli(t)
 	cli.DataDir = tmpdir
-	_, _, err := exec(cli, "cryptor valuate")
+	_, _, err := exec(cli, "cryptor valuate -save")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Equal(t, 3, len(cli.valuation))
 	savedValuations := portfolio.Portfolios{}
@@ -408,7 +408,7 @@ func TestSaveValuation(t *testing.T) {
 
 	cli = mockCli(t)
 	cli.DataDir = tmpdir
-	_, _, err = exec(cli, "cryptor valuate")
+	_, _, err = exec(cli, "cryptor valuate -save")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Equal(t, 3, len(cli.valuation))
 	savedValuations = append(savedValuations, cli.valuation...)
@@ -426,7 +426,7 @@ func TestSaveValuation(t *testing.T) {
 
 func TestMissingPortfolio(t *testing.T) {
 	cli := mockCli(t)
-	_, stderr, err := exec(cli, "cryptor valuate -no-save -portfolio non-existent")
+	_, stderr, err := exec(cli, "cryptor valuate -portfolio non-existent")
 	assert.FailIf(t, err == nil, "non-existent portfolio should generate an error")
 	assert.Contains(t, stderr, "missing portfolio: \"non-existent\"")
 }
@@ -611,7 +611,7 @@ func TestParsePriceOption(t *testing.T) {
 
 func TestValuatePriceOption(t *testing.T) {
 	cli := mockCli(t)
-	stdout, _, err := exec(cli, "cryptor valuate -price btc=50000 -price ETH=500.00 -no-save")
+	stdout, _, err := exec(cli, "cryptor valuate -price btc=50000 -price ETH=500.00")
 	assert.PassIf(t, err == nil, "%v", err)
 	assert.Equal(t, 3, len(cli.valuation))
 	assert.PassIf(t, cli.valuation.FindByNameAndDate("personal", "2000-12-01") != -1, "missing valuation")
@@ -659,7 +659,7 @@ BTC         0.2500     12500.00 USD    100.00%     50000.00 USD
 
 func TestMissingAsset(t *testing.T) {
 	cli := mockCli(t)
-	_, stderr, err := exec(cli, "cryptor valuate -no-save -price non-existent=1.0")
+	_, stderr, err := exec(cli, "cryptor valuate -price non-existent=1.0")
 	assert.FailIf(t, err == nil, "non-existent asset should generate an error")
 	assert.Contains(t, stderr, "missing asset: \"NON-EXISTENT\"")
 }

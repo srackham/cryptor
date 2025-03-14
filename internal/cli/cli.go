@@ -30,7 +30,7 @@ type cli struct {
 		currency      string              // Fiat currency symbol that the valuation is denominated in
 		notes         bool                // Include portfolio notes in the valuations
 		format        string              // Valuate command output format ("json" or "yaml")
-		noSave        bool                // Do not update the valuations file
+		save        bool                // Update the valuations file
 		portfolios    slice.Slice[string] // Names of portfolios to be printed
 		prices        portfolio.Prices    // Maps asset symbols to prices
 	}
@@ -108,8 +108,8 @@ func (cli *cli) parseArgs(args []string) error {
 			cli.opts.aggregateOnly = true
 		case opt == "-notes":
 			cli.opts.notes = true
-		case opt == "-no-save":
-			cli.opts.noSave = true
+		case opt == "-save":
+			cli.opts.save = true
 		case slice.New("-confdir", "-currency", "-format", "-portfolio", "-price").Has(opt):
 			// Process option argument.
 			if i+1 >= len(args) {
@@ -283,7 +283,7 @@ Options:
     -confdir CONF_DIR           Directory containing config, data and cache files
     -currency CURRENCY          Print fiat currency values denominated in CURRENCY
     -notes                      Include portfolio notes in the valuations
-    -no-save                    Do not update the valuations file
+    -save                       Update the valuations file
     -portfolio PORTFOLIO        Process named portfolio (default: all portfolios)
     -price SYMBOL=PRICE         Override the asset price of SYMBOL with PRICE (in USD)
     -format FORMAT              Set the valuate command output format ("json" or "yaml")
@@ -330,7 +330,7 @@ func (cli *cli) loadPortfolios() (err error) {
 
 // save appends the current valuation to the valuations file and saves the exchange rates cache file.
 func (cli *cli) save() (err error) {
-	if !cli.opts.noSave {
+	if cli.opts.save {
 		fname := cli.valuationsFile("json")
 		valuations := portfolio.Portfolios{}
 		if fsx.FileExists(fname) {
