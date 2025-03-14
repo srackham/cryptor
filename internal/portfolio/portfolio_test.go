@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/srackham/cryptor/internal/assert"
+	"github.com/srackham/cryptor/internal/binance"
 	"github.com/srackham/cryptor/internal/mock"
 )
 
@@ -140,4 +141,351 @@ func TestSortAndFilter(t *testing.T) {
 
 	filteredValuations = valuations.FilterByName("personal", "joint")
 	assert.Equal(t, 14, len(filteredValuations))
+}
+
+func TestAssets_Sort(t *testing.T) {
+	tests := []struct {
+		name     string
+		assets   Assets
+		expected Assets
+	}{
+		{
+			name: "Sort assets by descending value",
+			assets: Assets{
+				{Symbol: "BTC", Value: 100},
+				{Symbol: "ETH", Value: 200},
+				{Symbol: "XRP", Value: 50},
+			},
+			expected: Assets{
+				{Symbol: "ETH", Value: 200},
+				{Symbol: "BTC", Value: 100},
+				{Symbol: "XRP", Value: 50},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.assets.Sort()
+			if !reflect.DeepEqual(tt.assets, tt.expected) {
+				t.Errorf("Assets.Sort() = %v, want %v", tt.assets, tt.expected)
+			}
+		})
+	}
+}
+
+func TestAssets_Find(t *testing.T) {
+	assets := Assets{
+		{Symbol: "BTC"},
+		{Symbol: "ETH"},
+		{Symbol: "XRP"},
+	}
+
+	tests := []struct {
+		name     string
+		symbol   string
+		expected int
+	}{
+		{"Find existing asset", "ETH", 1},
+		{"Find non-existing asset", "LTC", -1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := assets.Find(tt.symbol); got != tt.expected {
+				t.Errorf("Assets.Find() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestPortfolio_SetUSDValues(t *testing.T) {
+	ctx := mock.NewContext()
+	mockReader := binance.NewPriceReader(&ctx)
+	p := &Portfolio{
+		Assets: Assets{
+			{Symbol: "BTC", Amount: 2},
+			{Symbol: "ETH", Amount: 10},
+		},
+	}
+	err := p.SetUSDValues(&mockReader)
+	if err != nil {
+		t.Fatalf("SetUSDValues() error = %v", err)
+	}
+	expectedTotal := 210_000.0
+	if p.Value != expectedTotal {
+		t.Errorf("SetUSDValues() total = %v, want %v", p.Value, expectedTotal)
+	}
+	expectedAssets := Assets{
+		{Symbol: "BTC", Amount: 2, Price: 100_000, Value: 200_000},
+		{Symbol: "ETH", Amount: 10, Price: 1000, Value: 10_000},
+	}
+	for i, asset := range p.Assets {
+		if asset.Value != expectedAssets[i].Value || asset.Price != expectedAssets[i].Price {
+			t.Errorf("SetUSDValues() asset %s = %+v, want %+v", asset.Symbol, asset, expectedAssets[i])
+		}
+	}
+}
+
+func TestPortfolio_SetAllocations(t *testing.T) {
+	p := &Portfolio{
+		Value: 100000,
+		Assets: Assets{
+			{Symbol: "BTC", Value: 60000},
+			{Symbol: "ETH", Value: 40000},
+		},
+	}
+	p.SetAllocations()
+	expected := Assets{
+		{Symbol: "BTC", Value: 60000, Allocation: 60},
+		{Symbol: "ETH", Value: 40000, Allocation: 40},
+	}
+	for i, asset := range p.Assets {
+		if asset.Allocation != expected[i].Allocation {
+			t.Errorf("SetAllocations() asset %s allocation = %v, want %v", asset.Symbol, asset.Allocation, expected[i].Allocation)
+		}
+	}
+}
+
+func TestPortfolio_DeepCopy(t *testing.T) {
+	original := Portfolio{
+		Name: "Test Portfolio",
+		Assets: Assets{
+			{Symbol: "BTC", Amount: 1},
+			{Symbol: "ETH", Amount: 10},
+		},
+	}
+	copy := original.DeepCopy()
+	if !reflect.DeepEqual(original, copy) {
+		t.Errorf("DeepCopy() = %v, want %v", copy, original)
+	}
+	// Modify the copy to ensure it doesn't affect the original
+	copy.Name = "Modified Portfolio"
+	copy.Assets[0].Amount = 2
+	if reflect.DeepEqual(original, copy) {
+		t.Errorf("DeepCopy() did not create a separate copy")
+	}
+}
+
+func TestPortfolios_Aggregate(t *testing.T) {
+	portfolios := Portfolios{
+		{
+			Name:  "Portfolio 1",
+			Value: 100000,
+			Cost:  90000,
+			Assets: Assets{
+				{Symbol: "BTC", Amount: 1, Value: 60000},
+				{Symbol: "ETH", Amount: 20, Value: 40000},
+			},
+		},
+		{
+			Name:  "Portfolio 2",
+			Value: 50000,
+			Cost:  45000,
+			Assets: Assets{
+				{Symbol: "BTC", Amount: 0.5, Value: 30000},
+				{Symbol: "XRP", Amount: 1000, Value: 20000},
+			},
+		},
+	}
+	aggregated := portfolios.Aggregate("Aggregated Portfolio")
+	expectedValue := 150000.0
+	if aggregated.Value != expectedValue {
+		t.Errorf("Aggregate() value = %v, want %v", aggregated.Value, expectedValue)
+	}
+	expectedCost := 135000.0
+	if aggregated.Cost != expectedCost {
+		t.Errorf("Aggregate() cost = %v, want %v", aggregated.Cost, expectedCost)
+	}
+	expectedAssets := Assets{
+		{Symbol: "BTC", Amount: 1.5, Value: 90000},
+		{Symbol: "ETH", Amount: 20, Value: 40000},
+		{Symbol: "XRP", Amount: 1000, Value: 20000},
+	}
+	if len(aggregated.Assets) != len(expectedAssets) {
+		t.Errorf("Aggregate() asset count = %d, want %d", len(aggregated.Assets), len(expectedAssets))
+	}
+	for _, expectedAsset := range expectedAssets {
+		found := false
+		for _, asset := range aggregated.Assets {
+			if asset.Symbol == expectedAsset.Symbol && asset.Amount == expectedAsset.Amount && asset.Value == expectedAsset.Value {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("Aggregate() missing or incorrect asset: %+v", expectedAsset)
+		}
+	}
+}
+
+func TestPortfolios_FindByNameAndDate(t *testing.T) {
+	portfolios := Portfolios{
+		{Name: "Portfolio 1", Date: "2025-03-15"},
+		{Name: "Portfolio 2", Date: "2025-03-15"},
+		{Name: "Portfolio 1", Date: "2025-03-16"},
+	}
+	tests := []struct {
+		name     string
+		pName    string
+		date     string
+		expected int
+	}{
+		{"Find existing portfolio", "Portfolio 1", "2025-03-15", 0},
+		{"Find non-existing portfolio", "Portfolio 3", "2025-03-15", -1},
+		{"Find existing portfolio with different date", "Portfolio 1", "2025-03-16", 2},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := portfolios.FindByNameAndDate(tt.pName, tt.date); got != tt.expected {
+				t.Errorf("Portfolios.FindByNameAndDate() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestPortfolios_FindByName(t *testing.T) {
+	portfolios := Portfolios{
+		{Name: "Portfolio 1"},
+		{Name: "Portfolio 2"},
+		{Name: "Portfolio 3"},
+	}
+	tests := []struct {
+		name     string
+		pName    string
+		expected int
+	}{
+		{"Find existing portfolio", "Portfolio 2", 1},
+		{"Find non-existing portfolio", "Portfolio 4", -1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := portfolios.FindByName(tt.pName); got != tt.expected {
+				t.Errorf("Portfolios.FindByName() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestPortfolios_SetAssetPrice(t *testing.T) {
+	portfolios := Portfolios{
+		{
+			Name: "Portfolio 1",
+			Assets: Assets{
+				{Symbol: "BTC", Price: 50000},
+				{Symbol: "ETH", Price: 3000},
+			},
+		},
+		{
+			Name: "Portfolio 2",
+			Assets: Assets{
+				{Symbol: "BTC", Price: 51000},
+				{Symbol: "XRP", Price: 1},
+			},
+		},
+	}
+	tests := []struct {
+		name      string
+		assetName string
+		price     float64
+		wantErr   bool
+	}{
+		{"Set existing asset price", "BTC", 55000, false},
+		{"Set non-existing asset price", "LTC", 200, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := portfolios.SetAssetPrice(tt.assetName, tt.price)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Portfolios.SetAssetPrice() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr {
+				for _, p := range portfolios {
+					i := p.Assets.Find(tt.assetName)
+					if i != -1 && p.Assets[i].Price != tt.price {
+						t.Errorf("Portfolios.SetAssetPrice() did not set price correctly for %s in %s", tt.assetName, p.Name)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestPortfolios_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		ps      Portfolios
+		nodups  bool
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "Valid portfolios",
+			ps: Portfolios{
+				{Name: "Portfolio1", Assets: Assets{{Symbol: "BTC"}, {Symbol: "ETH"}}},
+				{Name: "Portfolio2", Assets: Assets{{Symbol: "XRP"}}},
+			},
+			nodups:  true,
+			wantErr: false,
+		},
+		{
+			name: "Invalid portfolio name",
+			ps: Portfolios{
+				{Name: "Invalid Name", Assets: Assets{{Symbol: "BTC"}}},
+			},
+			nodups:  true,
+			wantErr: true,
+			errMsg:  "invalid portfolio name: \"Invalid Name\"",
+		},
+		{
+			name: "Invalid asset name",
+			ps: Portfolios{
+				{Name: "Portfolio1", Assets: Assets{{Symbol: "Invalid Asset"}}},
+			},
+			nodups:  true,
+			wantErr: true,
+			errMsg:  "invalid portfolio asset name: \"Invalid Asset\"",
+		},
+		{
+			name: "Duplicate asset name",
+			ps: Portfolios{
+				{Name: "Portfolio1", Assets: Assets{{Symbol: "BTC"}, {Symbol: "BTC"}}},
+			},
+			nodups:  true,
+			wantErr: true,
+			errMsg:  "duplicate asset name: \"BTC\"",
+		},
+		{
+			name: "Duplicate portfolio name with nodups true",
+			ps: Portfolios{
+				{Name: "Portfolio1", Assets: Assets{{Symbol: "BTC"}}},
+				{Name: "Portfolio1", Assets: Assets{{Symbol: "ETH"}}},
+			},
+			nodups:  true,
+			wantErr: true,
+			errMsg:  "duplicate portfolio name: \"Portfolio1\"",
+		},
+		{
+			name: "Duplicate portfolio name with nodups false",
+			ps: Portfolios{
+				{Name: "Portfolio1", Assets: Assets{{Symbol: "BTC"}}},
+				{Name: "Portfolio1", Assets: Assets{{Symbol: "ETH"}}},
+			},
+			nodups:  false,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.ps.Validate(tt.nodups)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Portfolios.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.wantErr && err.Error() != tt.errMsg {
+				t.Errorf("Portfolios.Validate() error message = %v, want %v", err.Error(), tt.errMsg)
+			}
+		})
+	}
 }

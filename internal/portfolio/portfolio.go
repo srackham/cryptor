@@ -100,7 +100,6 @@ func (assets Assets) Find(symbol string) int {
 }
 
 // SetUSDValues calculates the current USD value of portfolio assets and their total value.
-// TODO tests
 func (p *Portfolio) SetUSDValues(reader *binance.PriceReader) error {
 	total := 0.0
 	for i, a := range p.Assets {
@@ -121,7 +120,6 @@ func (p *Portfolio) SetUSDValues(reader *binance.PriceReader) error {
 }
 
 // SetAllocations synthesizes asset allocation as a percentage of the total portfolio value.
-// TODO tests
 func (p *Portfolio) SetAllocations() {
 	for i, a := range p.Assets {
 		if p.Value != 0.00 {
@@ -131,7 +129,6 @@ func (p *Portfolio) SetAllocations() {
 }
 
 // See [How to deep copy a struct in Go](https://www.educative.io/answers/how-to-deep-copy-a-struct-in-go)
-// TODO tests
 func (p Portfolio) DeepCopy() Portfolio {
 	res := p
 	res.Assets = nil
@@ -197,7 +194,6 @@ func (ps Portfolios) SaveValuations(fname string) (err error) {
 // Aggregate returns a new portfolio that combines the valuated receiver portfolios.
 // Portfolio Notes field is assigned the list of combined portfolios.
 // Aggregated costs are valid only if all portfolios are costed.
-// TODO tests
 func (ps Portfolios) Aggregate(name string) Portfolio {
 	res := Portfolio{
 		Name:   name,
@@ -245,7 +241,6 @@ func (ps Portfolios) FilterByDate(date string) Portfolios {
 
 // FindByNameAndDate searches portfolios slice for a portfolio whose name and date matches portfolio `p`.
 // If found it return the portfolio index else returns -1.
-// TODO tests
 func (ps Portfolios) FindByNameAndDate(name string, date string) int {
 	for i := range ps {
 		if name == ps[i].Name && date == ps[i].Date {
@@ -257,7 +252,6 @@ func (ps Portfolios) FindByNameAndDate(name string, date string) int {
 
 // Find searches portfolios slice for a portfolio whose name matches `name`.
 // If found return the portfolio index else return -1.
-// TODO tests
 func (ps Portfolios) FindByName(name string) int {
 	for i := range ps {
 		if name == ps[i].Name {
@@ -268,7 +262,6 @@ func (ps Portfolios) FindByName(name string) int {
 }
 
 // SetAssetPrice sets the unit price of assets named `name` to `price`.
-// TODO tests
 func (ps Portfolios) SetAssetPrice(name string, price float64) (err error) {
 	found := false
 	for i := range ps {
@@ -287,7 +280,6 @@ func (ps Portfolios) SetAssetPrice(name string, price float64) (err error) {
 
 // Validate returns `true` if the portfolio fields pass basic sanity checks.
 // If `nodups` is `true` duplicate portfolio names are disallowed.
-// TODO tests
 func (ps Portfolios) Validate(nodups bool) error {
 	names := set.New[string]()
 	for _, p := range ps {
