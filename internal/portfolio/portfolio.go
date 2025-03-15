@@ -347,17 +347,18 @@ func (p Portfolio) pcgains() float64 {
 func (ps *Portfolios) ToText(currency string, xrate float64) string {
 	res := ""
 	for _, p := range *ps {
-		res += fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nTIME:  %s\nVALUE: %.2f %s",
-			p.Name, p.Notes, p.Date, p.Time, p.Value*xrate, currency)
+		if p.Notes == "" {
+			res += fmt.Sprintf("NAME:  %s\nDATE:  %s\nTIME:  %s\nVALUE: %.2f %s",
+				p.Name, p.Date, p.Time, p.Value*xrate, currency)
+		} else {
+			res += fmt.Sprintf("NAME:  %s\nNOTES: %s\nDATE:  %s\nTIME:  %s\nVALUE: %.2f %s",
+				p.Name, p.Notes, p.Date, p.Time, p.Value*xrate, currency)
+		}
 		if p.Cost > 0.00 {
 			res += fmt.Sprintf("\nCOST:  %.2f %s\nGAINS: %.2f %s (%.2f%%)", p.Cost*xrate, currency, p.gains()*xrate, currency, p.pcgains())
-		} else {
-			res += "\nCOST:\nGAINS:"
 		}
 		if currency != "USD" {
 			res += fmt.Sprintf("\nXRATE: 1 USD = %.2f %s", xrate, currency)
-		} else {
-			res += "\nXRATE:"
 		}
 		res += "\n            AMOUNT            VALUE    PERCENT       UNIT PRICE\n"
 		for _, a := range p.Assets {

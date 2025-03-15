@@ -126,38 +126,28 @@ func TestValuateCmd(t *testing.T) {
 	assert.PassIf(t, cli.valuation.FindByNameAndDate("personal", "2000-12-01") != -1, "missing valuation")
 	wanted := `
 NAME:  personal
-NOTES:
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 52600.00 USD
 COST:  6666.67 USD
 GAINS: 45933.33 USD (689.00%)
-XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.5000     50000.00 USD     95.06%    100000.00 USD
 ETH         2.5000      2500.00 USD      4.75%      1000.00 USD
 USDC      100.0000       100.00 USD      0.19%         1.00 USD
 
 NAME:  joint
-NOTES:
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 52500.00 USD
-COST:
-GAINS:
-XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.5000     50000.00 USD     95.24%    100000.00 USD
 ETH         2.5000      2500.00 USD      4.76%      1000.00 USD
 
 NAME:  portfolio1
-NOTES:
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 25000.00 USD
-COST:
-GAINS:
-XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.2500     25000.00 USD    100.00%    100000.00 USD
 `
@@ -180,7 +170,6 @@ TIME:  12:30:00
 VALUE: 52600.00 USD
 COST:  6666.67 USD
 GAINS: 45933.33 USD (689.00%)
-XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.5000     50000.00 USD     95.06%    100000.00 USD
 ETH         2.5000      2500.00 USD      4.75%      1000.00 USD
@@ -191,21 +180,14 @@ NOTES: Joint Portfolio
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 52500.00 USD
-COST:
-GAINS:
-XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.5000     50000.00 USD     95.24%    100000.00 USD
 ETH         2.5000      2500.00 USD      4.76%      1000.00 USD
 
 NAME:  portfolio1
-NOTES:
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 25000.00 USD
-COST:
-GAINS:
-XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.2500     25000.00 USD    100.00%    100000.00 USD
 `
@@ -222,9 +204,6 @@ NOTES: joint, personal, portfolio1
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 130100.00 USD
-COST:
-GAINS:
-XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         1.2500    125000.00 USD     96.08%    100000.00 USD
 ETH         5.0000      5000.00 USD      3.84%      1000.00 USD
@@ -334,8 +313,6 @@ NOTES: joint, personal, portfolio1
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 195150.00 NZD
-COST:
-GAINS:
 XRATE: 1 USD = 1.50 NZD
             AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         1.2500    187500.00 NZD     96.08%    150000.00 NZD
@@ -638,38 +615,28 @@ func TestValuatePriceOption(t *testing.T) {
 	assert.PassIf(t, cli.valuation.FindByNameAndDate("personal", "2000-12-01") != -1, "missing valuation")
 	wanted := `
 NAME:  personal
-NOTES:
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 26350.00 USD
 COST:  6666.67 USD
 GAINS: 19683.33 USD (295.25%)
-XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.5000     25000.00 USD     94.88%     50000.00 USD
 ETH         2.5000      1250.00 USD      4.74%       500.00 USD
 USDC      100.0000       100.00 USD      0.38%         1.00 USD
 
 NAME:  joint
-NOTES:
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 26250.00 USD
-COST:
-GAINS:
-XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.5000     25000.00 USD     95.24%     50000.00 USD
 ETH         2.5000      1250.00 USD      4.76%       500.00 USD
 
 NAME:  portfolio1
-NOTES:
 DATE:  2000-12-01
 TIME:  12:30:00
 VALUE: 12500.00 USD
-COST:
-GAINS:
-XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.2500     12500.00 USD    100.00%     50000.00 USD
 `
