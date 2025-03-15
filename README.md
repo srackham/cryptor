@@ -27,7 +27,17 @@ creating cache directory: "/home/srackham/.cache/cryptor"
 creating data directory: "/home/srackham/.local/share/cryptor"
 ```
 
-Edit the YAML portfolios configuration file (`$HOME/.config/cryptor/portfolios.yaml`) to match your portfolios.
+Edit the YAML portfolios configuration file (`$HOME/.config/cryptor/portfolios.yaml`) to match your portfolios. For example:
+
+```
+- name:  personal
+  notes: Personal portfolio notes.
+  cost: $10,000.00 USD
+  assets:
+    BTC: 0.5
+    ETH: 2.5
+    USDC: 100
+```
 
 Use the `cryptor valuate` command to value the portfolios. For example:
 
@@ -35,13 +45,11 @@ Use the `cryptor valuate` command to value the portfolios. For example:
 $ cryptor valuate
 
 NAME:  personal
-NOTES:
 DATE:  2025-02-10
 TIME:  19:08:45
 VALUE: 55202.96 USD
 COST:  10000.00 USD
 GAINS: 45202.96 USD (452.03%)
-XRATE:
             AMOUNT            VALUE    PERCENT       UNIT PRICE
 BTC         0.5000     48522.29 USD     87.90%     97044.58 USD
 ETH         2.5000      6580.68 USD     11.92%      2632.27 USD
