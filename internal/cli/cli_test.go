@@ -487,6 +487,33 @@ func TestNoConfigFile(t *testing.T) {
 	assert.PassIf(t, err == nil, "missing config.yaml file should not generate an error: %v", err)
 }
 
+func TestNonCryptoAsset(t *testing.T) {
+	tmpdir := mock.MkdirTemp(t)
+	cli := mockCli(t)
+	cli.ConfigDir = tmpdir
+	cli.DataDir = tmpdir
+	err := fsx.WriteFile(path.Join(tmpdir, "portfolios.yaml"), `# Portfolio with gold.
+- name:
+  assets:
+    BTC: 0.5
+    GOLD: 10`)
+	assert.PassIf(t, err == nil, "%v", err)
+	stdout, _, err := exec(cli, "cryptor valuate -price gold=3000")
+	assert.PassIf(t, err == nil, "%v", err)
+	wanted := `
+NAME:  portfolio1
+DATE:  2000-12-01
+TIME:  12:30:00
+VALUE: 80000.00 USD
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
+BTC         0.5000     50000.00 USD     62.50%    100000.00 USD
+GOLD       10.0000     30000.00 USD     37.50%      3000.00 USD
+`
+	wanted = helpers.StripTrailingSpaces(wanted)
+	stdout = helpers.StripTrailingSpaces(stdout)
+	assert.EqualStrings(t, wanted, stdout)
+}
+
 func TestParsePriceOption(t *testing.T) {
 	testCases := []struct {
 		name           string
