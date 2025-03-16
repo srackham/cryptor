@@ -5,56 +5,47 @@ Cryptor valuates cryptocurrency asset portfolios.
 -   Processes multiple asset portfolios.
 -   Reports the current value and performance of cryptocurrency assets.
 
-## Quick Start
+## Installation
 
-If you have [Go](https://go.dev/) installed on your
-system then you can download and compile the latest version with this command:
+If you have [Go](https://go.dev/) installed on your system then you can download and compile the latest version with this command:
 
     go install github.com/srackham/cryptor@latest
 
-Pre-compiled binaries are also available on the
-[Cryptor releases page](https://github.com/srackham/cryptor/releases).
-Download the relevant release and extract the `cryptor` executable.
+Pre-compiled binaries are also available on the [Cryptor releases page](https://github.com/srackham/cryptor/releases). Download the relevant release and extract the `cryptor` executable.
 
-Install an example configuration using the `cryptor init` command. For example:
+## Quick Start
 
-```
-$ cryptor init
-creating configuration directory: "/home/srackham/.config/cryptor"
-installing example config file: "/home/srackham/.config/cryptor/config.yaml"
-installing example portfolios file: "/home/srackham/.config/cryptor/portfolios.yaml"
-creating cache directory: "/home/srackham/.cache/cryptor"
-creating data directory: "/home/srackham/.local/share/cryptor"
-```
+1. Install an example configuration using the `cryptor init` command. For example:
 
-Edit the YAML portfolios configuration file (`$HOME/.config/cryptor/portfolios.yaml`) to match your portfolios. For example:
+    ```
+    $ cryptor init
+    creating configuration directory: "/home/srackham/.config/cryptor"
+    installing example config file: "/home/srackham/.config/cryptor/config.yaml"
+    installing example portfolios file: "/home/srackham/.config/cryptor/portfolios.yaml"
+    creating cache directory: "/home/srackham/.cache/cryptor"
+    creating data directory: "/home/srackham/.local/share/cryptor"
+    ```
 
-```
-- name:  personal
-  notes: Personal portfolio notes.
-  cost: $10,000.00 USD
-  assets:
-    BTC: 0.5
-    ETH: 2.5
-    USDC: 100
-```
+2. Edit the [`portfolios.yaml` configuration file](#portfolios-configuration-file) to match your portfolios.
 
-Use the `cryptor valuate` command to value the portfolios. For example:
+3. Use the `cryptor valuate` command to calculate the current value the portfolios and their assets. For example:
 
-```
-$ cryptor valuate
+    ```
+    $ cryptor valuate
 
-NAME:  personal
-DATE:  2025-02-10
-TIME:  19:08:45
-VALUE: 55202.96 USD
-COST:  10000.00 USD
-GAINS: 45202.96 USD (452.03%)
-            AMOUNT            VALUE    PERCENT       UNIT PRICE
-BTC         0.5000     48522.29 USD     87.90%     97044.58 USD
-ETH         2.5000      6580.68 USD     11.92%      2632.27 USD
-USDC      100.0000        99.99 USD      0.18%         1.00 USD
-```
+    NAME:  personal
+    DATE:  2025-02-10
+    TIME:  19:08:45
+    VALUE: 55202.96 USD
+    COST:  10000.00 USD
+    GAINS: 45202.96 USD (452.03%)
+                AMOUNT            VALUE    PERCENT       UNIT PRICE
+    BTC         0.5000     48522.29 USD     87.90%     97044.58 USD
+    ETH         2.5000      6580.68 USD     11.92%      2632.27 USD
+    USDT      100.0000        99.99 USD      0.18%         1.00 USD
+    ```
+
+## Command Options
 
 Run the `cryptor help` command to view all the commands and command options:
 
@@ -97,21 +88,18 @@ Github:     https://github.com/srackham/cryptor
 
 ## Implementation and Usage Notes
 
--   The `valuate` command values portfolio assets specified in the `portfolios.yaml` configuration file.
+-   The `valuate` command values portfolio assets specified in the [`portfolios.yaml` configuration file](#portfolios-configuration-file).
 -   All values are saved in USD (the `-currency` option can be used to display printed values in non-USD currencies).
 -   Fiat currency exchange rates are cached locally and refreshed daily.
--   Portfolio names are unique and can only contain alphanumeric characters, underscores and dashes.
--   If you specify a portfolio's `COST` amount (the total amount paid for the portfolio assets) then portfolio gains (or losses) are calculated.
--   The portfolio `COST` value is formatted like `<amount><symbol>`. The amount is mandatory; the currency symbol is optional and defaults to `USD`; dollar, comma and space characters are ignored; case insensitive. Examples:
-
-          $5,000.00 NZD     # Five thousand New Zealand dollars.
-          1000aud           # One thousand Australian dollars.
-          .5                # Fifty cents USD.
-
 -   Asset and currency symbols are case insensitive and are converted to uppercase.
 -   Saved portfolio valuations include the valuation's local `date` and `time`.
 -   Dates are saved as `YYYY-DD-MM` formatted strings.
 -   Times are saved as `hh:mm:ss` formatted strings.
+-   Cryptocurrency prices are fetched using the [Binance HTTP ticker price](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#symbol-price-ticker) API.
+-   Fiat currency exchange rates are fetched using the [Open Exchange Rates](https://openexchangerates.org/) API.
+-   By default valuations are printed in a human-friendly text format; use the `-format` option to print in JSON or YAML formats.
+-   Currency values in JSON and YAML formats are always in USD.
+
 -   The `-portfolio` option can be specified multiple times.
 -   The `-price` option allows the user to override current asset prices in order to evaluate "what if" scenarios. Example:
 
@@ -119,31 +107,70 @@ Github:     https://github.com/srackham/cryptor
 
 -   The `-price` option can be specified multiple times.
 -   The `-price` option could be used to include non-crypto assets, e.g. gold, in the portfolios.
--   Cryptocurrency prices are fetched using the [Binance HTTP ticker price](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#symbol-price-ticker) API.
--   Fiat currency exchange rates are fetched using the [Open Exchange Rates](https://openexchangerates.org/) API.
--   By default valuations are printed in a human-friendly text format; use the `-format` option to print in JSON or YAML formats.
--   Currency values in JSON and YAML formats are always in USD.
 
-## Files
+-   Cryptor processes the following configuration, cache, and data files:
 
-Cryptor processes the following configuration, cache, and data files:
+    -   `$HOME/.config/cryptor/config.yaml`: YAML formatted cryptor options
+    -   `$HOME/.config/cryptor/portfolios.yaml`: YAML formatted portfolios
+    -   `$HOME/.cache/cryptor/exchange-rates.json`: JSON formatted cached fiat currency exchange rates
+    -   `$HOME/.local/share/data/cryptor/valuations.json`: JSON formatted valuations
 
--   `$HOME/.config/cryptor/config.yaml`: YAML formatted cryptor options
--   `$HOME/.config/cryptor/portfolios.yaml`: YAML formatted portfolios
--   `$HOME/.cache/cryptor/exchange-rates.json`: JSON formatted cached fiat currency exchange rates
--   `$HOME/.local/share/data/cryptor/valuations.json`: JSON formatted valuations
+-   Default locations for configuration, cache, and data files conform to the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/latest/).
+-   An alternate single directory for all files can be specified using the `-confdir` command option.
 
-The default locations conform to the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/latest/);
-an alternate single directory for all files can be specified using the `-confdir` command option.
+## Portfolios Configuration File
+
+Asset portfolios are specified the [YAML](https://yaml.org/) formatted `portfolios.yaml` file in `$HOME/.config/cryptor/`). There are two portfolio file formats:
+
+### Single-portfolio assets-only format
+Contains a list of assets, one asset per line formatted like `<symbol>: <amount>`.
+For example:
+
+```yaml
+BTC: 0.5
+ETH: 2.5
+USDT: 100
+```
+
+### Multi-portfolio format
+Contains one or more portfolios each containing a list of assets along with optional portfolio name, notes and cost.
+
+-   Portfolio names are unique and can only contain alphanumeric characters, underscores and dashes; the name `aggregate` is reserved.
+-   If you specify a portfolio's `cost` amount (the total amount paid for the portfolio assets) then portfolio gains (or losses) are calculated.
+-   The portfolio `cost` value is formatted like `<amount><symbol>`. The amount is mandatory; the currency symbol is optional and defaults to `USD`; dollar, comma and space characters are ignored; case insensitive. Examples:
+
+        $5,000.00 NZD     # Five thousand New Zealand dollars.
+        1000aud           # One thousand Australian dollars.
+        .5                # Fifty cents USD.
+
+Example multi-portfolios configuration file containing two portfolios:
+
+```yaml
+- name: personal
+  notes: Personal portfolio notes.
+  cost: $10,000.00 USD
+  assets:
+      BTC: 0.5
+      ETH: 2.5
+      USDT: 100
+
+- name: business
+  notes: |
+      Business portfolio notes
+      over multiple lines.
+  cost: $20,000.00 USD
+  assets:
+      BTC: 1.0
+```
 
 ## Valuations
 
+-   If the `-save` option is specified the `valuate` command appends portfolio valuations to the `valuations.json` file located in the data configuration directory.
 -   The `valuate` command prints and saves valuations in the same order that they occur in the portfolios configuration file.
 -   The printed output can be customised using the `-portfolio`, `-aggregate` and `-aggregate-only` options.
--   If the `-save` option is specified the valuation of all portfolios is appended to the `valuations.json` valuations file; the aggregate valuation is appended after the portfolio valuations.
+-   The aggregate valuation is appended after the portfolio valuations with the portfolio name `aggregate`.
 -   Saved valuations always include all portfolio valuations plus the aggregate valuation.
 -   The `aggregate` portfolio is the aggregate of all portfolios, not just those specified by `-portfolio` options.
--   The `valuations.json` file is located in the data configuration directory.
 -   The `-portfolio`, `-aggregate` and `-aggregate-only` options apply to printed outputs.
 
 ## Post-processing Valuation Data
