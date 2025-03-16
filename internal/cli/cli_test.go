@@ -514,6 +514,34 @@ GOLD       10.0000     30000.00 USD     37.50%      3000.00 USD
 	assert.EqualStrings(t, wanted, stdout)
 }
 
+func TestMinimalPortfolio(t *testing.T) {
+	tmpdir := mock.MkdirTemp(t)
+	cli := mockCli(t)
+	cli.ConfigDir = tmpdir
+	cli.DataDir = tmpdir
+	err := fsx.WriteFile(path.Join(tmpdir, "portfolios.yaml"), `
+BTC: 0.5
+ETH: 2.5
+USDC: 100
+`)
+	assert.PassIf(t, err == nil, "%v", err)
+	stdout, _, err := exec(cli, "cryptor valuate")
+	assert.PassIf(t, err == nil, "%v", err)
+	wanted := `
+NAME:  portfolio1
+DATE:  2000-12-01
+TIME:  12:30:00
+VALUE: 52600.00 USD
+            AMOUNT            VALUE    PERCENT       UNIT PRICE
+BTC         0.5000     50000.00 USD     95.06%    100000.00 USD
+ETH         2.5000      2500.00 USD      4.75%      1000.00 USD
+USDC      100.0000       100.00 USD      0.19%         1.00 USD
+`
+	wanted = helpers.StripTrailingSpaces(wanted)
+	stdout = helpers.StripTrailingSpaces(stdout)
+	assert.EqualStrings(t, wanted, stdout)
+}
+
 func TestParsePriceOption(t *testing.T) {
 	testCases := []struct {
 		name           string

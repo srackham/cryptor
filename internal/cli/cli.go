@@ -30,7 +30,7 @@ type cli struct {
 		currency      string              // Fiat currency symbol that the valuation is denominated in
 		notes         bool                // Include portfolio notes in the valuations
 		format        string              // Valuate command output format ("json" or "yaml")
-		save        bool                // Update the valuations file
+		save          bool                // Update the valuations file
 		portfolios    slice.Slice[string] // Names of portfolios to be printed
 		prices        portfolio.Prices    // Maps asset symbols to prices
 	}
@@ -413,20 +413,30 @@ func (cli *cli) valuateCmd() error {
 
 // loadConfigFile reads portfolios configuration file.
 func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
+	type Config []struct {
+		Name   string             `yaml:"name"`
+		Notes  string             `yaml:"notes"`
+		Cost   string             `yaml:"cost"`
+		Assets map[string]float64 `yaml:"assets"`
+	}
 	res := portfolio.Portfolios{}
 	s, err := fsx.ReadFile(filename)
 	if err != nil {
 		return res, err
 	}
-	config := []struct {
-		Name   string             `yaml:"name"`
-		Notes  string             `yaml:"notes"`
-		Cost   string             `yaml:"cost"`
-		Assets map[string]float64 `yaml:"assets"`
-	}{}
+	config := Config{}
 	err = yaml.Unmarshal([]byte(s), &config)
 	if err != nil {
-		return res, err
+		// Try to parse a minimal portfolio
+		assets := make(map[string]float64)
+		err = yaml.Unmarshal([]byte(s), &assets)
+		if err != nil {
+			return res, err
+		}
+		config = Config{{
+			Name:   "portfolio1",
+			Assets: assets,
+		}}
 	}
 	// Copy parsed portfolios configuration to Portfolios slice.
 	for _, c := range config {
