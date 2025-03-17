@@ -72,7 +72,7 @@ Options:
     -currency CURRENCY          Print fiat currency values denominated in CURRENCY
     -notes                      Include portfolio notes in the valuations
     -save                       Update the valuations file
-    -portfolio PORTFOLIO        Process named portfolio (default: all portfolios)
+    -portfolio PORTFOLIO        Print named portfolio valuation (default: all portfolios)
     -price SYMBOL=PRICE         Override the asset price of SYMBOL with PRICE (in USD)
     -format FORMAT              Set the valuate command output format ("json" or "yaml")
 
