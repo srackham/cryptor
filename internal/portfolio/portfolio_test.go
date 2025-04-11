@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/srackham/cryptor/internal/assert"
 	"github.com/srackham/cryptor/internal/binance"
 	"github.com/srackham/cryptor/internal/mock"
+	"github.com/srackham/go-utils/assert"
 )
 
 func TestIsValidPortfolioName(t *testing.T) {

@@ -3,8 +3,8 @@ package binance
 import (
 	"testing"
 
-	"github.com/srackham/cryptor/internal/assert"
 	"github.com/srackham/cryptor/internal/mock"
+	"github.com/srackham/go-utils/assert"
 )
 
 func TestPrice(t *testing.T) {

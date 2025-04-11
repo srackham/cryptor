@@ -8,11 +8,11 @@ import (
 	"strings"
 
 	"github.com/srackham/cryptor/internal/binance"
-	"github.com/srackham/cryptor/internal/fsx"
 	. "github.com/srackham/cryptor/internal/global"
 	"github.com/srackham/cryptor/internal/portfolio"
-	"github.com/srackham/cryptor/internal/slice"
 	"github.com/srackham/cryptor/internal/xrates"
+	"github.com/srackham/go-utils/fsx"
+	"github.com/srackham/go-utils/slice"
 	"gopkg.in/yaml.v3"
 )
 
@@ -43,6 +43,7 @@ func New(ctx *Context) *cli {
 	priceReader := binance.NewPriceReader(ctx)
 	cli.priceReader = &priceReader
 	xrates := xrates.New(ctx)
+	xrates.CacheFile = filepath.Join(ctx.CacheDir, "exchange-rates.json")
 	cli.xrates = &xrates
 	return &cli
 }
@@ -347,9 +348,9 @@ func (cli *cli) save() (err error) {
 		}
 	}
 	if len(*(cli.xrates.CacheData)) > 0 {
-		err = cli.xrates.Save(cli.xrates.CacheFile())
+		err = cli.xrates.Save()
 		if err != nil {
-			return fmt.Errorf("exchange rates file: \"%s\": %s", cli.xrates.CacheFile(), err.Error())
+			return fmt.Errorf("exchange rates file: \"%s\": %s", cli.xrates.CacheFile, err.Error())
 		}
 	}
 	return

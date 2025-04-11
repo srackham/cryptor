@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/srackham/cryptor/internal/binance"
-	"github.com/srackham/cryptor/internal/fsx"
-	"github.com/srackham/cryptor/internal/helpers"
-	"github.com/srackham/cryptor/internal/set"
+	"github.com/srackham/go-utils/fsx"
+	"github.com/srackham/go-utils/helpers"
+	"github.com/srackham/go-utils/set"
 	"gopkg.in/yaml.v3"
 )
 

@@ -1,11 +1,10 @@
 module github.com/srackham/cryptor
 
-go 1.23.0
-
-toolchain go1.23.5
+go 1.23.7
 
 require (
 	github.com/google/go-cmp v0.6.0
-	golang.org/x/exp v0.0.0-20250215185904-eff6e970281f
+	github.com/srackham/go-utils v0.0.4
+	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0
 	gopkg.in/yaml.v3 v3.0.1
 )

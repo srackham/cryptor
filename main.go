@@ -8,7 +8,7 @@ import (
 
 	"github.com/srackham/cryptor/internal/cli"
 	. "github.com/srackham/cryptor/internal/global"
-	"github.com/srackham/cryptor/internal/helpers"
+	"github.com/srackham/go-utils/helpers"
 )
 
 func main() {

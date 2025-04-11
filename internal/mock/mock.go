@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/srackham/cryptor/internal/assert"
-	"github.com/srackham/cryptor/internal/fsx"
 	. "github.com/srackham/cryptor/internal/global"
+	"github.com/srackham/go-utils/assert"
+	"github.com/srackham/go-utils/fsx"
 )
 
 func MkdirTemp(t *testing.T) string {

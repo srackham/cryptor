@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/srackham/cryptor/internal/assert"
-	"github.com/srackham/cryptor/internal/fsx"
-	"github.com/srackham/cryptor/internal/helpers"
 	"github.com/srackham/cryptor/internal/mock"
 	"github.com/srackham/cryptor/internal/portfolio"
+	"github.com/srackham/go-utils/assert"
+	"github.com/srackham/go-utils/fsx"
+	"github.com/srackham/go-utils/helpers"
 )
 
 func mockCli(t *testing.T) *cli {
@@ -290,14 +290,14 @@ USDC      100.0000       100.00 USD      0.08%         1.00 USD
 	assert.EqualStrings(t, wanted, stdout)
 
 	cli = mockCli(t)
-	if fsx.FileExists(cli.xrates.CacheFile()) {
-		err = os.Remove(cli.xrates.CacheFile())
+	if fsx.FileExists(cli.xrates.CacheFile) {
+		err = os.Remove(cli.xrates.CacheFile)
 		assert.PassIf(t, err == nil, "%v", err)
 	}
 	stdout, _, err = exec(cli, "cryptor valuate -aggregate-only -currency NZD")
 	assert.PassIf(t, err == nil, "%v", err)
-	assert.PassIf(t, fsx.FileExists(cli.xrates.CacheFile()), "missing exchange rates cache file: \"%v\"", cli.xrates.CacheFile())
-	got, err := fsx.ReadFile(cli.xrates.CacheFile())
+	assert.PassIf(t, fsx.FileExists(cli.xrates.CacheFile), "missing exchange rates cache file: \"%v\"", cli.xrates.CacheFile)
+	got, err := fsx.ReadFile(cli.xrates.CacheFile)
 	assert.PassIf(t, err == nil, "%v", err)
 	wanted = `{
   "2000-12-01": {

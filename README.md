@@ -117,6 +117,7 @@ Github:     https://github.com/srackham/cryptor
 
 -   Default locations for configuration, cache, and data files conform to the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/latest/).
 -   An alternate single directory for all files can be specified using the `-confdir` command option.
+-   Use the `-confdir` option if you want to separate portfolios or groups of portfolios.
 
 ## Portfolios Configuration File
 

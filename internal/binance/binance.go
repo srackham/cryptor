@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/srackham/cryptor/internal/cache"
 	. "github.com/srackham/cryptor/internal/global"
+	"github.com/srackham/go-utils/cache"
 )
 
 // Cache data types.

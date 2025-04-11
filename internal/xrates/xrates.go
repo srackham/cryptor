@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/srackham/cryptor/internal/cache"
 	"github.com/srackham/cryptor/internal/config"
 	. "github.com/srackham/cryptor/internal/global"
+	"github.com/srackham/go-utils/cache"
 )
 
 // Cache data types.
@@ -26,6 +26,7 @@ func New(ctx *Context) ExchangeRates {
 	result.Context = ctx
 	data := make(RatesCacheData)
 	result.Cache = cache.New(&data)
+	result.CacheFile = filepath.Join(ctx.CacheDir, "exchange-rates.json")
 	return result
 }
 
@@ -33,9 +34,9 @@ func (x *ExchangeRates) ConfigFile() string {
 	return filepath.Join(x.ConfigDir, "config.yaml")
 }
 
-func (x *ExchangeRates) CacheFile() string {
-	return filepath.Join(x.CacheDir, "exchange-rates.json")
-}
+// func (x *ExchangeRates) CacheFile() string {
+// 	return filepath.Join(x.CacheDir, "exchange-rates.json")
+// }
 
 // getRates executes an HTTP query to fetch a list of currency exchange rates against the USD
 func (x *ExchangeRates) getRates() (Rates, error) {
