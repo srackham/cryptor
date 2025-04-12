@@ -34,18 +34,16 @@ func (x *ExchangeRates) ConfigFile() string {
 	return filepath.Join(x.ConfigDir, "config.yaml")
 }
 
-// func (x *ExchangeRates) CacheFile() string {
-// 	return filepath.Join(x.CacheDir, "exchange-rates.json")
-// }
-
-// getRates executes an HTTP query to fetch a list of currency exchange rates against the USD
+// getRates executes an HTTP query to fetch a list of currency exchange rates against the USD.
 func (x *ExchangeRates) getRates() (Rates, error) {
 	rates := make(Rates)
 	if x.url == "" {
-		// Lazy load config file.
 		conf, err := config.LoadConfig(x.ConfigFile())
 		if err != nil {
 			return rates, err
+		}
+		if conf.XratesAppId == "" {
+			return rates, fmt.Errorf("missing config file xrates-appid (openexchangerates.org App ID): %v", x.ConfigFile())
 		}
 		x.url = XRATES_QUERY + conf.XratesAppId
 	}

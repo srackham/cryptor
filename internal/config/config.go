@@ -12,13 +12,14 @@ type Config struct {
 	XratesAppId string `yaml:"xrates-appid"` // https://openexchangerates.org/ app ID
 }
 
+// The config file is loaded by xrates.getRate to get the exchange rates Web service app ID.
 func LoadConfig(fileName string) (*Config, error) {
 	if !fsx.FileExists(fileName) {
 		return nil, fmt.Errorf("missing config file: %v", fileName)
 	}
 	confFile, err := os.Open(fileName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open config file: %s", fileName)
+		return nil, fmt.Errorf("failed to open config file: %v", fileName)
 	}
 	defer confFile.Close()
 
@@ -26,10 +27,7 @@ func LoadConfig(fileName string) (*Config, error) {
 	yamlDecoder := yaml.NewDecoder(confFile)
 	err = yamlDecoder.Decode(&config)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode config file: %s", fileName)
-	}
-	if config.XratesAppId == "" {
-		return nil, fmt.Errorf("missing openexchangerates.org App ID (xrates-appid)")
+		return nil, fmt.Errorf("failed to decode config file: %v", fileName)
 	}
 	return &config, nil
 }
