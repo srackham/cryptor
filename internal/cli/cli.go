@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/srackham/cryptor/internal/portfolio"
 	"github.com/srackham/cryptor/internal/xrates"
 	"github.com/srackham/go-utils/fsx"
-	"github.com/srackham/go-utils/slice"
 	"gopkg.in/yaml.v3"
 )
 
@@ -25,14 +25,14 @@ type cli struct {
 	priceReader *binance.PriceReader  // Crypto currency price oracle
 	xrates      *xrates.ExchangeRates // Fiat currency to USD exchange rate oracle
 	opts        struct {
-		aggregate     bool                // Inlcude aggregate (combined) portfolios valuation
-		aggregateOnly bool                // Only include aggregate portfolio valuation
-		currency      string              // Fiat currency symbol that the valuation is denominated in
-		notes         bool                // Include portfolio notes in the valuations
-		format        string              // Valuate command output format ("json" or "yaml")
-		save          bool                // Update the valuations file
-		portfolios    slice.Slice[string] // Names of portfolios to be printed
-		prices        portfolio.Prices    // Maps asset symbols to prices
+		aggregate     bool             // Inlcude aggregate (combined) portfolios valuation
+		aggregateOnly bool             // Only include aggregate portfolio valuation
+		currency      string           // Fiat currency symbol that the valuation is denominated in
+		notes         bool             // Include portfolio notes in the valuations
+		format        string           // Valuate command output format ("json" or "yaml")
+		save          bool             // Update the valuations file
+		portfolios    []string         // Names of portfolios to be printed
+		prices        portfolio.Prices // Maps asset symbols to prices
 	}
 }
 
@@ -57,7 +57,7 @@ func (cli *cli) Execute(args ...string) error {
 		}
 	}()
 	cli.opts.currency = "USD"
-	cli.opts.portfolios = slice.New[string]()
+	cli.opts.portfolios = []string{}
 	err = cli.parseArgs(args)
 	if err != nil {
 		return err
@@ -111,7 +111,7 @@ func (cli *cli) parseArgs(args []string) error {
 			cli.opts.notes = true
 		case opt == "-save":
 			cli.opts.save = true
-		case slice.New("-confdir", "-currency", "-format", "-portfolio", "-price").Has(opt):
+		case slices.Contains([]string{"-confdir", "-currency", "-format", "-portfolio", "-price"}, opt):
 			// Process option argument.
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
@@ -125,7 +125,7 @@ func (cli *cli) parseArgs(args []string) error {
 			case "-currency":
 				cli.opts.currency = strings.ToUpper(arg)
 			case "-format":
-				if !slice.New("json", "yaml").Has(arg) {
+				if !slices.Contains([]string{"json", "yaml"}, arg) {
 					return fmt.Errorf("invalid -format argument: \"%s\"", arg)
 				}
 				cli.opts.format = arg
@@ -133,10 +133,10 @@ func (cli *cli) parseArgs(args []string) error {
 				if !portfolio.IsValidName(arg) {
 					return fmt.Errorf("invalid -portfolio argument: \"%s\"", arg)
 				}
-				if cli.opts.portfolios.Has(arg) {
+				if slices.Contains(cli.opts.portfolios, arg) {
 					return fmt.Errorf("-portfolio name can only be specified once: \"%s\"", arg)
 				}
-				cli.opts.portfolios = append(cli.opts.portfolios, arg)
+				cli.opts.portfolios = slices.Insert(cli.opts.portfolios, len(cli.opts.portfolios), arg)
 			case "-price":
 				symbol, price, err := ParsePriceOption(arg)
 				if err != nil {
@@ -302,7 +302,7 @@ Github:     ` + github
 }
 
 func isCommand(name string) bool {
-	return slice.New("help", "history", "init", "valuate").Has(name)
+	return slices.Contains([]string{"help", "history", "init", "valuate"}, name)
 }
 
 func (cli *cli) configFile() string {
@@ -385,7 +385,7 @@ func (cli *cli) valuateCmd() error {
 		// Select -portfolio option valuations.
 		printed_valuation = portfolio.Portfolios{}
 		for _, p := range cli.valuation {
-			if cli.opts.portfolios.IndexOf(p.Name) >= 0 {
+			if slices.Index(cli.opts.portfolios, p.Name) >= 0 {
 				printed_valuation = append(printed_valuation, p)
 			}
 		}
@@ -439,7 +439,7 @@ func (cli *cli) loadConfigFile(filename string) (portfolio.Portfolios, error) {
 			Assets: assets,
 		}}
 	}
-	// Copy parsed portfolios configuration to Portfolios slice.
+	// Copy parsed portfolios configuration to Portfolios.
 	for _, c := range config {
 		p := portfolio.Portfolio{}
 		p.Name = c.Name
