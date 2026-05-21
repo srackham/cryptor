@@ -97,9 +97,9 @@ Github:     https://github.com/srackham/cryptor
 -   Times are saved as `hh:mm:ss` formatted strings.
 -   Cryptocurrency prices are fetched using the [Binance HTTP ticker price](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#symbol-price-ticker) API.
 -   Fiat currency exchange rates are fetched using the [Open Exchange Rates](https://openexchangerates.org/) API.
+-   If non-USD currency denominations are used you will need to obtain an [Open Exchange Rates](https://openexchangerates.org/) app ID and put it in the `config.yaml` configuration file.
 -   By default valuations are printed in a human-friendly text format; use the `-format` option to print in JSON or YAML formats.
 -   Currency values in JSON and YAML formats are always in USD.
-
 -   The `-portfolio` option can be specified multiple times.
 -   The `-price` option allows the user to override current asset prices in order to evaluate "what if" scenarios. Example:
 
